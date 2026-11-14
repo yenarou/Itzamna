@@ -1,41 +1,51 @@
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
-
-var summaries = new[]
+app.MapGet("/api/health", () => Results.Ok(new
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+    status = "healthy",
+    service = "backend"
+}));
 
-app.MapGet("/weatherforecast", () =>
+app.MapGet("/api/health/scientific-engine", async (IHttpClientFactory httpClientFactory, IConfiguration configuration) =>
 {
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+    var baseUrl = configuration["ScientificEngine:BaseUrl"] ?? "http://localhost:8001";
+    var client = httpClientFactory.CreateClient();
+    var response = await client.GetAsync($"{baseUrl.TrimEnd('/')}/health");
+
+    if (!response.IsSuccessStatusCode)
+    {
+        return Results.Problem(
+            detail: $"Scientific engine health check failed with status code {(int)response.StatusCode}.",
+            statusCode: StatusCodes.Status503ServiceUnavailable,
+            title: "Scientific engine unavailable");
+    }
+
+    var payload = await response.Content.ReadAsStringAsync();
+
+    return Results.Ok(new
+    {
+        status = "healthy",
+        service = "backend",
+        scientificEngine = new
+        {
+            baseUrl,
+            healthEndpoint = "/health",
+            status = "healthy",
+            response = payload
+        }
+    });
+});
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+public partial class Program { }

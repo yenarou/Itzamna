@@ -12,9 +12,6 @@ services:
       HOST: 0.0.0.0
       PORT: 4321
       PUBLIC_API_URL: http://backend:8080
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
     depends_on:
       - backend
     networks:
@@ -46,8 +43,6 @@ services:
     environment:
       PYTHONUNBUFFERED: "1"
       PORT: 8000
-    volumes:
-      - ./scientific-engine:/app
     networks:
       - itzamna-network
 
