@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Itzamna.API/Itzamna.API.csproj" />
+    <Project Path="src/Itzamna.Application/Itzamna.Application.csproj" />
+    <Project Path="src/Itzamna.Domain/Itzamna.Domain.csproj" />
+    <Project Path="src/Itzamna.Infrastructure/Itzamna.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Itzamna.IntegrationTests/Itzamna.IntegrationTests.csproj" />
+    <Project Path="tests/Itzamna.UnitTests/Itzamna.UnitTests.csproj" />
+  </Folder>
+</Solution>

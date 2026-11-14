@@ -1,0 +1,12 @@
+**/node_modules
+**/bin
+**/obj
+**/.git
+**/.venv
+**/dist
+**/.cache
+**/__pycache__
+**/.pytest_cache
+**/.idea
+**/.vscode
+**/.DS_Store

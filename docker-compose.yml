@@ -1,0 +1,56 @@
+version: '3.9'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: itzamna-frontend
+    ports:
+      - "4321:4321"
+    environment:
+      HOST: 0.0.0.0
+      PORT: 4321
+      PUBLIC_API_URL: http://backend:8080
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - itzamna-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: itzamna-backend
+    ports:
+      - "5000:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ScientificEngine__BaseUrl: http://scientific-engine:8000
+    depends_on:
+      - scientific-engine
+    networks:
+      - itzamna-network
+
+  scientific-engine:
+    build:
+      context: ./scientific-engine
+      dockerfile: Dockerfile
+    container_name: itzamna-scientific-engine
+    ports:
+      - "8001:8000"
+    environment:
+      PYTHONUNBUFFERED: "1"
+      PORT: 8000
+    volumes:
+      - ./scientific-engine:/app
+    networks:
+      - itzamna-network
+
+networks:
+  itzamna-network:
+    driver: bridge

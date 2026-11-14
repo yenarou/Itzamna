@@ -1,0 +1,60 @@
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node / Astro
+node_modules/
+frontend/.astro/
+frontend/dist/
+frontend/.cache/
+.npm/
+
+# .NET
+backend/**/bin/
+backend/**/obj/
+backend/**/*.user
+backend/**/*.suo
+backend/**/*.userosscache
+backend/**/*.sln.docstates
+backend/**/*.dbmdl
+backend/.vs/
+backend/*.user
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+.pytest_cache/
+*.egg-info/
+
+# Docker
+.docker/
+**/.docker/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+**/secrets.*
+**/*.pem
+**/*.key
+**/*.crt
+
+# Logs and temp files
+*.log
+*.tmp
+*.temp
+/tmp/
+
+# Build outputs
+coverage/
+dist/
+build/
