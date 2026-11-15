@@ -7,7 +7,9 @@ import urllib.parse
 import urllib.request
 from math import asin, atan2, cos, degrees, radians, sin, sqrt
 
-from app.schemas.search import BodyInfo, InfoField, Match, SearchQuery
+from app.schemas.info import BodyInfo, InfoField
+from app.schemas.match import Match
+from app.schemas.query import SearchQuery
 
 TONE = {
     "basalt": "linear-gradient(160deg,#3d4a52,#1c262c)",
