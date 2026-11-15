@@ -119,7 +119,6 @@ function updateMapMarker(): void {
             map.removeLayer(circle);
             circle = null;
         }
-        updateGoogleMapsLink();
     } else {
         const ll: [number, number] = [lat, lng];
         if (!marker) {
@@ -138,8 +137,6 @@ function updateMapMarker(): void {
         else map.panTo(ll);
 
         const r = Number(locRadius.value || "100");
-        // update maps link
-        updateGoogleMapsLink();
         if (Number.isFinite(r) && r > 0) {
             if (!circle)
                 circle = L.circle(ll, {
