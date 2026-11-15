@@ -36,5 +36,39 @@ const { title, fullscreen = false, transparentHeader = false } = Astro.props;
   ]}>
     <Header transparent={transparentHeader} />
     <slot />
+    <div id="safety-gate" class="safety-gate" role="dialog" aria-modal="true" aria-labelledby="safety-gate-title" aria-describedby="safety-gate-text">
+      <div class="safety-gate-card">
+        <h2 id="safety-gate-title" class="safety-gate-title">AVISO DE SEGURIDAD Y PROPIEDAD PRIVADA</h2>
+        <p id="safety-gate-text" class="safety-gate-text">
+          Al continuar, aceptas que debes respetar las leyes locales y los límites de propiedad privada.
+          <br /><br />
+          Queda estrictamente prohibido invadir terrenos, viviendas o espacios cerrados para interactuar con elementos del juego. El desarrollador no se hace responsable por sanciones legales, accidentes o daños derivados del acceso no autorizado a cualquier inmueble.
+        </p>
+        <button id="safety-gate-accept" type="button" class="btn-primary safety-gate-btn">Acepto y entiendo</button>
+      </div>
+    </div>
+    <script is:inline>
+      (() => {
+        const key = 'itzamna-safety-accepted';
+        const gate = document.getElementById('safety-gate');
+        const btn = document.getElementById('safety-gate-accept');
+        if (!gate || !btn) return;
+        const accepted = (() => { try { return localStorage.getItem(key) === '1'; } catch { return false; } })();
+        if (accepted) {
+          gate.hidden = true;
+          gate.setAttribute('aria-hidden', 'true');
+          return;
+        }
+        document.body.style.overflow = 'hidden';
+        gate.hidden = false;
+        gate.setAttribute('aria-hidden', 'false');
+        btn.addEventListener('click', () => {
+          try { localStorage.setItem(key, '1'); } catch {}
+          gate.hidden = true;
+          gate.setAttribute('aria-hidden', 'true');
+          document.body.style.overflow = '';
+        });
+      })();
+    </script>
   </body>
 </html>

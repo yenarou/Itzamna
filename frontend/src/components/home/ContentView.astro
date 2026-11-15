@@ -1,0 +1,137 @@
+---
+const tech = [
+  { name: "Astro", desc: "interfaz web estática/modular y composición de vistas." },
+  { name: "TypeScript", desc: "lógica de interacción, tipado y utilidades del explorador." },
+  { name: "Tailwind CSS", desc: "estilos y sistema visual responsivo." },
+  { name: "ASP.NET Core (.NET)", desc: "API gateway/proxy y endpoints de salud/búsqueda." },
+  { name: "Python (FastAPI)", desc: "motor científico de búsqueda y cálculo de análogos." },
+];
+---
+    <section id="view-content" class="app-view" data-app-view="content" hidden aria-label="Contenido del proyecto">
+      <div class="content-shell">
+        <div class="content-topbar">
+          <div class="content-progress" aria-live="polite"><span id="content-step-label">1 / 6</span></div>
+        </div>
+
+        <!-- Hero dentro de contenido -->
+        <section class="content-hero reveal is-visible" data-content-step="0">
+          <div class="content-hero-inner">
+            <p class="hero-kicker">Itzamná · Misión y contexto</p>
+            <h2>De la superficie terrestre a la exploración planetaria</h2>
+            <p>Conoce el propósito, análisis y tecnología detrás de la plataforma en secciones breves, una a la vez.</p>
+            <div class="hero-actions">
+              <button type="button" class="btn-primary" data-content-next>Siguiente</button>
+              <button type="button" class="btn-secondary" data-show-view="explore" data-focus-picker="true">Explorar ahora</button>
+            </div>
+          </div>
+        </section>
+
+        <div id="content-parts">
+    <!-- ZIGZAG 1: ¿Qué es Itzamná? -->
+    <section class="zigzag" id="que-es" data-content-step="1">
+      <div class="zigzag-inner">
+        <div class="zigzag-media reveal is-visible">
+          <img src="https://images-assets.nasa.gov/image/PIA18033/PIA18033~orig.jpg" alt="La Tierra vista desde el espacio, con océanos y continentes iluminados" loading="lazy" decoding="async" />
+        </div>
+        <div class="zigzag-copy reveal is-visible">
+          <p class="zigzag-kicker">Plataforma</p>
+          <h2>¿Qué es Itzamná?</h2>
+          <p>
+            <strong>Itzamná (Integrated Terrestrial-Zonal Analog &amp; Multi-factor Nearest Atlas)</strong> es una plataforma que ayuda a localizar y comparar regiones de la Tierra con rasgos similares a zonas de la Luna y Marte.
+          </p>
+          <p>
+            A partir de un punto geográfico, un radio y características seleccionadas, calcula candidatos análogos y presenta información georreferenciada, similitud por criterios y datos de apoyo para la exploración y el análisis.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ZIGZAG 2: Nuestro propósito -->
+    <section class="zigzag zigzag-alt" id="proposito" data-content-step="2" hidden>
+      <div class="zigzag-inner reverse">
+        <div class="zigzag-media reveal is-visible">
+          <img src="https://images-assets.nasa.gov/image/PIA17944/PIA17944~orig.jpg" alt="Superficie de Marte en el cráter Gale, vista por el rover Curiosity" loading="lazy" decoding="async" />
+        </div>
+        <div class="zigzag-copy reveal is-visible">
+          <p class="zigzag-kicker">Propósito</p>
+          <h2>Nuestro propósito</h2>
+          <p>
+            Encontrar análogos terrestres permite estudiar, en nuestro propio planeta, condiciones y paisajes comparables a entornos extraterrestres. Esto facilita preparar observaciones, entrenamientos y análisis en lugares accesibles antes de pensar en escenarios lunares o marcianos.
+          </p>
+          <p>
+            Itzamná busca hacer esa comparación más clara: reunir ubicación, contexto ambiental y criterios de similitud en una sola vista para apoyar la toma de decisiones y el aprendizaje.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ZIGZAG 3: Exploración y análisis -->
+    <section class="zigzag" id="analisis" data-content-step="3" hidden>
+      <div class="zigzag-inner">
+        <div class="zigzag-media reveal is-visible">
+          <img src="https://images-assets.nasa.gov/image/PIA00256/PIA00256~orig.jpg" alt="Superficie lunar con cráteres y mares basálticos" loading="lazy" decoding="async" />
+        </div>
+        <div class="zigzag-copy reveal is-visible">
+          <p class="zigzag-kicker">Análisis geoespacial</p>
+          <h2>Exploración y análisis</h2>
+          <p>
+            La plataforma permite seleccionar un planeta y una zona de interés, elegir un punto en el mapa y definir un radio de búsqueda. Con esos parámetros genera candidatos calculados en el área y muestra su similitud, distancia y correlación por campo.
+          </p>
+          <p>
+            Los resultados combinan datos de consulta (cuando las fuentes responden) con estimaciones locales marcadas como tales, ofreciendo una lectura transparente entre datos obtenidos y valores calculados.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ZIGZAG 4: Tecnología -->
+    <section class="zigzag zigzag-alt" id="tecnologia" data-content-step="4" hidden>
+      <div class="zigzag-inner reverse">
+        <div class="zigzag-media reveal is-visible">
+          <img src="https://images-assets.nasa.gov/image/PIA12235/PIA12235~orig.jpg" alt="Mapa topográfico y relieve representando análisis de superficie" loading="lazy" decoding="async" />
+        </div>
+        <div class="zigzag-copy reveal is-visible">
+          <p class="zigzag-kicker">Arquitectura</p>
+          <h2>Tecnología</h2>
+          <p>Itzamná integra componentes web y de cálculo científico, cada uno con una responsabilidad definida:</p>
+          <ul>
+            {tech.map((t) => (
+              <li><strong>{t.name}:</strong> {t.desc}</li>
+            ))}
+          </ul>
+          <div class="chip-row" aria-label="Tecnologías del proyecto">
+            {tech.map((t) => <span class="chip">{t.name}</span>)}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ZIGZAG 5: Visión a futuro -->
+    <section class="zigzag" id="vision-futuro" data-content-step="5" hidden>
+      <div class="zigzag-inner">
+        <div class="zigzag-media reveal is-visible">
+          <img src="https://images-assets.nasa.gov/image/PIA03654/PIA03654~orig.jpg" alt="Concepto de exploración planetaria y terreno rocoso" loading="lazy" decoding="async" />
+        </div>
+        <div class="zigzag-copy reveal is-visible">
+          <p class="zigzag-kicker">Evolución</p>
+          <h2>Visión a futuro</h2>
+          <p>
+            La visión del proyecto es fortalecer la precisión y utilidad de las comparaciones, incorporando de forma progresiva mejores fuentes de datos y criterios de análisis documentados, para que la herramienta sea cada vez más útil en contextos educativos y de planificación exploratoria.
+          </p>
+          <p>
+            Cualquier nueva capacidad se incorporará de manera gradual y verificable, manteniendo clara la distinción entre resultados calculados, estimaciones y datos provenientes de fuentes externas.
+          </p>
+        </div>
+      </div>
+    </section>
+        </div>
+
+        <div class="content-nav">
+          <button type="button" class="btn-secondary" data-content-prev>Anterior</button>
+          <button type="button" class="btn-primary" data-content-next>Siguiente</button>
+          <button type="button" class="btn-primary" id="content-to-explore" hidden data-show-view="explore" data-focus-picker="true">Ir al explorador</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW: EXPLORE (herramienta, funcionalidad preservada) -->

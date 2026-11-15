@@ -1,0 +1,169 @@
+.loc-map .leaflet-control-attribution a {
+    color: #8fd3ff !important;
+}
+/* Confirm search button */
+.confirm-search-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.85rem;
+    width: 100%;
+    padding: 0.85rem 1.1rem 0.85rem 0.85rem;
+    border-radius: 1rem;
+    border: 1px solid rgba(120, 190, 255, 0.28);
+    background: linear-gradient(145deg, rgba(32, 90, 180, 0.95), rgba(18, 58, 128, 0.98));
+    color: #f4faff;
+    box-shadow:
+        8px 10px 24px rgba(2, 10, 30, 0.35),
+        -3px -3px 10px rgba(140, 210, 255, 0.08),
+        inset 1px 1px 0 rgba(255, 255, 255, 0.18),
+        inset -1px -2px 0 rgba(0, 0, 0, 0.12);
+    cursor: pointer;
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.2s ease,
+        filter 0.2s ease,
+        border-color 0.2s ease;
+    text-align: left;
+}
+.loc-confirm {
+    width: 100%;
+}
+.confirm-search-btn:hover {
+    transform: translateY(-1px);
+    border-color: rgba(160, 220, 255, 0.45);
+    box-shadow:
+        10px 14px 30px rgba(2, 10, 30, 0.38),
+        0 0 0 1px rgba(120, 190, 255, 0.12),
+        inset 1px 1px 0 rgba(255, 255, 255, 0.22),
+        inset -1px -2px 0 rgba(0, 0, 0, 0.1);
+    filter: saturate(1.08) brightness(1.03);
+}
+.confirm-search-btn:active {
+    transform: translateY(0);
+    box-shadow:
+        inset 3px 4px 10px rgba(0, 0, 0, 0.22),
+        inset -1px -1px 0 rgba(255, 255, 255, 0.12),
+        4px 6px 14px rgba(2, 10, 30, 0.25);
+}
+.confirm-search-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    filter: grayscale(0.15);
+}
+.confirm-search-icon {
+    display: inline-grid;
+    place-items: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 0.8rem;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.08));
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow:
+        inset 1px 1px 0 rgba(255, 255, 255, 0.2),
+        0 4px 10px rgba(0, 0, 0, 0.15);
+    flex-shrink: 0;
+}
+
+/* ============ Light theme fixes (espacial claro) ============ */
+html[data-theme="light"] body::before {
+    background:
+        radial-gradient(60% 50% at 15% 20%, rgba(80, 170, 255, 0.18), transparent 60%),
+        radial-gradient(40% 40% at 70% 10%, rgba(54, 214, 245, 0.12), transparent 60%),
+        radial-gradient(45% 35% at 50% 60%, rgba(139, 108, 255, 0.1), transparent 65%);
+    filter: blur(50px);
+    opacity: 0.7;
+}
+html[data-theme="light"] body::after { opacity: 0.25; }
+
+html[data-theme="light"] .site-header.is-scrolled,
+html[data-theme="light"] .site-header.menu-open,
+html[data-theme="light"] .site-header:not([data-transparent="true"]) {
+    background: rgba(244, 247, 255, 0.82);
+    border-bottom: 1px solid rgba(18, 58, 112, 0.12);
+}
+html[data-theme="light"] .site-header[data-transparent="true"] {
+    background: linear-gradient(180deg, rgba(244, 247, 255, 0.35), rgba(244, 247, 255, 0));
+}
+html[data-theme="light"] .nav-mobile {
+    background: rgba(244, 247, 255, 0.92);
+    border-top: 1px solid rgba(18, 58, 112, 0.12);
+}
+html[data-theme="light"] .nav-link:hover,
+html[data-theme="light"] .nav-link.is-active,
+html[data-theme="light"] .nav-link-mobile:hover,
+html[data-theme="light"] .nav-link-mobile.is-active {
+    background: rgba(31, 99, 224, 0.08);
+}
+
+/* Hero readable in light mode */
+html[data-theme="light"] .hero {
+    background:
+        radial-gradient(900px 500px at 50% 20%, rgba(38, 123, 255, 0.18), transparent 60%),
+        radial-gradient(700px 420px at 20% 70%, rgba(54, 217, 192, 0.12), transparent 60%),
+        radial-gradient(600px 360px at 80% 70%, rgba(139, 108, 255, 0.12), transparent 60%),
+        linear-gradient(180deg, #eaf1ff 0%, #dfeaff 55%, #edf3ff 100%);
+}
+html[data-theme="light"] .hero-stars { opacity: 0.35; filter: saturate(0.6); }
+html[data-theme="light"] .hero-glow { background: radial-gradient(circle, rgba(38, 123, 255, 0.18), rgba(54, 214, 245, 0.06) 45%, transparent 70%); opacity: .7; }
+html[data-theme="light"] .hero h1,
+html[data-theme="light"] .hero p,
+html[data-theme="light"] .hero-kicker { color: var(--color-chalk); }
+html[data-theme="light"] .hero p { color: var(--color-mist); }
+
+html[data-theme="light"] .content-topbar {
+    background: linear-gradient(180deg, rgba(244, 247, 255, 0.85), rgba(244, 247, 255, 0));
+}
+html[data-theme="light"] .content-progress {
+    border-color: rgba(18, 58, 112, 0.14);
+    background: rgba(255, 255, 255, 0.75);
+}
+html[data-theme="light"] .content-hero-inner {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.82), rgba(238, 244, 255, 0.78));
+    border: 1px solid rgba(18, 58, 112, 0.12);
+}
+
+/* Dropdowns/selects (planet, custom, fields) */
+html[data-theme="light"] .planet-dd-trigger,
+html[data-theme="light"] .custom-dd-trigger,
+html[data-theme="light"] .field-select,
+html[data-theme="light"] select.field-select,
+html[data-theme="light"] #loc-radius,
+html[data-theme="light"] input.field-select {
+    background: linear-gradient(180deg, #ffffff, #f1f6ff);
+    border-color: rgba(18, 58, 112, 0.16);
+    color: var(--color-chalk);
+    box-shadow: 0 6px 16px rgba(18, 58, 112, 0.08), inset 1px 1px 0 rgba(255,255,255,.8);
+}
+html[data-theme="light"] .planet-dd-trigger:hover,
+html[data-theme="light"] .custom-dd-trigger:hover,
+html[data-theme="light"] .field-select:hover,
+html[data-theme="light"] .planet-dd[data-open="true"] .planet-dd-trigger,
+html[data-theme="light"] .custom-dd[data-open="true"] .custom-dd-trigger {
+    border-color: rgba(31, 99, 224, 0.35);
+    box-shadow: 0 8px 20px rgba(18, 58, 112, 0.12), 0 0 0 1px rgba(31, 99, 224, 0.08);
+}
+html[data-theme="light"] .planet-dd-menu,
+html[data-theme="light"] .custom-dd-menu {
+    background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(244,248,255,0.98));
+    border-color: rgba(18, 58, 112, 0.14);
+    box-shadow: 0 16px 36px rgba(18, 58, 112, 0.14);
+}
+html[data-theme="light"] .planet-dd-option,
+html[data-theme="light"] .custom-dd-option {
+    color: var(--color-chalk);
+}
+html[data-theme="light"] .planet-dd-option:hover,
+html[data-theme="light"] .custom-dd-option:hover,
+html[data-theme="light"] .planet-dd-option[aria-selected="true"],
+html[data-theme="light"] .custom-dd-option[aria-selected="true"] {
+    background: rgba(31, 99, 224, 0.1);
+    color: #0a1428;
+}
+html[data-theme="light"] .field-select::placeholder { color: #6a7f9f; }
+
+/* Location/map card */
+html[data-theme="light"] .loc-card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(242,247,255,0.92));
+    border-color: rgba(18, 58, 112, 0.14);
+}

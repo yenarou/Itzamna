@@ -1,0 +1,172 @@
+@keyframes skeleton-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+.loading-bar {
+    animation: loading-progress 1.4s ease-in-out infinite;
+}
+@keyframes loading-progress {
+    0% {
+        transform: translateX(-120%);
+        width: 35%;
+    }
+    50% {
+        width: 55%;
+    }
+    100% {
+        transform: translateX(320%);
+        width: 35%;
+    }
+}
+
+/* Tablas de datos */
+.data-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--color-line);
+    border-radius: 0.75rem;
+    background: var(--soft-surface);
+}
+.data-table {
+    width: 100%;
+    min-width: 44rem; /* si el contenedor es más angosto, hay scroll horizontal en lugar de encimarse */
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 0.96rem;
+}
+.data-table-compact {
+    min-width: 30rem;
+}
+.data-table col.col-label {
+    width: 10.5rem;
+}
+.data-table col.col-value {
+    width: 14rem;
+}
+.data-table col.col-corr {
+    width: 10.5rem;
+}
+.data-table col.col-detail {
+    width: auto;
+}
+.data-table th,
+.data-table td {
+    padding: 0.95rem 1rem;
+    border-bottom: 1px solid var(--color-line);
+    vertical-align: top;
+    text-align: left;
+    overflow-wrap: break-word;
+    word-break: normal;
+    hyphens: auto;
+    min-width: 0;
+}
+.data-table thead th {
+    white-space: nowrap;
+}
+.data-table th {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-mist);
+    background: rgba(18, 58, 112, 0.25);
+    font-weight: 600;
+}
+.data-table tr:last-child td,
+.data-table tr:last-child th {
+    border-bottom: none;
+}
+.data-table .cell-label {
+    color: var(--color-mist);
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+.data-table .cell-value {
+    font-weight: 600;
+    line-height: 1.45;
+}
+.data-table .metric-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.28rem;
+}
+.data-table .metric-item {
+    display: block;
+    line-height: 1.5;
+    white-space: normal;
+}
+.geo-span-card {
+    grid-column: 1 / -1;
+    width: 100%;
+    margin-top: 0.25rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid rgba(120, 190, 255, 0.2);
+    border-radius: 0.9rem;
+    background: linear-gradient(180deg, rgba(18, 46, 80, 0.9), rgba(12, 27, 46, 0.92));
+    box-shadow: var(--shadow-raised), var(--shadow-inset);
+}
+.geo-span-label {
+    margin-bottom: 0.35rem;
+    color: var(--color-mist);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+.geo-span-value {
+    color: var(--color-chalk);
+    font-size: 0.98rem;
+    font-weight: 600;
+    line-height: 1.5;
+}
+#general,
+#advanced {
+    display: grid;
+}
+#general {
+    grid-template-columns: 1fr;
+}
+#general > .body-card {
+    grid-column: 1 / -1;
+    width: 100%;
+}
+@media (min-width: 1280px) {
+    #advanced {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+.data-table .cell-corr {
+    overflow: hidden; /* la barra nunca invade la columna de descripción */
+}
+.data-table .cell-detail {
+    color: var(--color-mist);
+    font-size: 0.93rem;
+    line-height: 1.65;
+}
+.data-table-compact th,
+.data-table-compact td {
+    padding: 0.85rem 0.9rem;
+}
+@media (min-width: 1280px) {
+    .data-table:not(.data-table-compact) th,
+    .data-table:not(.data-table-compact) td {
+        padding: 1rem 1.15rem;
+    }
+}
+.data-table a {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+.formula {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    padding: 0.05rem 0.35rem;
+    border-radius: 0.35rem;
+    background: rgba(54, 214, 245, 0.12);
+    color: #cfefff;
+    border: 1px solid rgba(54, 214, 245, 0.22);
+    white-space: normal;
+}

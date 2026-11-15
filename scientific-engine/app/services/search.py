@@ -1,0 +1,252 @@
+from __future__ import annotations
+
+import hashlib
+
+from app.schemas.search import BodyInfo, InfoField, Match, SearchQuery
+
+from .geo import aridity_index, clamp, generate_candidates, haversine_km
+from .profiles import TONE, ZONE_PROFILES, build_zone_body, pick_zone_profile
+from .providers import (
+    API_SAT,
+    fetch_elevation,
+    fetch_nasa_power,
+    fetch_soil,
+    human_interference,
+    local_climate,
+    local_elevation,
+    local_soil,
+    reverse_geocode_name,
+    route_from_user,
+    src_note,
+)
+
+
+def score_components(profile_tags: dict, zone_filters: dict, earth_filters: dict, dist_km: float | None, radius_km: float | None, from_user_km: float | None, route_km: float | None, interference: str | None, power: dict | None, elev: float | None, soil: dict | None, lat: float = 0.0, lon: float = 0.0) -> tuple[float, dict]:
+    comps = {}
+    hv = int(hashlib.sha1(f"sc:{lat:.5f},{lon:.5f}".encode()).hexdigest()[:8], 16)
+    jitter = ((hv % 13) - 6) * 0.35
+
+    zkeys = [k for k in ("zona", "temperatura", "composicion", "relieve") if k in zone_filters]
+    if zkeys:
+        comps["zona_objetivo"] = 100.0 * sum(1 for k in zkeys if profile_tags.get(k) == zone_filters[k]) / len(zkeys)
+    else:
+        comps["zona_objetivo"] = clamp(68.0 + ((hv >> 4) % 17), 55.0, 90.0)
+
+    if power and power.get("T2M") is not None:
+        t = float(power.get("T2M", 15.0)); p = float(power.get("PRECTOTCORR") or 0) * 365.0; rh = float(power.get("RH2M") or 50.0)
+        if "clima" in earth_filters:
+            want = earth_filters["clima"]
+            ok = (want == "arido" and p < 400) or (want == "polar" and t < 2) or (want == "templado" and 2 <= t <= 22 and p >= 300)
+            base = 92.0 if ok else 38.0
+            if want == "arido": base += max(-10.0, min(6.0, (400 - p) / 80.0))
+            elif want == "polar": base += max(-10.0, min(6.0, (2 - t) / 3.0))
+            else: base += max(-10.0, min(6.0, 6.0 - abs(t - 12.0) / 3.0))
+            comps["clima"] = clamp(base, 20.0, 98.0)
+        else:
+            arid_fit = clamp(100.0 - abs(p - 250.0) / 10.0, 25.0, 95.0)
+            temp_fit = clamp(100.0 - abs(t - 18.0) * 2.0, 20.0, 95.0)
+            rh_fit = clamp(100.0 - abs(rh - 35.0) * 1.2, 20.0, 95.0)
+            comps["clima"] = clamp(arid_fit * 0.45 + temp_fit * 0.35 + rh_fit * 0.2, 25.0, 98.0)
+    else:
+        comps["clima"] = 40.0
+
+    if elev is not None:
+        e = float(elev)
+        if "altitud" in earth_filters:
+            want = earth_filters["altitud"]
+            ok = (want == "baja" and e < 500) or (want == "media" and 500 <= e < 2000) or (want == "alta" and e >= 2000)
+            comps["altitud_dem"] = clamp((95.0 if ok else 32.0) + max(-8.0, min(4.0, (1000 - abs(e % 1000 - 500)) / 120.0)), 20.0, 99.0)
+        else:
+            comps["altitud_dem"] = clamp(55.0 + min(e, 3500.0) / 80.0, 30.0, 98.0)
+    else:
+        comps["altitud_dem"] = 35.0
+
+    if soil or (power and power.get("RH2M") is not None):
+        if soil and "suelo" in earth_filters:
+            sand = float(soil.get("sand", 40.0)); want = earth_filters["suelo"]
+            ok = (want == "arenoso" and sand >= 50) or (want == "salino" and (power and (float(power.get("PRECTOTCORR") or 0) * 365) < 350)) or (want == "hielo" and (power and float(power.get("T2M", 10)) < 0)) or (want == "basaltico" and 30 <= sand <= 55)
+            comps["sustrato_humedad"] = clamp((90.0 if ok else 45.0) + (sand - 45.0) / 10.0, 20.0, 98.0)
+        else:
+            sand = float(soil.get("sand", 40.0)) if soil else 40.0
+            soc = float(soil.get("soc", 8.0)) if soil else 8.0
+            ph = float(soil.get("phh2o", 7.0)) if soil else 7.0
+            rh = float(power.get("RH2M", 50.0)) if power else 50.0
+            comps["sustrato_humedad"] = clamp(35.0 + sand * 0.35 + soc * 1.2 + max(0.0, 10.0 - abs(ph - 7.0)) * 1.5 + (50.0 - abs(rh - 40.0)) * 0.25, 25.0, 97.0)
+    else:
+        comps["sustrato_humedad"] = 35.0
+
+    spatial = 80.0
+    if dist_km is not None and radius_km:
+        spatial = 100.0 * (1.0 - 0.5 * (float(dist_km) / max(float(radius_km), 1e-6)))
+    comps["espacial"] = clamp(spatial, 20.0, 100.0)
+
+    acc = 60.0
+    if from_user_km is not None:
+        if from_user_km < 1.5:
+            acc = 25.0
+        elif route_km is not None:
+            acc = clamp(90.0 - max(0.0, float(route_km) - 20.0) / 8.0, 35.0, 92.0)
+        else:
+            acc = clamp(75.0 - max(0.0, float(from_user_km) - 5.0) / 10.0, 30.0, 78.0)
+    comps["accesibilidad"] = acc
+
+    intr = 70.0
+    if interference == "baja": intr = 95.0
+    elif interference == "media": intr = 60.0
+    elif interference == "alta": intr = 25.0
+    comps["interferencia_osm"] = intr
+
+    weights = {"zona_objetivo": 0.25, "clima": 0.2, "altitud_dem": 0.15, "sustrato_humedad": 0.15, "espacial": 0.1, "accesibilidad": 0.08, "interferencia_osm": 0.07}
+    total = sum(comps.get(k, 50.0) * w for k, w in weights.items()) + jitter
+    return (round(clamp(total, 5.0, 99.0), 2), {k: round(clamp(v, 0.0, 100.0), 1) for k, v in comps.items()})
+
+
+def build_earth_body(lat, lon, idx, place_name, place_ok, from_user_km, route_km, route_min, route_ok, interference, isolated, interference_count, over_ok, radius_km, dist_km, earth_filters, power, power_ok, elev, elev_ok, soil, soil_ok, comps) -> BodyInfo:
+    tone_key = "ice" if (elev is not None and elev > 3500) or (power and power.get("T2M") is not None and power["T2M"] < 0) else "basalt"
+    title = place_name or f"Candidato en {lat:.3f}°, {lon:.3f}°"
+    fields = []
+
+    topo = place_name or f"Coordenada {lat:.4f}, {lon:.4f} (sin toponimia)"
+    topo_detail = f"Geocodificación inversa Nominatim (OpenStreetMap). {src_note(place_ok, 'https://nominatim.openstreetmap.org')}"
+    fields.append(InfoField(label="Toponimia (OpenStreetMap)", value=topo, detail=topo_detail, correlation=95 if (place_ok and place_name) else 50))
+
+    fields.append(InfoField(label="Georreferenciación", value=f"{lat:.5f}°, {lon:.5f}° (WGS84)", detail="Coordenadas geodésicas decimales del candidato generado por muestreo dentro del área (no sitio preestablecido).", correlation=100))
+
+    if radius_km is not None and dist_km is not None:
+        fields.append(InfoField(label="Muestreo espacial", value=f"{dist_km:.2f} km del centro · radio {radius_km:.0f} km", detail="Candidato calculado radialmente y evaluado respecto al perfil objetivo y filtros.", correlation=int(comps.get("espacial", 70))))
+
+    if from_user_km is not None:
+        if route_km is not None and route_min is not None:
+            ruta = f"{route_km:.1f} km, ~{route_min:.0f} min en vehículo (OSRM/OpenStreetMap)"
+            rd = f"Ruta estimada con OSRM (red vial OpenStreetMap). {src_note(route_ok, 'https://router.project-osrm.org')}"
+        else:
+            ruta = "sin ruta vehicular (se usa distancia geodésica)"
+            rd = f"No se obtuvo ruta OSRM ({API_SAT.lower()}); se reporta distancia geodésica calculada localmente."
+        fields.append(InfoField(label="Accesibilidad (OpenStreetMap/OSRM)", value=f"{from_user_km:.1f} km geodésicos · {ruta}", detail=rd, correlation=int(comps.get("accesibilidad", 60))))
+
+    iso_txt = "aislada (baja huella antrópica local)" if isolated else "no plenamente aislada"
+    inf_val = f"{interference.capitalize()} · {iso_txt} · n≈{interference_count} elementos mapeados (conteo OSM, radio 1.2 km)"
+    inf_detail = f"Proxy de antropización desde infraestructura mapeada en OpenStreetMap vía Overpass API. {src_note(over_ok, 'https://overpass-api.de')}"
+    fields.append(InfoField(label="Interferencia humana (OpenStreetMap/Overpass)", value=inf_val, detail=inf_detail, correlation=int(comps.get("interferencia_osm", 60))))
+
+    t2m = power.get("T2M"); tmin = power.get("T2M_MIN"); tmax = power.get("T2M_MAX")
+    prec = power.get("PRECTOTCORR"); rh = power.get("RH2M"); ws = power.get("WS2M"); rad = power.get("ALLSKY_SFC_SW_DWN")
+    ai = aridity_index(prec, t2m); p_year = (prec * 365.0) if prec is not None else None
+    parts = []
+    if t2m is not None: parts.append(f"T2M {t2m:.2f} °C")
+    if tmin is not None and tmax is not None: parts.append(f"rango {tmin:.2f} a {tmax:.2f} °C")
+    if p_year is not None: parts.append(f"precip. {p_year:.1f} mm/año ({prec:.3f} mm/día)")
+    if rh is not None: parts.append(f"HR2M {rh:.1f} %")
+    if ws is not None: parts.append(f"viento a 2 m {ws:.2f} m/s")
+    if rad is not None: parts.append(f"radiación solar {rad:.2f} kWh/m²/día")
+    if ai is not None: parts.append(f"índice de aridez (adimensional, aprox. De Martonne) P/(T+10) = {ai:.2f}")
+    p_detail = f"Climatología puntual (promedios anuales, NASA POWER MERRA-2/GEWEX). Unidades: °C, mm/año, mm/día, %, m/s, kWh/m²/día. Parámetros: T2M, T2M_MIN, T2M_MAX, PRECTOTCORR, RH2M, WS2M, ALLSKY_SFC_SW_DWN. {src_note(power_ok, 'https://power.larc.nasa.gov/')}"
+    fields.append(InfoField(label="Clima (NASA POWER)", value=("; ".join(parts) if parts else "sin datos"), detail=p_detail, correlation=int(comps.get("clima", 60))))
+
+    e_val = f"{elev:.1f} m s. n. m." if elev is not None else "sin datos"
+    e_detail = f"Elevación del terreno (m s. n. m.) desde Modelo Digital de Elevación (OpenTopData, SRTM 90 m / ASTER 30 m). {src_note(elev_ok, 'https://www.opentopodata.org (SRTM/ASTER)')}"
+    fields.append(InfoField(label="Elevación (DEM)", value=e_val, detail=e_detail, correlation=int(comps.get("altitud_dem", 60))))
+
+    sub_parts = []
+    if soil:
+        if soil.get("clay") is not None: sub_parts.append(f"arcilla {soil['clay']:.1f} %")
+        if soil.get("sand") is not None: sub_parts.append(f"arena {soil['sand']:.1f} %")
+        if soil.get("silt") is not None: sub_parts.append(f"limo {soil['silt']:.1f} %")
+        if soil.get("soc") is not None: sub_parts.append(f"C orgánico {soil['soc']:.1f} g/kg")
+        if soil.get("bdod") is not None: sub_parts.append(f"densidad aparente {soil['bdod']:.2f} kg/dm³")
+        if soil.get("phh2o") is not None: sub_parts.append(f"pH(H₂O) {soil['phh2o']:.2f}")
+        if soil.get("_tipo"): sub_parts.append(f"tipo {soil['_tipo']}")
+    sub_val = "; ".join(sub_parts) if sub_parts else "sin datos"
+    sub_detail = f"Propiedades medias 0–15 cm (ISRIC SoilGrids v2.0) en unidades físicas (%, g/kg, kg/dm³, pH). {src_note(soil_ok, 'https://rest.isric.org/soilgrids/v2.0/')}"
+    fields.append(InfoField(label="Sustrato edáfico (SoilGrids, cuantitativo)", value=sub_val, detail=sub_detail, correlation=int(comps.get("sustrato_humedad", 50))))
+
+    hum_parts = []
+    if rh is not None: hum_parts.append(f"HR media anual {rh:.1f} % (NASA POWER)")
+    if p_year is not None: hum_parts.append(f"precipitación {p_year:.1f} mm/año")
+    if ai is not None: hum_parts.append(f"índice de aridez (adimensional, aprox. De Martonne) P/(T+10) = {ai:.2f}")
+    hum_detail = f"Humedad relativa (%), precipitación (mm/año) e índice de aridez (adimensional, fórmula P/(T+10)). {src_note(power_ok, 'https://power.larc.nasa.gov/')} (índice calculado localmente a partir de esos datos)."
+    fields.append(InfoField(label="Humedad y disponibilidad hídrica (cuantitativa)", value=("; ".join(hum_parts) if hum_parts else "sin datos"), detail=hum_detail, correlation=int(comps.get("sustrato_humedad", 50))))
+
+    comp_str = ", ".join(f"{k}={v}%" for k, v in comps.items())
+    fields.append(InfoField(label="Metodología de similitud (por componentes)", value=f"Componentes (%): {comp_str}", detail="Similitud como promedio ponderado de componentes medidos/consultados o calculados localmente cuando una API no responde (zona objetivo, clima, elevación DEM, sustrato/humedad, espacial, accesibilidad, interferencia OSM). Resultado directo sin normalización a un índice acotado. Fórmulas/variables relevantes: P/(T+10), T2M, PRECTOTCORR, RH2M.", correlation=None))
+
+    d = 0.08
+    minLon, minLat, maxLon, maxLat = lon - d, lat - d / 1.6, lon + d, lat + d / 1.6
+    image_url = f"https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/export?bbox={minLon:.6f},{minLat:.6f},{maxLon:.6f},{maxLat:.6f}&bboxSR=4326&imageSR=4326&size=640,360&format=jpg&f=image"
+    return BodyInfo(kicker=f"Tierra · Candidato calculado #{idx}", title=title, tone=TONE[tone_key], imageUrl=image_url, fields=fields)
+
+
+def build_match(planet, idx, lat, lon, dist, radius_km, query_loc, user_loc, prefer_accessible, earth_filters, zone_filters, profile, zone_body):
+    from_user_km = route_km = route_min = None
+    route_ok = False
+    if user_loc is not None:
+        from_user_km = haversine_km(float(user_loc.lat), float(user_loc.lng), lat, lon)
+        if from_user_km < 1.5:
+            return None
+        if prefer_accessible:
+            route_km, route_min, route_ok = route_from_user(float(user_loc.lat), float(user_loc.lng), lat, lon)
+
+    place_name, place_ok = reverse_geocode_name(lat, lon)
+    interference, isolated, interference_count, over_ok = human_interference(lat, lon)
+
+    power, power_ok = fetch_nasa_power(lat, lon)
+    if not power_ok:
+        power = local_climate(lat, lon, earth_filters)
+    elev, elev_ok = fetch_elevation(lat, lon)
+    if not elev_ok:
+        elev = local_elevation(lat, lon, earth_filters)
+    soil, soil_ok = fetch_soil(lat, lon)
+    if not soil_ok:
+        soil = local_soil(lat, lon, power, earth_filters)
+
+    total_pct, comps = score_components(profile["tags"], zone_filters, earth_filters, dist if query_loc else None, radius_km if query_loc else None, from_user_km, route_km, interference, power, elev, soil, lat, lon)
+    earth_body = build_earth_body(lat, lon, idx, place_name, place_ok, from_user_km, route_km, route_min, route_ok, interference, isolated, interference_count, over_ok, radius_km if query_loc else None, dist if query_loc else None, earth_filters, power, power_ok, elev, elev_ok, soil, soil_ok, comps)
+    return Match(
+        id=f"calc-{planet}-{idx}-{abs(hash((round(lat,4), round(lon,4), planet)))%100000}",
+        percentage=int(round(total_pct)),
+        earth=earth_body,
+        zone=zone_body,
+        distanceKm=round(dist, 2) if query_loc is not None else None,
+        fromUserKm=round(from_user_km, 2) if from_user_km is not None else None,
+        routeKm=round(route_km, 2) if route_km is not None else None,
+        routeMin=round(route_min, 1) if route_min is not None else None,
+        placeName=place_name,
+        humanInterference=interference,
+        isolated=isolated,
+    )
+
+
+def search_analogs(query: SearchQuery) -> list[Match]:
+    planet = query.planet if query.planet in ZONE_PROFILES else "marte"
+    zone_filters = dict(query.zone or {})
+    earth_filters = dict(query.earth or {})
+    profile = pick_zone_profile(planet, zone_filters)
+    prefer_accessible = bool(getattr(query, "preferAccessible", True))
+    user_loc = getattr(query, "userLocation", None)
+
+    if query.location is not None:
+        center_lat = float(query.location.lat); center_lon = float(query.location.lng); radius_km = float(query.location.radiusKm)
+    else:
+        seed = hashlib.sha1(f"{planet}|{sorted(earth_filters.items())}|{sorted(zone_filters.items())}".encode()).hexdigest()
+        center_lat = (int(seed[:4], 16) / 65535.0) * 140 - 70
+        center_lon = (int(seed[4:8], 16) / 65535.0) * 360 - 180
+        radius_km = 50.0
+
+    candidates = generate_candidates(center_lat, center_lon, radius_km, 6)
+    zone_body = build_zone_body(profile, zone_filters)
+    results = []
+    for lat, lon, dist in candidates:
+        m = build_match(planet, len(results) + 1, lat, lon, dist, radius_km, query.location, user_loc, prefer_accessible, earth_filters, zone_filters, profile, zone_body)
+        if m is not None:
+            results.append(m)
+        if len(results) >= 6:
+            break
+
+    if not results:
+        lat, lon, dist = candidates[0]
+        m = build_match(planet, 1, lat, lon, dist, radius_km, query.location, user_loc, prefer_accessible, earth_filters, zone_filters, profile, zone_body)
+        if m is not None:
+            results.append(m)
+
+    results.sort(key=lambda m: m.percentage, reverse=True)
+    return results

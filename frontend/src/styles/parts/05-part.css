@@ -1,0 +1,169 @@
+.zigzag-copy p {
+    color: var(--color-mist);
+    font-size: 1.05rem;
+    line-height: 1.85;
+    margin: 0 0 1rem;
+    max-width: 68ch;
+}
+.zigzag-copy ul {
+    margin: 0.5rem 0 0;
+    padding-left: 1.1rem;
+    color: var(--color-mist);
+    line-height: 1.85;
+}
+.zigzag-copy li {
+    margin: 0.25rem 0;
+}
+.chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+.chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid rgba(54, 214, 245, 0.22);
+    background: rgba(54, 214, 245, 0.08);
+    color: #dff6ff;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+html[data-theme="light"] .chip {
+    color: #0a3a52;
+}
+
+/* ============ Reveal animations ============ */
+.reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+        opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal.is-visible {
+    opacity: 1;
+    transform: none;
+}
+
+/* ============ Nosotros / story ============ */
+.story-page {
+    padding-top: 5.5rem;
+}
+.story-hero {
+    padding: 4rem 1.25rem 2rem;
+}
+@media (min-width: 768px) {
+    .story-hero {
+        padding: 5rem 2rem 2.5rem;
+    }
+}
+.story-hero-inner {
+    max-width: 72rem;
+    margin: 0 auto;
+}
+.story-hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    letter-spacing: -0.04em;
+    margin: 0.5rem 0 1rem;
+}
+.story-hero p {
+    color: var(--color-mist);
+    font-size: 1.1rem;
+    line-height: 1.8;
+    max-width: 65ch;
+}
+.section-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+}
+.section-nav a {
+    padding: 0.4rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-line);
+    color: var(--color-mist);
+    text-decoration: none;
+    font-size: 0.88rem;
+    background: rgba(54, 214, 245, 0.04);
+}
+.section-nav a:hover {
+    color: var(--color-chalk);
+    border-color: rgba(54, 214, 245, 0.3);
+}
+.story-section {
+    padding: 3.5rem 1.25rem;
+    scroll-margin-top: 6rem;
+}
+@media (min-width: 768px) {
+    .story-section {
+        padding: 5rem 2rem;
+    }
+}
+.story-section-inner {
+    max-width: 72rem;
+    margin: 0 auto;
+}
+.story-grid {
+    display: grid;
+    gap: 1.5rem;
+}
+@media (min-width: 900px) {
+    .story-grid.two {
+        grid-template-columns: 1.1fr 0.9fr;
+        align-items: start;
+    }
+}
+.story-card {
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 1.1rem;
+    padding: 1.25rem 1.35rem;
+    background: linear-gradient(145deg, rgba(16, 34, 64, 0.62), rgba(8, 18, 36, 0.72));
+    box-shadow: var(--shadow-raised), var(--shadow-inset);
+    backdrop-filter: blur(10px);
+}
+.story-card h3 {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    margin: 0 0 0.4rem;
+}
+.story-card p,
+.story-card li {
+    color: var(--color-mist);
+    line-height: 1.75;
+}
+.team-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+.team-placeholder {
+    border: 1px dashed rgba(54, 214, 245, 0.3);
+    border-radius: 1rem;
+    padding: 1.25rem;
+    background: rgba(54, 214, 245, 0.04);
+    min-height: 160px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+.team-avatar {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(54, 214, 245, 0.35), rgba(139, 108, 255, 0.35));
+    border: 1px solid rgba(54, 214, 245, 0.25);
+    margin-bottom: 0.25rem;
+}
+.muted {
+    color: var(--color-mist);
+}
+.mono {
+    font-family: var(--font-mono);
+}
+
+/* ============ Explorer & functional styles (preservados) ============ */

@@ -1,0 +1,169 @@
+.planet-dd-menu {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 0.45rem);
+    z-index: 60;
+    margin: 0;
+    padding: 0.35rem;
+    list-style: none;
+    background: linear-gradient(180deg, rgba(14, 30, 58, 0.96), rgba(8, 18, 36, 0.98));
+    border: 1px solid rgba(120, 190, 255, 0.18);
+    border-radius: 1rem;
+    box-shadow:
+        0 18px 40px rgba(2, 8, 20, 0.55),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(12px);
+}
+.planet-dd-menu[hidden] {
+    display: none;
+}
+.planet-dd-option {
+    width: 100%;
+    text-align: left;
+    padding: 0.7rem 0.85rem;
+    border-radius: 0.7rem;
+    border: 0;
+    background: transparent;
+    color: var(--color-chalk);
+    font: inherit;
+    cursor: pointer;
+    transition:
+        background 0.15s ease,
+        color 0.15s ease;
+}
+.planet-dd-option:hover,
+.planet-dd-option[aria-selected="true"] {
+    background: rgba(56, 189, 248, 0.12);
+    color: #fff;
+}
+
+/* ============ Dropdowns ============ */
+/* Lista nativa de <select>: fondo oscuro y texto claro (antes salía blanca con texto casi invisible) */
+.field-select,
+#loc-radius {
+    color-scheme: dark;
+}
+html[data-theme="light"] .field-select,
+html[data-theme="light"] #loc-radius {
+    color-scheme: light;
+}
+.field-select option {
+    background-color: #0b1830;
+    color: #f4f7ff;
+    padding: 0.5rem 0.75rem;
+}
+.field-select option:checked {
+    background-color: #1d4f9c;
+    color: #fff;
+}
+.field-select option:disabled {
+    color: #7d8fae;
+}
+html[data-theme="light"] .field-select option {
+    background-color: #ffffff;
+    color: #0a1428;
+}
+html[data-theme="light"] .field-select option:checked {
+    background-color: #dbe8ff;
+    color: #0a1428;
+}
+/* Menú de planeta: ancho fijo cuando el selector está en la esquina (antes se encogía y partía el texto) */
+#explorer:not([data-state="idle"]) .planet-dd {
+    width: 11.5rem;
+}
+.planet-dd-trigger,
+.planet-dd-option {
+    white-space: nowrap;
+}
+.planet-dd-menu {
+    min-width: 100%;
+}
+.planet-dd-option {
+    padding: 0.7rem 0.9rem;
+}
+
+/* Custom dropdowns para búsqueda por características (formato visual del selector de planeta) */
+.custom-dd {
+    position: relative;
+    width: 100%;
+}
+.custom-dd-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    text-align: left;
+    border: 1px solid rgba(120, 190, 255, 0.22);
+    border-radius: 1rem;
+    padding: 0.85rem 1rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--color-chalk);
+    background: linear-gradient(145deg, rgba(18, 38, 72, 0.82), rgba(10, 22, 44, 0.9));
+    box-shadow:
+        var(--shadow-raised),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    cursor: pointer;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.15s ease;
+}
+.custom-dd-trigger:hover {
+    border-color: rgba(86, 207, 225, 0.55);
+}
+.custom-dd[data-open="true"] .custom-dd-trigger,
+.custom-dd-trigger:focus-visible {
+    border-color: var(--color-jade);
+    box-shadow:
+        var(--shadow-raised),
+        0 0 0 3px rgba(86, 207, 225, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    outline: none;
+}
+.custom-dd-caret {
+    width: 1.2rem;
+    height: 1.2rem;
+    color: var(--color-mist);
+    transition: transform 0.2s ease;
+    flex: 0 0 auto;
+}
+.custom-dd[data-open="true"] .custom-dd-caret {
+    transform: rotate(180deg);
+    color: var(--color-jade);
+}
+.custom-dd-menu {
+    position: absolute;
+    z-index: 60;
+    left: 0;
+    right: 0;
+    margin-top: 0.45rem;
+    padding: 0.35rem;
+    list-style: none;
+    border: 1px solid rgba(120, 190, 255, 0.2);
+    border-radius: 1rem;
+    background: linear-gradient(180deg, rgba(10, 24, 48, 0.98), rgba(7, 17, 34, 0.98));
+    box-shadow:
+        0 18px 40px rgba(0, 0, 0, 0.45),
+        var(--shadow-inset);
+    backdrop-filter: blur(12px);
+    max-height: 15rem;
+    overflow: auto;
+}
+.custom-dd-menu[hidden] {
+    display: none;
+}
+.custom-dd-option {
+    width: 100%;
+    text-align: left;
+    padding: 0.65rem 0.8rem;
+    border: 0;
+    border-radius: 0.7rem;
+    background: transparent;
+    color: var(--color-chalk);
+    font: inherit;
+    font-size: 0.98rem;
+    cursor: pointer;
+}
