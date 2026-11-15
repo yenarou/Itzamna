@@ -1,0 +1,32 @@
+---
+import Base from '../layouts/Base.astro';
+import InfoMosaic from '../components/InfoMosaic.astro';
+---
+
+<Base title="Nosotros">
+  <InfoMosaic
+    topLabel={{
+      heading: 'Nosotros',
+      paragraphs: ['Un equipo que mezcla desarrollo de software y ciencias de la Tierra y del espacio.'],
+    }}
+    topInfo={{
+      heading: 'Qué es Itzamná',
+      paragraphs: [
+        'Itzamná (Integrated Terrestrial-Zonal Analog & Multi-factor Nearest Atlas) es una plataforma para identificar ubicaciones terrestres con características comparables a zonas de la Luna y Marte.',
+        'Su nombre viene de la deidad maya asociada al cielo y al conocimiento.',
+      ],
+    }}
+    bottomInfo={{
+      heading: 'Cómo funciona',
+      paragraphs: [
+        'Eliges un planeta, indicas las características que te interesan de la Tierra y del planeta, y la plataforma devuelve las zonas más parecidas con un porcentaje de similitud.',
+      ],
+    }}
+    bottomLabel={{
+      heading: 'Misión',
+      paragraphs: [
+        'Poner al alcance de todos una forma clara de comparar la Tierra con otros mundos.',
+      ],
+    }}
+  />
+</Base>

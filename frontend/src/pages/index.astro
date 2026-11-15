@@ -1,32 +1,228 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import Base from '../layouts/Base.astro';
+import Planet from '../components/Planet.astro';
+import { EARTH_FIELDS, PLANETS } from '../lib/data';
+
+const paneTitle = 'font-display text-3xl font-medium';
 ---
 
-<Layout title="Itzamná | Inicio">
-  <main class="min-h-screen px-6 py-20">
-    <div class="mx-auto max-w-5xl">
-      <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-8 shadow-2xl shadow-slate-950/40 ring-1 ring-slate-800/70">
-        <p class="mb-4 text-sm font-medium uppercase tracking-[0.3em] text-cyan-300">Itzamná</p>
-        <h1 class="text-4xl font-bold tracking-tight text-white sm:text-5xl">Integrated Terrestrial-Zonal Analog &amp; Multi-factor Nearest Atlas</h1>
-        <p class="mt-6 max-w-2xl text-lg text-slate-300">
-          Estructura inicial del proyecto preparada para futuras etapas de análisis comparativo entre ubicaciones terrestres, lunares y marcianas.
-        </p>
+<Base title="Explorar" fullscreen>
+  <main
+    id="explorer"
+    data-state="idle"
+    class="relative grid min-h-0 flex-1 grid-rows-2 md:grid-cols-2 md:grid-rows-1"
+  >
+    <!-- Tierra -->
+    <section
+      aria-labelledby="earth-title"
+      class="flex flex-col items-center justify-center gap-5 bg-[#10303e] p-4"
+    >
+      <div id="earth-visual" class="flex flex-col items-center gap-3">
+        <Planet body="tierra" />
+        <div id="earth-compare-wrap" class="relative hidden">
+          <img id="earth-compare" alt="" hidden referrerpolicy="no-referrer" class="aspect-video w-[min(34vmin,26rem)] rounded-lg border border-line object-cover shadow-2xl" />
+          <span aria-hidden="true" class="pointer-events-none absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-full"><span class="block h-4 w-4 -rotate-45 rounded-full rounded-bl-none border-2 border-white bg-ochre shadow-lg"></span><span class="mx-auto -mt-0.5 block h-2 w-2 rounded-full bg-white/90 shadow"></span></span>
+        </div>
+        <p id="earth-compare-caption" hidden class="max-w-xs text-center text-sm text-mist"></p>
+      </div>
+      <h2 id="earth-title" class={paneTitle}>Tierra</h2>
+    </section>
 
-        <div class="mt-10 grid gap-4 md:grid-cols-3">
-          <div class="rounded-xl border border-slate-700 bg-slate-950/60 p-4">
-            <p class="text-sm text-slate-400">Frontend</p>
-            <p class="mt-2 font-semibold text-cyan-300">Astro + TypeScript + Tailwind</p>
+    <!-- Planeta elegido -->
+    <section class="relative flex flex-col items-center justify-center gap-5 bg-deep p-4">
+      <div class="absolute right-4 top-4 z-10">
+        <label for="planet-select" class="sr-only">Planeta</label>
+        <select id="planet-select" class="field-select !w-auto min-w-36">
+          <option value="">Planeta</option>
+          {PLANETS.map((p) => <option value={p.id}>{p.name}</option>)}
+        </select>
+      </div>
+
+      <p id="empty-prompt" class="max-w-xs text-center text-lg leading-snug text-mist">
+        Elige la Luna o Marte para compararlos con la Tierra.
+      </p>
+
+      {
+        PLANETS.map((p) => (
+          <div data-planet-view={p.id} hidden class="flex flex-col items-center gap-5">
+            <div class="planet-visual flex flex-col items-center gap-3">
+              <Planet body={p.id} />
+              <img data-zone-compare={p.id} alt="" hidden referrerpolicy="no-referrer" class="aspect-video w-[min(34vmin,26rem)] rounded-lg border border-line object-cover shadow-2xl" />
+              <p data-zone-caption={p.id} hidden class="max-w-xs text-center text-sm text-mist"></p>
+            </div>
+            <h2 class={paneTitle}>{p.name}</h2>
           </div>
-          <div class="rounded-xl border border-slate-700 bg-slate-950/60 p-4">
-            <p class="text-sm text-slate-400">Backend</p>
-            <p class="mt-2 font-semibold text-violet-300">ASP.NET Core Web API</p>
+        ))
+      }
+    </section>
+
+    <!-- Porcentaje y botón de búsqueda -->
+    <div id="control" class="absolute bottom-5 left-1/2 z-40 flex -translate-x-1/2 flex-col items-center gap-2">
+      <div
+        class="min-w-32 rounded-md border border-line bg-panel px-4 py-1.5 text-center"
+        aria-live="polite"
+      >
+        <span class="block text-xs text-mist">Similitud</span>
+        <strong id="percent-value" class="font-display text-2xl font-semibold text-ochre">—</strong>
+      </div>
+      <button
+        id="toggle-search"
+        type="button"
+        disabled
+        aria-expanded="false"
+        aria-controls="search-panel"
+        aria-label="Buscar por características"
+        class="grid size-12 place-items-center rounded-md border border-line bg-panel text-chalk transition-colors enabled:hover:border-ochre disabled:opacity-40"
+      >
+        <svg
+          id="chevron"
+          class="transition-transform duration-300"
+          width="22"
+          height="22"
+          viewBox="0 0 22 22"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="m5 9 6-6 6 6"></path>
+          <path d="m5 17 6-6 6 6"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Búsqueda por campos -->
+    <form
+      id="search-panel"
+      hidden
+      class="absolute inset-0 z-30 overflow-y-auto bg-deep/95 px-4 pb-44 pt-6 backdrop-blur md:px-10"
+    >
+      <h2 class="mb-6 text-center font-display text-3xl font-medium">Buscar por características</h2>
+      <div class="mx-auto grid max-w-4xl gap-8 md:grid-cols-2">
+        <fieldset class="space-y-4" data-group="earth">
+          <legend class="mb-4 font-display text-2xl text-jade">Tierra</legend>
+          {
+            EARTH_FIELDS.map((f) => (
+              <div>
+                <label for={`earth-${f.id}`} class="mb-1.5 block text-sm text-mist">{f.label}</label>
+                <select id={`earth-${f.id}`} name={f.id} class="field-select">
+                  <option value="">Cualquiera</option>
+                  {f.options.map((o) => <option value={o.value}>{o.label}</option>)}
+                </select>
+              </div>
+            ))
+          }
+          <div class="mt-6 border-t border-line pt-4">
+            <p class="mb-3 text-sm font-medium text-chalk">Punto geográfico y rango (opcional)</p>
+            <div class="mb-3 flex flex-wrap items-center gap-2">
+              <button id="use-my-location" type="button" class="rounded-md border border-line px-3 py-1.5 text-sm hover:border-ochre">📍 Usar mi ubicación</button>
+              <span id="user-loc-status" class="text-xs text-mist"></span>
+            </div>
+            <div id="loc-map" class="mb-3 h-56 w-full overflow-hidden rounded-md border border-line" aria-label="Mapa para seleccionar punto en la Tierra"></div>
+            <div class="grid gap-3 sm:grid-cols-3">
+              <div>
+                <label for="loc-lat" class="mb-1.5 block text-sm text-mist">Latitud</label>
+                <input id="loc-lat" name="loc-lat" type="number" step="any" min="-90" max="90" placeholder="ej. -24.5" class="field-select" />
+              </div>
+              <div>
+                <label for="loc-lng" class="mb-1.5 block text-sm text-mist">Longitud</label>
+                <input id="loc-lng" name="loc-lng" type="number" step="any" min="-180" max="180" placeholder="ej. -69.25" class="field-select" />
+              </div>
+              <div>
+                <label for="loc-radius" class="mb-1.5 block text-sm text-mist">Radio</label>
+                <select id="loc-radius" name="loc-radius" class="field-select">
+                  <option value="">Sin filtro</option>
+                  <option value="1">1 km</option>
+                  <option value="10">10 km</option>
+                  <option value="50">50 km</option>
+                  <option value="100">100 km</option>
+                </select>
+              </div>
+            </div>
+            <p class="mt-2 text-xs text-mist">Haz clic en el mapa para elegir un punto de búsqueda y un radio. Si usas tu ubicación, se calcula ruta/accesibilidad desde ahí (OpenStreetMap/OSRM), se evita sugerir sitios justo a tu lado y se priorizan áreas más aisladas (menor interferencia humana) con nombre de lugar cuando está disponible.</p>
           </div>
-          <div class="rounded-xl border border-slate-700 bg-slate-950/60 p-4">
-            <p class="text-sm text-slate-400">Motor científico</p>
-            <p class="mt-2 font-semibold text-emerald-300">FastAPI</p>
-          </div>
+        </fieldset>
+
+        {
+          PLANETS.map((p) => (
+            <fieldset hidden class="space-y-4" data-group="zone" data-planet-fields={p.id}>
+              <legend class:list={['mb-4 font-display text-2xl', p.id === 'marte' ? 'text-rust' : 'text-mist']}>
+                {p.name}
+              </legend>
+              {p.fields.map((f) => (
+                <div>
+                  <label for={`${p.id}-${f.id}`} class="mb-1.5 block text-sm text-mist">{f.label}</label>
+                  <select id={`${p.id}-${f.id}`} name={f.id} class="field-select">
+                    <option value="">Cualquiera</option>
+                    {f.options.map((o) => <option value={o.value}>{o.label}</option>)}
+                  </select>
+                </div>
+              ))}
+            </fieldset>
+          ))
+        }
+      </div>
+      <div class="mx-auto mt-8 flex max-w-4xl flex-col items-end gap-2">
+        <button
+          id="confirm"
+          type="submit"
+          class="rounded-md bg-jade px-6 py-2.5 font-semibold text-deep transition-colors hover:bg-[#63c498] disabled:opacity-60"
+        >
+          Confirmar
+        </button>
+        <p id="search-status" role="status" class="min-h-5 text-sm text-mist"></p>
+      </div>
+    </form>
+
+    <!-- Resultados -->
+    <section
+      id="results"
+      hidden
+      aria-labelledby="results-title"
+      class="absolute inset-0 z-30 overflow-y-auto bg-deep"
+    >
+      <div class="sticky top-0 z-10 border-b border-line bg-panel/95 px-4 py-3 backdrop-blur md:px-8">
+        <div class="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-3">
+          <button
+            id="results-close"
+            type="button"
+            class="rounded-md border border-line px-3 py-1.5 text-sm hover:border-ochre"
+          >
+            Volver
+          </button>
+          <h2 id="results-title" class="font-display text-2xl font-medium">Zonas similares</h2>
+          <div id="match-tabs" role="tablist" aria-label="Zonas encontradas" class="flex flex-wrap gap-2"></div>
         </div>
       </div>
-    </div>
+
+      <div class="mx-auto max-w-6xl px-4 py-8 md:px-8">
+        <p class="mb-6 flex items-baseline gap-3">
+          <span class="text-sm text-mist">Similitud</span>
+          <strong id="result-percent" class="font-display text-5xl font-semibold text-ochre"></strong>
+        </p>
+        <div id="general" class="grid gap-8 md:grid-cols-2"></div>
+
+        <div class="mt-10 border-t border-line pt-6">
+          <button
+            id="advanced-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="advanced"
+            class="rounded-md border border-line px-4 py-2 text-sm font-medium hover:border-ochre"
+          >
+            Ver información avanzada
+          </button>
+          <div id="advanced" hidden class="mt-8 grid gap-8 md:grid-cols-2"></div>
+        </div>
+      </div>
+    </section>
   </main>
-</Layout>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script>
+    import '../scripts/explorer';
+  </script>
+</Base>

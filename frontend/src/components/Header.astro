@@ -1,0 +1,38 @@
+---
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const links = [
+  { href: '/', label: 'Explorar' },
+  { href: '/vision', label: 'Visión' },
+  { href: '/nosotros', label: 'Nosotros' },
+];
+---
+
+<header class="flex h-14 shrink-0 items-center justify-between border-b border-line bg-panel px-4 md:px-8">
+  <a href="/" class="flex items-center gap-2.5 font-display text-2xl font-semibold tracking-tight">
+    <svg width="28" height="20" viewBox="0 0 28 20" aria-hidden="true">
+      <circle cx="9" cy="10" r="8" fill="#4fb286"></circle>
+      <circle cx="19" cy="10" r="8" fill="#c4502d" fill-opacity="0.92"></circle>
+    </svg>
+    Itzamná
+  </a>
+  <nav aria-label="Principal">
+    <ul class="flex gap-1">
+      {
+        links.map((l) => (
+          <li>
+            <a
+              href={l.href}
+              aria-current={path === l.href ? 'page' : undefined}
+              class:list={[
+                'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+                path === l.href ? 'bg-deep text-chalk' : 'text-mist hover:text-chalk',
+              ]}
+            >
+              {l.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</header>

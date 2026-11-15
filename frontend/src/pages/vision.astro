@@ -1,0 +1,32 @@
+---
+import Base from '../layouts/Base.astro';
+import InfoMosaic from '../components/InfoMosaic.astro';
+---
+
+<Base title="Visión">
+  <InfoMosaic
+    topLabel={{
+      heading: 'Visión',
+      paragraphs: ['Que explorar otros mundos ayude a entender mejor el nuestro.'],
+    }}
+    topInfo={{
+      heading: 'Un atlas que une dos mundos',
+      paragraphs: [
+        'Itzamná quiere ser la referencia para encontrar en la Tierra lugares que se parezcan a zonas de la Luna y Marte.',
+        'Con ellos, equipos de investigación pueden probar equipos, procedimientos y hábitats sin salir del planeta.',
+      ],
+    }}
+    bottomInfo={{
+      heading: 'Información abierta y comparable',
+      paragraphs: [
+        'Cada zona se describe con los mismos campos, para que compararla con otra sea directo. Primero se ve un resumen y, cuando se necesita, el detalle completo.',
+      ],
+    }}
+    bottomLabel={{
+      heading: 'Público objetivo',
+      paragraphs: [
+        'Estudiantes, docentes e investigadores en ciencias planetarias, y cualquier persona curiosa por la exploración espacial.',
+      ],
+    }}
+  />
+</Base>

@@ -1,0 +1,35 @@
+---
+interface Card {
+  heading: string;
+  paragraphs: string[];
+}
+interface Props {
+  /** Fila superior: tarjeta de título (estrecha) + información (ancha). */
+  topLabel: Card;
+  topInfo: Card;
+  /** Fila inferior: información (ancha) + tarjeta de título (estrecha). */
+  bottomInfo: Card;
+  bottomLabel: Card;
+}
+const { topLabel, topInfo, bottomInfo, bottomLabel } = Astro.props;
+const cardClass = 'rounded-xl border border-line p-6 md:p-8';
+---
+
+<main class="mx-auto grid w-full max-w-6xl flex-1 gap-4 p-4 md:grid-cols-12 md:p-8">
+  <section class:list={[cardClass, 'bg-panel md:col-span-4']}>
+    <h1 class="font-display text-4xl font-medium">{topLabel.heading}</h1>
+    {topLabel.paragraphs.map((p) => <p class="mt-4 leading-relaxed text-mist">{p}</p>)}
+  </section>
+  <section class:list={[cardClass, 'md:col-span-8']}>
+    <h2 class="font-display text-2xl font-medium">{topInfo.heading}</h2>
+    {topInfo.paragraphs.map((p) => <p class="mt-4 max-w-[68ch] leading-relaxed text-mist">{p}</p>)}
+  </section>
+  <section class:list={[cardClass, 'md:col-span-8']}>
+    <h2 class="font-display text-2xl font-medium">{bottomInfo.heading}</h2>
+    {bottomInfo.paragraphs.map((p) => <p class="mt-4 max-w-[68ch] leading-relaxed text-mist">{p}</p>)}
+  </section>
+  <section class:list={[cardClass, 'bg-panel md:col-span-4']}>
+    <h2 class="font-display text-3xl font-medium">{bottomLabel.heading}</h2>
+    {bottomLabel.paragraphs.map((p) => <p class="mt-4 leading-relaxed text-mist">{p}</p>)}
+  </section>
+</main>
