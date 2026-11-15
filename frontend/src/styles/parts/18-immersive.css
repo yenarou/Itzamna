@@ -27,10 +27,9 @@
   height: auto;
   margin: 0 auto;
   position: relative;
+  overflow: hidden;
+  border-radius: 9999px;
 }
 .earth-globe canvas {
-  width: 100% !important;
-  height: 100% !important;
   display: block;
-  border-radius: 9999px;
 }

@@ -131,6 +131,11 @@ function initEarthGlobe(): void {
         globeEarth.controls().enablePan = false;
         globeEarth.controls().enableZoom = false;
         globeEarth.pointOfView({ lat: 18, lng: -18, altitude: 1.6 }, 0);
+        try {
+            if (typeof ResizeObserver !== "undefined") {
+                new ResizeObserver(() => resizeEarthGlobe()).observe(earthGlobe);
+            }
+        } catch {}
         window.addEventListener("resize", resizeEarthGlobe);
     } catch (error) {
         console.error("No se pudo inicializar Globe.GL", error);
@@ -206,6 +211,8 @@ function updateMapMarker(): void {
         } else {
             marker.setLatLng(ll);
         }
+        if (map.getZoom() < 4) map.setView(ll, 8);
+        else map.panTo(ll);
 
         const r = Number(locRadius.value || "100");
         if (Number.isFinite(r) && r > 0) {
