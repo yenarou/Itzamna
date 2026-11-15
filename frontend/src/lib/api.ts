@@ -1,4 +1,3 @@
-import { PLANET_IMAGES } from "./data";
 import type { BodyInfo, InfoField, Match, SearchQuery } from "./types";
 
 const API_URL: string = import.meta.env.PUBLIC_API_URL ?? "";
@@ -796,10 +795,12 @@ function earthBody(
     if (power?.T2M != null) pParts.push(`T2M ${Number(power.T2M).toFixed(2)} °C`);
     if (power?.T2M_MIN != null && power?.T2M_MAX != null)
         pParts.push(`rango ${Number(power.T2M_MIN).toFixed(2)} a ${Number(power.T2M_MAX).toFixed(2)} °C`);
-    if (pYear != null) pParts.push(`precip. ${pYear.toFixed(1)} mm/año (${Number(power.PRECTOTCORR).toFixed(3)} mm/día)`);
+    if (pYear != null)
+        pParts.push(`precip. ${pYear.toFixed(1)} mm/año (${Number(power.PRECTOTCORR).toFixed(3)} mm/día)`);
     if (power?.RH2M != null) pParts.push(`HR2M ${Number(power.RH2M).toFixed(1)} %`);
     if (power?.WS2M != null) pParts.push(`viento a 2 m ${Number(power.WS2M).toFixed(2)} m/s`);
-    if (power?.ALLSKY_SFC_SW_DWN != null) pParts.push(`radiación solar ${Number(power.ALLSKY_SFC_SW_DWN).toFixed(2)} kWh/m²/día`);
+    if (power?.ALLSKY_SFC_SW_DWN != null)
+        pParts.push(`radiación solar ${Number(power.ALLSKY_SFC_SW_DWN).toFixed(2)} kWh/m²/día`);
     if (ai != null) pParts.push(`índice de aridez (adimensional, aprox. De Martonne) P/(T+10) = ${ai.toFixed(2)}`);
     fields.push({
         label: "Clima (NASA POWER)",
@@ -841,7 +842,7 @@ function earthBody(
     });
     const compStr = Object.entries(comps)
         .map(([k, v]) => `${k}=${Math.round(Number(v))} %`)
-        .join(", ");
+        .join("; ");
     fields.push({
         label: "Metodología de similitud (por componentes)",
         value: `Componentes (%): ${compStr}`,
@@ -858,7 +859,7 @@ function earthBody(
 }
 function zoneBody(profile: ZoneProfile, zone: Record<string, string>): BodyInfo {
     const keys = ["composicion", "temperatura", "relieve", "zona"];
-    const vals = keys.map(k => (zone[k] ? (profile.tags[k] === zone[k] ? 92 : 35) : (k === "temperatura" ? 80 : 78)));
+    const vals = keys.map(k => (zone[k] ? (profile.tags[k] === zone[k] ? 92 : 35) : k === "temperatura" ? 80 : 78));
     const corrs = [vals[0], vals[1], Math.round((vals[2] + vals[3]) / 2), 74];
     return {
         kicker: profile.kicker,
