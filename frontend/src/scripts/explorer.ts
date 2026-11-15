@@ -24,6 +24,9 @@ const searchPanel = el<HTMLFormElement>("#search-panel");
 const confirmBtn = el<HTMLButtonElement>("#confirm");
 const searchStatus = el<HTMLElement>("#search-status");
 const searchLoading = el<HTMLElement>("#search-loading");
+const searchLoadingMsg = document.getElementById("search-loading-msg");
+const searchLoadingBar = document.getElementById("search-loading-bar");
+const searchLoadingPct = document.getElementById("search-loading-pct");
 const results = el<HTMLElement>("#results");
 const resultsSkeleton = document.querySelector<HTMLElement>("#results-skeleton");
 const resultsClose = el<HTMLButtonElement>("#results-close");
@@ -484,15 +487,176 @@ function exportResultsCsv(): void {
     URL.revokeObjectURL(url);
 }
 
+function readFormLabel(id: string): string {
+    const node = document.getElementById(id) as HTMLSelectElement | HTMLInputElement | null;
+    if (!node) return "";
+    if (node instanceof HTMLSelectElement) {
+        const opt = node.selectedOptions[0];
+        return opt && opt.value ? (opt.textContent || opt.value).trim() : "";
+    }
+    return (node.value || "").trim();
+}
+
 function exportResultsPdf(): void {
     if (!matches.length) return;
-    // asegurar datos completos visibles para impresión/PDF
-    if (resultsSkeleton) resultsSkeleton.hidden = true;
-    advanced.hidden = false;
-    advancedToggle.setAttribute("aria-expanded", "true");
-    advancedToggle.textContent = "Ocultar información avanzada";
-    el<HTMLElement>("#advanced-panel").classList.add("is-open");
-    setTimeout(() => window.print(), 50);
+    const planetName = planet ? (planet === "luna" ? "Luna" : "Marte") : "—";
+    const now = new Date();
+    const fecha = now.toLocaleString("es-MX", { dateStyle: "full", timeStyle: "short" });
+    const lat = readFormLabel("loc-lat");
+    const lng = readFormLabel("loc-lng");
+    const radius = readFormLabel("loc-radius");
+    const zona = readFormLabel("zone-zona");
+    const temp = readFormLabel("zone-temperatura");
+    const comp = readFormLabel("zone-composicion");
+    const rel = readFormLabel("zone-relieve");
+    const clima = readFormLabel("earth-clima");
+    const alt = readFormLabel("earth-altitud");
+    const suelo = readFormLabel("earth-suelo");
+    const hum = readFormLabel("earth-humedad");
+    const filtros = [
+        zona && `Zona: ${zona}`, temp && `Temperatura: ${temp}`, comp && `Composición: ${comp}`, rel && `Relieve: ${rel}`,
+        clima && `Clima: ${clima}`, alt && `Altitud: ${alt}`, suelo && `Suelo: ${suelo}`, hum && `Humedad: ${hum}`
+    ].filter(Boolean).join(" · ") || "Sin filtros específicos";
+    const ubic = (lat && lng) ? `Punto: ${lat}, ${lng} · Radio: ${radius || "—"} km` : "Sin punto seleccionado";
+    const user = userLocation ? ` · Tu ubicación: ${userLocation.lat.toFixed(5)}, ${userLocation.lng.toFixed(5)}` : "";
+
+    const corrBar = (c?: number) => {
+        if (typeof c !== "number") return `<span class="muted">—</span>`;
+        const v = Math.max(0, Math.min(100, Math.round(c)));
+        const cls = v >= 80 ? "g" : v >= 60 ? "b" : v >= 35 ? "a" : "r";
+        return `<div class="corr"><div class="corr-track"><div class="corr-fill ${cls}" style="width:${v}%"></div></div><span>${v}%</span></div>`;
+    };
+
+    const renderBody = (b: BodyInfo) => `
+      <div class="body-block">
+        <div class="body-head">
+          <div>
+            <div class="kicker">${esc(b.kicker)}</div>
+            <h4>${esc(b.title)}</h4>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>Campo</th><th>Valor</th><th>Correlación</th><th>Descripción</th></tr></thead>
+          <tbody>
+            ${b.fields.map(f => `<tr>
+              <td class="f-label">${esc(f.label)}</td>
+              <td class="f-value">${fmtFormulas(esc(f.value))}</td>
+              <td class="f-corr">${corrBar(f.correlation)}</td>
+              <td class="f-desc">${fmtFormulas(esc(f.detail || ""))}</td>
+            </tr>`).join("")}
+          </tbody>
+        </table>
+      </div>`;
+
+    const candidatesHtml = matches.map((m, i) => {
+        const label = m.placeName || m.earth.title || `Candidato ${i + 1}`;
+        const meta = [
+            `Similitud: ${m.percentage}%`,
+            m.distanceKm != null ? `Distancia: ${m.distanceKm} km` : null,
+            m.fromUserKm != null ? `Desde tu ubicación: ${m.fromUserKm} km` : null,
+            m.routeKm != null ? `Ruta: ${m.routeKm} km` : null,
+            m.routeMin != null ? `${m.routeMin} min` : null,
+            m.humanInterference ? `Interferencia: ${m.humanInterference}` : null,
+        ].filter(Boolean).join(" · ");
+        const coords = candidateCoords(m);
+        const maps = coords ? `<a href="https://www.google.com/maps/search/?api=1&query=${coords.lat},${coords.lon}" target="_blank">Ver en Google Maps</a>` : "";
+        return `<section class="candidate">
+          <div class="cand-head">
+            <div>
+              <div class="rank">Candidato ${i + 1}</div>
+              <h3>${esc(label)}</h3>
+              <div class="meta">${esc(meta)}${maps ? ` · ${maps}` : ""}</div>
+            </div>
+            <div class="score">${m.percentage}<span>%</span></div>
+          </div>
+          <div class="bodies">
+            ${renderBody(m.earth)}
+            ${renderBody(m.zone)}
+          </div>
+        </section>`;
+    }).join("");
+
+    const html = `<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8" />
+<title>Itzamná - Reporte de análogos</title>
+<style>
+  :root{--ink:#0b1220;--muted:#4b5b73;--line:#d8e0ec;--soft:#f4f7fb;--accent:#2563eb;--ok:#059669;--mid:#0284c7;--warn:#d97706;--bad:#dc2626}
+  *{box-sizing:border-box} body{margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);background:#fff;line-height:1.45;font-size:11pt}
+  .page{max-width:1100px;margin:0 auto;padding:28px 32px}
+  .cover{border:1px solid var(--line);border-radius:14px;padding:22px 24px;background:linear-gradient(135deg,#eff6ff,#f8fbff 55%,#eef9ff);margin-bottom:18px}
+  .brand{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  h1{margin:6px 0 4px;font-size:26px;line-height:1.15} .sub{color:var(--muted);margin:0 0 10px}
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+  .info{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .info b{display:block;font-size:12px;color:var(--muted);margin-bottom:2px}
+  .candidate{margin:18px 0 22px;page-break-inside:avoid;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .cand-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;padding:16px 18px;background:var(--soft);border-bottom:1px solid var(--line)}
+  .rank{font-size:12px;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+  h3{margin:2px 0 4px;font-size:20px} .meta{color:var(--muted);font-size:12px}
+  .score{font-size:34px;font-weight:800;color:var(--accent);line-height:1;white-space:nowrap}.score span{font-size:18px;color:var(--muted);margin-left:2px}
+  .bodies{padding:14px 16px;display:grid;gap:14px}
+  .body-block{page-break-inside:avoid}
+  .kicker{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+  h4{margin:2px 0 8px;font-size:16px}
+  table{width:100%;border-collapse:collapse;font-size:10.5pt}
+  th,td{border:1px solid var(--line);padding:8px 9px;vertical-align:top;text-align:left}
+  th{background:#f8fafc;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#334155}
+  .f-label{width:18%;font-weight:600}.f-value{width:28%}.f-corr{width:16%}.f-desc{width:38%;color:#1f2937}
+  .corr{display:flex;align-items:center;gap:8px}.corr-track{flex:1;height:8px;background:#e5edf7;border-radius:999px;overflow:hidden;min-width:70px}
+  .corr-fill{height:100%;border-radius:999px}.corr-fill.g{background:var(--ok)}.corr-fill.b{background:var(--mid)}.corr-fill.a{background:var(--warn)}.corr-fill.r{background:var(--bad)}
+  .muted{color:var(--muted)} code.formula{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em;background:#eef4ff;border:1px solid #d9e6ff;border-radius:4px;padding:1px 4px}
+  a{color:var(--accent)}
+  .footer{margin-top:14px;color:var(--muted);font-size:11px}
+  @media print{.page{padding:10mm 8mm;max-width:none} .candidate{break-inside:avoid} tr{break-inside:avoid} @page{margin:12mm}}
+</style></head><body>
+  <div class="page">
+    <header class="cover">
+      <div class="brand">Itzamná · Análogos terrestres</div>
+      <h1>Reporte de análisis de análogos</h1>
+      <p class="sub">Exportación personalizada con resultados, correlaciones y datos de referencia (APIs y/o valores calculados/locales según disponibilidad).</p>
+      <div class="grid">
+        <div class="info"><b>Fecha</b>${esc(fecha)}</div>
+        <div class="info"><b>Planeta/zona objetivo</b>${esc(planetName)}</div>
+        <div class="info"><b>Ubicación de búsqueda</b>${esc(ubic + user)}</div>
+        <div class="info"><b>Filtros aplicados</b>${esc(filtros)}</div>
+      </div>
+    </header>
+    ${candidatesHtml}
+    <div class="footer">Generado por Itzamná. Las similitudes y correlaciones son orientativas y dependen de las fuentes y modelos disponibles al momento de la consulta.</div>
+  </div>
+  <script>window.onload=()=>setTimeout(()=>window.print(),250);</script>
+</body></html>`;
+
+    const printInFrame = () => {
+        const iframe = document.createElement("iframe");
+        iframe.style.position = "fixed";
+        iframe.style.right = "0";
+        iframe.style.bottom = "0";
+        iframe.style.width = "0";
+        iframe.style.height = "0";
+        iframe.style.border = "0";
+        iframe.setAttribute("aria-hidden", "true");
+        document.body.appendChild(iframe);
+        const doc = iframe.contentWindow?.document;
+        if (!doc) { document.body.removeChild(iframe); searchStatus.textContent = "No se pudo generar el PDF en este navegador."; return; }
+        doc.open();
+        doc.write(html);
+        doc.close();
+        const win = iframe.contentWindow;
+        setTimeout(() => {
+            try { win?.focus(); win?.print(); } catch { /* ignore */ }
+            setTimeout(() => { iframe.remove(); }, 1500);
+        }, 350);
+    };
+
+    try {
+        printInFrame();
+    } catch {
+        const w = window.open("", "_blank");
+        if (w) { w.document.open(); w.document.write(html); w.document.close(); }
+        else { searchStatus.textContent = "Permite ventanas emergentes o usa la opción de imprimir del navegador para exportar el PDF."; }
+    }
 }
 
 /* ----- Eventos ----- */
@@ -553,11 +717,31 @@ searchPanel.addEventListener("submit", async event => {
         ...(uLoc ? { userLocation: uLoc, preferIsolated: true, preferAccessible: true } : {}),
     };
     confirmBtn.disabled = true;
+    // asegurar que el overlay no quede recortado por contenedores/transform del form
+    if (searchLoading.parentElement !== document.body) document.body.appendChild(searchLoading);
     searchLoading.hidden = false;
+    if (resultsSkeleton) resultsSkeleton.hidden = true;
+    if (searchLoadingMsg) searchLoadingMsg.textContent = "Conectando con la API";
+    if (searchLoadingBar) (searchLoadingBar as HTMLElement).style.width = "22%";
+    if (searchLoadingPct) searchLoadingPct.textContent = "Iniciando…";
     searchStatus.textContent = "";
+    const t1 = setTimeout(() => {
+        if (searchLoadingMsg) searchLoadingMsg.textContent = "Conexión establecida";
+        if (searchLoadingBar) (searchLoadingBar as HTMLElement).style.width = "62%";
+        if (searchLoadingPct) searchLoadingPct.textContent = "Consultando fuentes y calculando…";
+    }, 450);
+    const t2 = setTimeout(() => {
+        if (searchLoadingMsg) searchLoadingMsg.textContent = "Procesando resultados";
+        if (searchLoadingBar) (searchLoadingBar as HTMLElement).style.width = "86%";
+        if (searchLoadingPct) searchLoadingPct.textContent = "Preparando información…";
+    }, 1300);
 
     try {
         matches = await searchAnalogs(query);
+        clearTimeout(t1); clearTimeout(t2);
+        if (searchLoadingMsg) searchLoadingMsg.textContent = "Listo";
+        if (searchLoadingBar) (searchLoadingBar as HTMLElement).style.width = "100%";
+        if (searchLoadingPct) searchLoadingPct.textContent = "Completado";
         active = 0;
         if (matches.length === 0) {
             searchStatus.textContent = "No hay zonas con esas características. Prueba con menos filtros.";
@@ -573,10 +757,12 @@ searchPanel.addEventListener("submit", async event => {
         renderResults();
         setState("results");
     } catch {
+        clearTimeout(t1); clearTimeout(t2);
+        if (searchLoadingMsg) searchLoadingMsg.textContent = "No se pudo conectar";
         searchStatus.textContent = "No se pudo completar la búsqueda. Inténtalo de nuevo.";
     } finally {
         confirmBtn.disabled = false;
-        searchLoading.hidden = true;
+        setTimeout(() => { searchLoading.hidden = true; }, 350);
     }
 });
 

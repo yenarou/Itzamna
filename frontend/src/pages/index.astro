@@ -15,38 +15,64 @@ const tech = [
 ---
 
 <Base title="Explorar" transparentHeader>
-  <main class="page-wrap">
-    <!-- HERO -->
-    <section class="hero" aria-labelledby="hero-title">
-      <div class="hero-stars" aria-hidden="true"></div>
-      <div class="hero-orbits" aria-hidden="true">
-        <span class="hero-orbit o1"></span>
-        <span class="hero-orbit o2"></span>
-        <span class="hero-orbit o3"></span>
-        <span class="hero-planet mars"></span>
-        <span class="hero-planet moon"></span>
-      </div>
-      <div class="hero-glow" aria-hidden="true"></div>
-      <div class="hero-content reveal is-visible">
-        <p class="hero-kicker">Exploración científica · Análogos terrestres</p>
-        <h1 id="hero-title">Explorando la Tierra para comprender otros mundos.</h1>
-        <p>
-          Itzamná identifica regiones terrestres con características comparables a entornos de la Luna y Marte mediante análisis geoespacial y criterios científicos.
-        </p>
-        <div class="hero-actions">
-          <a href="#explorador" class="btn-primary">Explorar Itzamná</a>
-          <a href="/nosotros" class="btn-secondary">Conocer el proyecto</a>
+  <main class="page-wrap" id="app-views" data-view="home">
+    <!-- VIEW: HOME (pantalla principal) -->
+    <section id="view-home" class="app-view" data-app-view="home" aria-labelledby="hero-title">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-stars" aria-hidden="true"></div>
+        <div class="hero-orbits" aria-hidden="true">
+          <span class="hero-orbit o1"></span>
+          <span class="hero-orbit o2"></span>
+          <span class="hero-orbit o3"></span>
+          <span class="hero-planet mars"></span>
+          <span class="hero-planet moon"></span>
         </div>
-      </div>
+        <div class="hero-glow" aria-hidden="true"></div>
+        <div class="hero-content reveal is-visible">
+          <p class="hero-kicker">Exploración científica · Análogos terrestres</p>
+          <h1 id="hero-title">Explorando la Tierra para comprender otros mundos.</h1>
+          <p>
+            Itzamná identifica regiones terrestres con características comparables a entornos de la Luna y Marte mediante análisis geoespacial y criterios científicos.
+          </p>
+          <div class="hero-actions">
+            <button type="button" class="btn-primary" data-show-view="explore" data-focus-picker="true">Explorar Itzamná</button>
+            <button type="button" class="btn-secondary" data-show-view="content">Ver contenido</button>
+            <a href="/nosotros" class="btn-secondary">Conocer el proyecto</a>
+          </div>
+        </div>
+      </section>
     </section>
 
-    <!-- ZIGZAG 1: ¿Qué es Itzamná? (imagen izq, texto der) -->
-    <section class="zigzag" id="que-es">
+    <!-- VIEW: CONTENT (por partes, sin scroll total) -->
+    <section id="view-content" class="app-view" data-app-view="content" hidden aria-label="Contenido del proyecto">
+      <div class="content-shell">
+        <div class="content-topbar">
+          <button type="button" class="btn-secondary btn-compact" data-show-view="home">Inicio</button>
+          <div class="content-progress" aria-live="polite"><span id="content-step-label">1 / 6</span></div>
+          <button type="button" class="btn-primary btn-compact" data-show-view="explore" data-focus-picker="true">Ir a explorar</button>
+        </div>
+
+        <!-- Hero dentro de contenido -->
+        <section class="content-hero reveal is-visible" data-content-step="0">
+          <div class="content-hero-inner">
+            <p class="hero-kicker">Itzamná · Misión y contexto</p>
+            <h2>De la superficie terrestre a la exploración planetaria</h2>
+            <p>Conoce el propósito, análisis y tecnología detrás de la plataforma en secciones breves, una a la vez.</p>
+            <div class="hero-actions">
+              <button type="button" class="btn-primary" data-content-next>Siguiente</button>
+              <button type="button" class="btn-secondary" data-show-view="explore" data-focus-picker="true">Explorar ahora</button>
+            </div>
+          </div>
+        </section>
+
+        <div id="content-parts">
+    <!-- ZIGZAG 1: ¿Qué es Itzamná? -->
+    <section class="zigzag" id="que-es" data-content-step="1">
       <div class="zigzag-inner">
-        <div class="zigzag-media reveal">
+        <div class="zigzag-media reveal is-visible">
           <img src="https://images-assets.nasa.gov/image/PIA18033/PIA18033~orig.jpg" alt="La Tierra vista desde el espacio, con océanos y continentes iluminados" loading="lazy" decoding="async" />
         </div>
-        <div class="zigzag-copy reveal">
+        <div class="zigzag-copy reveal is-visible">
           <p class="zigzag-kicker">Plataforma</p>
           <h2>¿Qué es Itzamná?</h2>
           <p>
@@ -59,13 +85,13 @@ const tech = [
       </div>
     </section>
 
-    <!-- ZIGZAG 2: Nuestro propósito (texto izq, imagen der) -->
-    <section class="zigzag zigzag-alt" id="proposito">
+    <!-- ZIGZAG 2: Nuestro propósito -->
+    <section class="zigzag zigzag-alt" id="proposito" data-content-step="2" hidden>
       <div class="zigzag-inner reverse">
-        <div class="zigzag-media reveal">
+        <div class="zigzag-media reveal is-visible">
           <img src="https://images-assets.nasa.gov/image/PIA00407/PIA00407~orig.jpg" alt="Superficie de Marte con relieve y tonalidades rojizas" loading="lazy" decoding="async" />
         </div>
-        <div class="zigzag-copy reveal">
+        <div class="zigzag-copy reveal is-visible">
           <p class="zigzag-kicker">Propósito</p>
           <h2>Nuestro propósito</h2>
           <p>
@@ -78,13 +104,13 @@ const tech = [
       </div>
     </section>
 
-    <!-- ZIGZAG 3: Exploración y análisis (imagen izq, texto der) -->
-    <section class="zigzag" id="analisis">
+    <!-- ZIGZAG 3: Exploración y análisis -->
+    <section class="zigzag" id="analisis" data-content-step="3" hidden>
       <div class="zigzag-inner">
-        <div class="zigzag-media reveal">
+        <div class="zigzag-media reveal is-visible">
           <img src="https://images-assets.nasa.gov/image/PIA00256/PIA00256~orig.jpg" alt="Superficie lunar con cráteres y mares basálticos" loading="lazy" decoding="async" />
         </div>
-        <div class="zigzag-copy reveal">
+        <div class="zigzag-copy reveal is-visible">
           <p class="zigzag-kicker">Análisis geoespacial</p>
           <h2>Exploración y análisis</h2>
           <p>
@@ -97,13 +123,13 @@ const tech = [
       </div>
     </section>
 
-    <!-- ZIGZAG 4: Tecnología (texto izq, imagen der) -->
-    <section class="zigzag zigzag-alt" id="tecnologia">
+    <!-- ZIGZAG 4: Tecnología -->
+    <section class="zigzag zigzag-alt" id="tecnologia" data-content-step="4" hidden>
       <div class="zigzag-inner reverse">
-        <div class="zigzag-media reveal">
+        <div class="zigzag-media reveal is-visible">
           <img src="https://images-assets.nasa.gov/image/PIA12235/PIA12235~orig.jpg" alt="Mapa topográfico y relieve representando análisis de superficie" loading="lazy" decoding="async" />
         </div>
-        <div class="zigzag-copy reveal">
+        <div class="zigzag-copy reveal is-visible">
           <p class="zigzag-kicker">Arquitectura</p>
           <h2>Tecnología</h2>
           <p>Itzamná integra componentes web y de cálculo científico, cada uno con una responsabilidad definida:</p>
@@ -119,13 +145,13 @@ const tech = [
       </div>
     </section>
 
-    <!-- ZIGZAG 5: Visión a futuro (imagen izq, texto der) -->
-    <section class="zigzag" id="vision-futuro">
+    <!-- ZIGZAG 5: Visión a futuro -->
+    <section class="zigzag" id="vision-futuro" data-content-step="5" hidden>
       <div class="zigzag-inner">
-        <div class="zigzag-media reveal">
+        <div class="zigzag-media reveal is-visible">
           <img src="https://images-assets.nasa.gov/image/PIA03654/PIA03654~orig.jpg" alt="Concepto de exploración planetaria y terreno rocoso" loading="lazy" decoding="async" />
         </div>
-        <div class="zigzag-copy reveal">
+        <div class="zigzag-copy reveal is-visible">
           <p class="zigzag-kicker">Evolución</p>
           <h2>Visión a futuro</h2>
           <p>
@@ -137,16 +163,31 @@ const tech = [
         </div>
       </div>
     </section>
+        </div>
 
-    <!-- EXPLORADOR (funcionalidad existente preservada) -->
-    <section id="explorador" class="relative border-t border-line" aria-label="Explorador de análogos">
-      <div class="mx-auto max-w-7xl px-4 pt-14 pb-4 md:px-8">
-        <p class="zigzag-kicker">Herramienta</p>
-        <h2 class="font-display text-3xl font-semibold tracking-tight md:text-4xl">Explorar análogos terrestres</h2>
-        <p class="mt-3 max-w-2xl text-mist">Selecciona un planeta, define características y un punto en la Tierra para buscar zonas comparables.</p>
+        <div class="content-nav">
+          <button type="button" class="btn-secondary" data-content-prev>Anterior</button>
+          <button type="button" class="btn-primary" data-content-next>Siguiente</button>
+          <button type="button" class="btn-primary" id="content-to-explore" hidden data-show-view="explore" data-focus-picker="true">Ir al explorador</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW: EXPLORE (herramienta, funcionalidad preservada) -->
+    <section id="view-explore" class="app-view" data-app-view="explore" hidden aria-label="Explorador de análogos">
+      <div class="explore-topbar">
+        <button type="button" class="btn-secondary btn-compact" data-show-view="home">Inicio</button>
+        <button type="button" class="btn-secondary btn-compact" data-show-view="content">Contenido</button>
       </div>
 
-      <div class="mx-auto max-w-[110rem] px-2 pb-6 md:px-4">
+      <section id="explorador" class="relative" aria-label="Explorador de análogos">
+        <div class="mx-auto max-w-7xl px-4 pt-4 pb-4 md:px-8">
+          <p class="zigzag-kicker">Herramienta</p>
+          <h2 class="font-display text-3xl font-semibold tracking-tight md:text-4xl">Explorar análogos terrestres</h2>
+          <p class="mt-3 max-w-2xl text-mist">Selecciona un planeta, define características y un punto en la Tierra para buscar zonas comparables.</p>
+        </div>
+
+        <div class="mx-auto max-w-[110rem] px-2 pb-6 md:px-4">
   <div
     id="explorer"
     data-state="idle"
@@ -320,11 +361,11 @@ const tech = [
               <span class="inline-block size-8 animate-spin rounded-full border-[3px] border-ochre border-t-transparent" aria-hidden="true"></span>
               Buscando zonas similares…
             </div>
-            <p class="mb-4 text-center text-sm text-mist">Consultando fuentes y calculando candidatos</p>
+            <p id="search-loading-msg" class="mb-4 text-center text-sm text-mist">Conectando con la API</p>
             <div class="mb-4 h-3 w-full overflow-hidden rounded-full bg-line/60">
-              <div id="search-loading-bar" class="loading-bar h-full rounded-full bg-ochre" style="width:35%"></div>
+              <div id="search-loading-bar" class="loading-bar h-full rounded-full bg-ochre" style="width:20%"></div>
             </div>
-            <div id="search-loading-pct" class="mb-4 text-center text-sm font-medium text-ochre">Calculando…</div>
+            <div id="search-loading-pct" class="mb-4 text-center text-sm font-medium text-ochre">Iniciando…</div>
             <div class="grid gap-2">
               <div class="skeleton h-3 w-11/12 rounded"></div>
               <div class="skeleton h-3 w-full rounded"></div>
@@ -406,7 +447,7 @@ const tech = [
           <div id="general" class="grid gap-8 md:grid-cols-2"></div>
         </section>
 
-        <section id="advanced-panel" aria-labelledby="info-advanced-title" class="info-section info-section-advanced mt-10">
+        <section id="advanced-panel" aria-labelledby="info-advanced-title" class="info-section info-section-advanced mt-8">
           <div class="flex flex-wrap items-center justify-between gap-3">
             <div class="flex flex-wrap items-center gap-3">
               <h3 id="info-advanced-title" class="font-display text-xl font-semibold">Información avanzada</h3>
@@ -431,6 +472,7 @@ const tech = [
   </div>
       </div>
     </section>
+    </section><!-- /view-explore -->
   </main>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
@@ -449,5 +491,61 @@ const tech = [
     } else {
       els.forEach((el) => el.classList.add('is-visible'));
     }
+
+    // View + content stepper navigation (no total scroll / por partes)
+    (() => {
+      const root = document.getElementById('app-views');
+      if (!root) return;
+      const views = Array.from(root.querySelectorAll<HTMLElement>('[data-app-view]'));
+      const steps = Array.from(document.querySelectorAll<HTMLElement>('[data-content-step]')).sort((a,b)=>Number(a.dataset.contentStep)-Number(b.dataset.contentStep));
+      const stepLabel = document.getElementById('content-step-label');
+      const toExploreBtn = document.getElementById('content-to-explore');
+      let stepIndex = 0;
+
+      function showView(name: string, opts?: {focusPicker?: boolean}) {
+        root!.dataset.view = name;
+        views.forEach(v => { v.hidden = v.dataset.appView !== name; });
+        if (name === 'content') {
+          updateSteps();
+          window.scrollTo({ top: 0, behavior: 'auto' });
+        } else if (name === 'home') {
+          window.scrollTo({ top: 0, behavior: 'auto' });
+        } else if (name === 'explore') {
+          window.scrollTo({ top: 0, behavior: 'auto' });
+          if (opts?.focusPicker) {
+            setTimeout(() => {
+              document.getElementById('planet-picker')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              (document.getElementById('planet-select') as HTMLElement | null)?.focus?.();
+            }, 50);
+          }
+        }
+      }
+      function updateSteps() {
+        steps.forEach((s,i) => { s.hidden = i !== stepIndex; s.classList.toggle('is-active-step', i === stepIndex); });
+        if (stepLabel) stepLabel.textContent = `${stepIndex + 1} / ${steps.length}`;
+        if (toExploreBtn) toExploreBtn.hidden = stepIndex < steps.length - 1;
+        const prevs = document.querySelectorAll<HTMLButtonElement>('[data-content-prev]');
+        const nexts = document.querySelectorAll<HTMLButtonElement>('[data-content-next]');
+        prevs.forEach(b => b.disabled = stepIndex <= 0);
+        nexts.forEach(b => b.hidden = stepIndex >= steps.length - 1);
+        window.scrollTo({ top: 0, behavior: 'auto' });
+      }
+
+      document.addEventListener('click', (e) => {
+        const t = e.target as HTMLElement;
+        const viewBtn = t.closest<HTMLElement>('[data-show-view]');
+        if (viewBtn) {
+          e.preventDefault();
+          showView(viewBtn.dataset.showView || 'home', { focusPicker: viewBtn.hasAttribute('data-focus-picker') });
+          return;
+        }
+        if (t.closest('[data-content-next]')) { e.preventDefault(); if (stepIndex < steps.length - 1) { stepIndex++; updateSteps(); } return; }
+        if (t.closest('[data-content-prev]')) { e.preventDefault(); if (stepIndex > 0) { stepIndex--; updateSteps(); } return; }
+      });
+
+      // default
+      showView('home');
+      updateSteps();
+    })();
   </script>
 </Base>
