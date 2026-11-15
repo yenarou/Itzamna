@@ -174,18 +174,23 @@ const paneTitle = 'font-display text-3xl font-medium';
         >
           Confirmar
         </button>
-        <div id="search-loading" hidden class="w-full max-w-md self-end rounded-md border border-line bg-panel/80 p-3" aria-live="polite">
-          <div class="mb-2 flex items-center justify-between text-sm text-mist">
-            <span class="flex items-center gap-2"><span class="inline-block size-4 animate-spin rounded-full border-2 border-ochre border-t-transparent" aria-hidden="true"></span>Buscando zonas similares…</span>
-            <span id="search-loading-pct" class="font-medium text-ochre">Calculando</span>
-          </div>
-          <div class="h-2.5 w-full overflow-hidden rounded-full bg-line/60">
-            <div id="search-loading-bar" class="loading-bar h-full rounded-full bg-ochre" style="width:35%"></div>
-          </div>
-          <div class="mt-3 grid gap-2">
-            <div class="skeleton h-3 w-11/12 rounded"></div>
-            <div class="skeleton h-3 w-9/12 rounded"></div>
-            <div class="skeleton h-3 w-10/12 rounded"></div>
+        <div id="search-loading" hidden class="loading-overlay" role="status" aria-live="polite" aria-label="Buscando zonas similares">
+          <div class="loading-popup">
+            <div class="mb-3 flex items-center justify-center gap-3 text-xl font-semibold text-fog">
+              <span class="inline-block size-8 animate-spin rounded-full border-[3px] border-ochre border-t-transparent" aria-hidden="true"></span>
+              Buscando zonas similares…
+            </div>
+            <p class="mb-4 text-center text-sm text-mist">Consultando fuentes y calculando candidatos</p>
+            <div class="mb-4 h-3 w-full overflow-hidden rounded-full bg-line/60">
+              <div id="search-loading-bar" class="loading-bar h-full rounded-full bg-ochre" style="width:35%"></div>
+            </div>
+            <div id="search-loading-pct" class="mb-4 text-center text-sm font-medium text-ochre">Calculando…</div>
+            <div class="grid gap-2">
+              <div class="skeleton h-3 w-11/12 rounded"></div>
+              <div class="skeleton h-3 w-full rounded"></div>
+              <div class="skeleton h-3 w-10/12 rounded"></div>
+              <div class="skeleton h-3 w-9/12 rounded"></div>
+            </div>
           </div>
         </div>
         <p id="search-status" role="status" class="min-h-5 text-sm text-mist"></p>
@@ -222,10 +227,20 @@ const paneTitle = 'font-display text-3xl font-medium';
       </div>
 
       <div id="results-print-root" class="mx-auto max-w-6xl px-4 py-8 md:px-8">
-        <p class="mb-6 flex items-baseline gap-3">
-          <span class="text-sm text-mist">Similitud</span>
-          <strong id="result-percent" class="font-display text-5xl font-semibold text-ochre"></strong>
-        </p>
+        <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+          <p class="flex items-baseline gap-3">
+            <span class="text-sm text-mist">Similitud</span>
+            <strong id="result-percent" class="font-display text-5xl font-semibold text-ochre"></strong>
+          </p>
+          <label class="flex flex-col gap-1 text-sm">
+            <span class="text-mist">Vista de datos</span>
+            <select id="data-view" class="field-select min-w-[14rem] py-2 text-sm">
+              <option value="both">Ambas (Tierra y zona)</option>
+              <option value="earth">Solo Tierra</option>
+              <option value="zone">Solo Luna/Marte</option>
+            </select>
+          </label>
+        </div>
         <div id="results-skeleton" hidden class="grid gap-8 md:grid-cols-2" aria-hidden="true">
           <div class="space-y-3">
             <div class="skeleton h-8 w-2/3 rounded"></div>
@@ -242,20 +257,35 @@ const paneTitle = 'font-display text-3xl font-medium';
             <div class="skeleton h-20 w-11/12 rounded"></div>
           </div>
         </div>
-        <div id="general" class="grid gap-8 md:grid-cols-2"></div>
+        <section aria-labelledby="info-basic-title" class="info-section info-section-basic">
+          <div class="mb-4 flex flex-wrap items-center gap-3">
+            <h3 id="info-basic-title" class="font-display text-xl font-semibold">Información general</h3>
+            <span class="info-badge info-badge-basic">Sencilla</span>
+            <span class="text-sm text-mist">Resumen clave y correlación por campo</span>
+          </div>
+          <div id="general" class="grid gap-8 md:grid-cols-2"></div>
+        </section>
 
-        <div class="mt-10 border-t border-line pt-6">
-          <button
-            id="advanced-toggle"
-            type="button"
-            aria-expanded="false"
-            aria-controls="advanced"
-            class="rounded-md border border-line px-4 py-2 text-sm font-medium hover:border-ochre"
-          >
-            Ver información avanzada
-          </button>
-          <div id="advanced" hidden class="mt-8 grid gap-8 md:grid-cols-2"></div>
-        </div>
+        <section id="advanced-panel" aria-labelledby="info-advanced-title" class="info-section info-section-advanced mt-10">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-3">
+              <h3 id="info-advanced-title" class="font-display text-xl font-semibold">Información avanzada</h3>
+              <span class="info-badge info-badge-advanced">Avanzada</span>
+              <span class="text-sm text-mist">Detalle técnico, fuentes, metodología y fórmulas</span>
+            </div>
+            <button
+              id="advanced-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="advanced"
+              class="rounded-md border border-line bg-panel px-4 py-2 text-sm font-medium hover:border-ochre"
+            >
+              Mostrar información avanzada
+            </button>
+          </div>
+          <p class="mt-2 text-sm text-mist">Incluye descripciones extendidas, parámetros/fórmulas y trazabilidad de datos (APIs o valores calculados/locales).</p>
+          <div id="advanced" hidden class="mt-6 grid gap-8 md:grid-cols-2"></div>
+        </section>
       </div>
     </section>
   </main>

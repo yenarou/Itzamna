@@ -45,10 +45,12 @@ const earthCompareCaption = el<HTMLElement>("#earth-compare-caption");
 const reopenResults = document.querySelector<HTMLButtonElement>("#reopen-results");
 const exportCsvBtn = document.querySelector<HTMLButtonElement>("#export-csv");
 const exportPdfBtn = document.querySelector<HTMLButtonElement>("#export-pdf");
+const dataViewSelect = document.querySelector<HTMLSelectElement>("#data-view");
 
 let planet: PlanetId | "" = "";
 let matches: Match[] = [];
 let active = 0;
+let dataView: "both" | "earth" | "zone" = "both";
 let map: any;
 let marker: any;
 let circle: any;
@@ -251,7 +253,7 @@ function setState(next: State): void {
         planetPicker.classList.toggle("picker-centered", next === "idle");
         planetPicker.classList.toggle("picker-corner", next !== "idle");
     }
-    if (reopenResults) reopenResults.hidden = !(next === "selected" && matches.length > 0);
+    if (reopenResults) reopenResults.hidden = !((next === "selected" || next === "searching") && matches.length > 0);
     if (next === "searching") {
         ensureMap();
         setTimeout(() => {
@@ -320,8 +322,10 @@ function fmtFormulas(text: string): string {
     return out;
 }
 
-function bodyColumn(b: BodyInfo, withImage: boolean, longText: boolean, extra?: string): string {
+function bodyColumn(b: BodyInfo, withImage: boolean, longText: boolean, extra?: string, opts?: { showDescription?: boolean; compact?: boolean }): string {
     void longText;
+    const showDescription = opts?.showDescription ?? true;
+    const compact = opts?.compact ?? false;
     const rows = b.fields
         .map(f => {
             const isGeo = f.label === "Georreferenciación";
@@ -334,14 +338,16 @@ function bodyColumn(b: BodyInfo, withImage: boolean, longText: boolean, extra?: 
             const corr = typeof f.correlation === "number" ? Math.max(0, Math.min(100, Math.round(f.correlation))) : null;
             const barColor = corr === null ? "bg-ochre" : corr >= 75 ? "bg-emerald-500" : corr >= 50 ? "bg-sky-500" : corr >= 25 ? "bg-amber-500" : "bg-rose-500";
             const corrHtml = corr !== null
-                ? `<div class="min-w-[9rem]"><div class="mb-1 flex items-center justify-between text-xs text-mist"><span>Correlación</span><span class="font-medium text-chalk">${corr} %</span></div><div class="h-2.5 w-full overflow-hidden rounded-full bg-line/60" role="img" aria-label="Correlación ${corr} por ciento"><div class="h-full rounded-full ${barColor}" style="width:${corr}%"></div></div></div>`
+                ? `<div class="${compact ? "min-w-[7rem]" : "min-w-[9rem]"}"><div class="mb-1 flex items-center justify-between text-xs text-mist"><span>Correlación</span><span class="font-medium text-chalk">${corr} %</span></div><div class="h-2.5 w-full overflow-hidden rounded-full bg-line/60" role="img" aria-label="Correlación ${corr} por ciento"><div class="h-full rounded-full ${barColor}" style="width:${corr}%"></div></div></div>`
                 : `<span class="text-mist">—</span>`;
-            const detailHtml = f.detail ? fmtFormulas(esc(f.detail)) : `<span class="text-mist">—</span>`;
+            const detailCell = showDescription
+                ? `<td class="cell-detail">${f.detail ? fmtFormulas(esc(f.detail)) : `<span class="text-mist">—</span>`}</td>`
+                : "";
             return `<tr>
               <th scope="row" class="cell-label">${esc(f.label)}</th>
               <td class="cell-value">${valueHtml}</td>
-              <td>${corrHtml}</td>
-              <td class="cell-detail">${detailHtml}</td>
+              <td class="cell-corr">${corrHtml}</td>
+              ${detailCell}
             </tr>`;
         })
         .join("");
@@ -357,7 +363,14 @@ function bodyColumn(b: BodyInfo, withImage: boolean, longText: boolean, extra?: 
             ? `<div class="${isEarthCoordImage ? "relative" : ""}">${pin}<img class="img-slot w-full object-cover" src="${esc(b.imageUrl)}" alt="${esc(imgAlt)}" loading="lazy" referrerpolicy="no-referrer" style="background:${b.tone}" onerror="this.onerror=null;this.src='${fallback}';this.alt='Imagen de referencia: ${esc(b.title)}';" /></div>`
             : `<div class="img-slot" style="background:${b.tone}" role="img" aria-label="Imagen de referencia: ${esc(b.title)}"></div>`
         : "";
-    return `<article class="space-y-4">
+    const thead = showDescription
+        ? `<thead><tr><th>Campo</th><th>Valor</th><th>Correlación</th><th>Descripción</th></tr></thead>`
+        : `<thead><tr><th>Campo</th><th>Valor</th><th>Correlación</th></tr></thead>`;
+    const colgroup = showDescription
+        ? `<colgroup><col class="col-label" /><col class="col-value" /><col class="col-corr" /><col class="col-detail" /></colgroup>`
+        : `<colgroup><col class="col-label" /><col class="col-value" /><col class="col-corr" /></colgroup>`;
+    const tableClass = compact ? "data-table data-table-compact" : "data-table";
+    return `<article class="space-y-4 min-w-0">
       <header>
         <p class="text-sm text-mist">${esc(b.kicker)}</p>
         <h3 class="font-display text-2xl font-medium">${esc(b.title)}</h3>
@@ -365,8 +378,9 @@ function bodyColumn(b: BodyInfo, withImage: boolean, longText: boolean, extra?: 
       </header>
       ${image}
       <div class="data-table-wrap">
-        <table class="data-table">
-          <thead><tr><th>Campo</th><th>Valor</th><th>Correlación</th><th>Descripción</th></tr></thead>
+        <table class="${tableClass}">
+          ${colgroup}
+          ${thead}
           <tbody>${rows}</tbody>
         </table>
       </div>
@@ -425,24 +439,45 @@ function renderResults(): void {
         ? `<a class="mt-2 inline-flex items-center gap-1 text-sm font-medium text-sky-300 underline decoration-sky-400/40 underline-offset-2 hover:text-sky-200" href="${esc(mapsUrl)}" target="_blank" rel="noopener noreferrer">Abrir ruta en Google Maps ↗</a>`
         : "";
     const dist = parts.length || mapsLink ? `<div class="mt-1">${parts.length ? `<p class="text-sm text-mist">${esc(parts.join(" · "))}</p>` : ""}${mapsLink}</div>` : "";
-    // tabla en ambas vistas para mejor visualización de datos
-    general.innerHTML = bodyColumn(m.earth, true, false, dist) + bodyColumn(m.zone, true, false);
-    advanced.innerHTML = bodyColumn(m.earth, false, true, dist) + bodyColumn(m.zone, false, true);
+    // vistas diferenciadas: sencilla (resumen) vs avanzada (detalle/descripciones)
+    const showEarth = dataView !== "zone";
+    const showZone = dataView !== "earth";
+    const single = dataView !== "both";
+    const generalLayout = single ? "grid gap-8" : "grid gap-8 xl:grid-cols-2";
+    const advancedLayout = "grid gap-8"; // avanzada: ancho completo para legibilidad de descripciones
+
+    const earthGeneral = showEarth ? bodyColumn(m.earth, true, false, dist, { showDescription: false, compact: !single }) : "";
+    const zoneGeneral = showZone ? bodyColumn(m.zone, true, false, "", { showDescription: false, compact: !single }) : "";
+    const earthAdvanced = showEarth ? bodyColumn(m.earth, true, true, dist, { showDescription: true, compact: false }) : "";
+    const zoneAdvanced = showZone ? bodyColumn(m.zone, true, true, "", { showDescription: true, compact: false }) : "";
+
+    general.className = generalLayout;
+    advanced.className = advancedLayout;
+    general.innerHTML = earthGeneral + zoneGeneral;
+    advanced.innerHTML = earthAdvanced + zoneAdvanced;
     setCompareImages(m);
 }
 
 function exportResultsCsv(): void {
     if (!matches.length) return;
-    const rows: string[][] = [["candidato","similitud_%","seccion","campo","valor","correlacion_%","descripcion"]];
+    const rows: string[][] = [["candidato","similitud_%","distancia_km","desde_usuario_km","ruta_km","ruta_min","interferencia","seccion","campo","valor","correlacion_%","descripcion"]];
     matches.forEach((m, i) => {
-        const label = m.placeName || m.earth.title || `Candidato ${i+1}`;
+        const label = m.placeName || m.earth.title || `Candidato ${i + 1}`;
+        const meta = [
+            String(m.percentage),
+            m.distanceKm != null ? String(m.distanceKm) : "",
+            m.fromUserKm != null ? String(m.fromUserKm) : "",
+            m.routeKm != null ? String(m.routeKm) : "",
+            m.routeMin != null ? String(m.routeMin) : "",
+            m.humanInterference ?? "",
+        ];
         const pushBody = (section: string, b: BodyInfo) => {
-            b.fields.forEach(f => rows.push([label, String(m.percentage), section, f.label, f.value, f.correlation != null ? String(f.correlation) : "", f.detail]));
+            b.fields.forEach(f => rows.push([label, ...meta, section, f.label, f.value, f.correlation != null ? String(f.correlation) : "", f.detail]));
         };
         pushBody("Tierra", m.earth);
         pushBody("Zona", m.zone);
     });
-    const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");
+    const csv = rows.map(r => r.map(c => `"${String(c ?? "").replace(/"/g,'""')}"`).join(",")).join("\r\n");
     const blob = new Blob(["\ufeff"+csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a"); a.href = url; a.download = "itzamna_resultados.csv"; a.click();
@@ -451,9 +486,13 @@ function exportResultsCsv(): void {
 
 function exportResultsPdf(): void {
     if (!matches.length) return;
-    // asegurar vista avanzada visible para incluir todos los datos en la impresión/PDF
+    // asegurar datos completos visibles para impresión/PDF
+    if (resultsSkeleton) resultsSkeleton.hidden = true;
     advanced.hidden = false;
-    window.print();
+    advancedToggle.setAttribute("aria-expanded", "true");
+    advancedToggle.textContent = "Ocultar información avanzada";
+    el<HTMLElement>("#advanced-panel").classList.add("is-open");
+    setTimeout(() => window.print(), 50);
 }
 
 /* ----- Eventos ----- */
@@ -529,7 +568,8 @@ searchPanel.addEventListener("submit", async event => {
         percentValue.textContent = `${matches[0].percentage}%`;
         advanced.hidden = true;
         advancedToggle.setAttribute("aria-expanded", "false");
-        advancedToggle.textContent = "Ver información avanzada";
+        advancedToggle.textContent = "Mostrar información avanzada";
+        el<HTMLElement>("#advanced-panel").classList.remove("is-open");
         renderResults();
         setState("results");
     } catch {
@@ -551,6 +591,10 @@ if (reopenResults) {
 
 if (exportCsvBtn) exportCsvBtn.addEventListener("click", exportResultsCsv);
 if (exportPdfBtn) exportPdfBtn.addEventListener("click", exportResultsPdf);
+if (dataViewSelect) dataViewSelect.addEventListener("change", () => {
+    dataView = (dataViewSelect.value as "both" | "earth" | "zone") || "both";
+    if (matches.length) renderResults();
+});
 
 if (matchPrev) {
     matchPrev.addEventListener("click", () => {
@@ -578,7 +622,9 @@ advancedToggle.addEventListener("click", () => {
     const open = advanced.hidden;
     advanced.hidden = !open;
     advancedToggle.setAttribute("aria-expanded", String(open));
-    advancedToggle.textContent = open ? "Ocultar información avanzada" : "Ver información avanzada";
+    advancedToggle.textContent = open ? "Ocultar información avanzada" : "Mostrar información avanzada";
+    const panel = el<HTMLElement>("#advanced-panel");
+    panel.classList.toggle("is-open", open);
 });
 
 resultsClose.addEventListener("click", () => setState("selected"));
