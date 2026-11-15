@@ -2,40 +2,30 @@
 import Base from '../layouts/Base.astro';
 
 const tech = [
-  { name: 'Astro', role: 'Frontend y generación de páginas rápidas.' },
-  { name: 'TypeScript', role: 'Tipado y lógica en el cliente.' },
-  { name: 'Tailwind CSS', role: 'Estilos y diseño responsive.' },
-  { name: 'ASP.NET Core', role: 'API/backend que orquesta las consultas.' },
-  { name: 'Python', role: 'Procesamiento y cálculo en el motor científico.' },
-  { name: 'FastAPI', role: 'Servicio científico para búsqueda y análisis de análogos.' },
-];
-
-const valores = [
-  { t: 'Claridad científica', d: 'Distinguir datos consultados, estimaciones y resultados calculados.' },
-  { t: 'Utilidad', d: 'Presentar comparaciones comprensibles para exploración y aprendizaje.' },
-  { t: 'Rigor progresivo', d: 'Mejorar criterios y fuentes de forma verificable y documentada.' },
-  { t: 'Accesibilidad', d: 'Hacer la información geoespacial más fácil de explorar y entender.' },
+  { name: 'Astro', roleEn: 'Frontend and fast page generation.', roleEs: 'Frontend y generación de páginas rápidas.', key: 'about.tech.astro' },
+  { name: 'TypeScript', roleEn: 'Typing and client-side logic.', roleEs: 'Tipado y lógica en el cliente.', key: 'about.tech.ts' },
+  { name: 'Tailwind CSS', roleEn: 'Styling and responsive design.', roleEs: 'Estilos y diseño responsive.', key: 'about.tech.tw' },
+  { name: 'ASP.NET Core', roleEn: 'API/backend that orchestrates queries.', roleEs: 'API/backend que orquesta las consultas.', key: 'about.tech.dotnet' },
+  { name: 'Python', roleEn: 'Processing and computation in the scientific engine.', roleEs: 'Procesamiento y cálculo en el motor científico.', key: 'about.tech.py' },
+  { name: 'FastAPI', roleEn: 'Scientific service for analog search and analysis.', roleEs: 'Servicio científico para búsqueda y análisis de análogos.', key: 'about.tech.fastapi' },
 ];
 ---
 
-<Base title="Nosotros">
+<Base title="About">
   <main class="story-page">
     <section class="story-hero">
       <div class="story-hero-inner">
-        <p class="zigzag-kicker">Proyecto</p>
-        <h1>Sobre Itzamná</h1>
-        <p>
-          Itzamná (Integrated Terrestrial-Zonal Analog &amp; Multi-factor Nearest Atlas) es una plataforma para identificar y comparar regiones de la Tierra con características comparables a entornos de la Luna y Marte, apoyándose en análisis geoespacial y criterios científicos.
-        </p>
-        <nav class="section-nav" aria-label="Secciones de esta página">
-          <a href="#introduccion">Introducción</a>
-          <a href="#problema">Problema</a>
-          <a href="#mision">Misión</a>
-          <a href="#vision">Visión</a>
-          <a href="#valores">Valores</a>
-          <a href="#equipo">Equipo</a>
-          <a href="#tecnologias">Tecnologías</a>
-          <a href="#objetivos">Objetivos</a>
+        <p class="zigzag-kicker" data-i18n="about.kicker">Project</p>
+        <h1 data-i18n="about.h1">About Itzamná</h1>
+        <p data-i18n="about.lead">Itzamná (Integrated Terrestrial-Zonal Analog &amp; Multi-factor Nearest Atlas) is a platform to identify and compare regions on Earth with characteristics comparable to environments on the Moon and Mars, supported by geospatial analysis and scientific criteria.</p>
+        <nav class="section-nav" aria-label="Page sections">
+          <a href="#introduccion" data-i18n="about.nav.intro">Introduction</a>
+          <a href="#problema" data-i18n="about.nav.problem">Problem</a>
+          <a href="#mision" data-i18n="about.nav.mission">Mission</a>
+          <a href="#vision" data-i18n="about.nav.vision">Vision</a>
+          <a href="#valores" data-i18n="about.nav.values">Values</a>
+          <a href="#tecnologias" data-i18n="about.nav.tech">Technologies</a>
+          <a href="#objetivos" data-i18n="about.nav.goals">Goals</a>
         </nav>
       </div>
     </section>
@@ -43,17 +33,13 @@ const valores = [
     <section id="introduccion" class="zigzag">
       <div class="zigzag-inner">
         <div class="zigzag-media reveal">
-          <img src="https://images-assets.nasa.gov/image/PIA18033/PIA18033~orig.jpg" alt="La Tierra desde el espacio" loading="lazy" decoding="async" />
+          <img src="https://images-assets.nasa.gov/image/PIA18033/PIA18033~orig.jpg" alt="Earth from space" data-i18n-aria="content.img1.alt" loading="lazy" decoding="async" />
         </div>
         <div class="zigzag-copy reveal">
-          <p class="zigzag-kicker">Introducción</p>
-          <h2>Un atlas de análogos entre la Tierra y otros mundos</h2>
-          <p>
-            Itzamná reúne en una misma experiencia la selección de un punto en la Tierra, un radio de búsqueda y características de interés para encontrar candidatos análogos a zonas lunares o marcianas.
-          </p>
-          <p>
-            Su objetivo es facilitar la comparación entre paisajes terrestres y entornos planetarios mediante una interfaz clara y resultados con información de apoyo.
-          </p>
+          <p class="zigzag-kicker" data-i18n="about.s1.kicker">Introduction</p>
+          <h2 data-i18n="about.s1.h2">An atlas of analogs between Earth and other worlds</h2>
+          <p data-i18n="about.s1.p1">Itzamná brings together, in a single experience, selecting a point on Earth, a search radius, and characteristics of interest to find analog candidates for lunar or Martian zones.</p>
+          <p data-i18n="about.s1.p2">Its goal is to facilitate comparison between terrestrial landscapes and planetary environments through a clear interface and results with supporting information.</p>
         </div>
       </div>
     </section>
@@ -61,17 +47,13 @@ const valores = [
     <section id="problema" class="zigzag zigzag-alt">
       <div class="zigzag-inner reverse">
         <div class="zigzag-media reveal">
-          <img src="https://images-assets.nasa.gov/image/PIA00407/PIA00407~orig.jpg" alt="Terreno marciano visto desde órbita" loading="lazy" decoding="async" />
+          <img src="https://images-assets.nasa.gov/image/PIA00407/PIA00407~orig.jpg" alt="Martian terrain from orbit" data-i18n-aria="about.img2.alt" loading="lazy" decoding="async" />
         </div>
         <div class="zigzag-copy reveal">
-          <p class="zigzag-kicker">Contexto</p>
-          <h2>Qué problema busca abordar</h2>
-          <p>
-            Estudiar entornos similares a la Luna o Marte suele requerir identificar lugares en la Tierra que compartan rasgos relevantes. Esa búsqueda puede ser dispersa y difícil de comparar cuando la información geográfica, ambiental y de similitud no está integrada.
-          </p>
-          <p>
-            Itzamná aborda esta necesidad ofreciendo una forma de explorar candidatos en un área definida y visualizar, de manera unificada, su ubicación, similitud y campos descriptivos asociados.
-          </p>
+          <p class="zigzag-kicker" data-i18n="about.s2.kicker">Context</p>
+          <h2 data-i18n="about.s2.h2">What problem it aims to address</h2>
+          <p data-i18n="about.s2.p1">Studying environments similar to the Moon or Mars often requires identifying places on Earth that share relevant traits. That search can be fragmented and hard to compare when geographic, environmental, and similarity information is not integrated.</p>
+          <p data-i18n="about.s2.p2">Itzamná addresses this need by offering a way to explore candidates in a defined area and visualize, in a unified way, their location, similarity, and associated descriptive fields.</p>
         </div>
       </div>
     </section>
@@ -79,18 +61,16 @@ const valores = [
     <section id="mision" class="story-section">
       <div class="story-section-inner story-grid two">
         <div class="reveal">
-          <p class="zigzag-kicker">Misión</p>
-          <h2 class="font-display text-3xl font-semibold tracking-tight md:text-4xl">Hacer comparables la Tierra y otros mundos</h2>
-          <p class="mt-4 text-lg leading-8 text-mist max-w-[65ch]">
-            Facilitar la identificación y comprensión de regiones terrestres análogas a entornos de la Luna y Marte, presentando información geoespacial y criterios de similitud de forma clara y útil para el aprendizaje y la exploración.
-          </p>
+          <p class="zigzag-kicker" data-i18n="about.mission.kicker">Mission</p>
+          <h2 class="font-display text-3xl font-semibold tracking-tight md:text-4xl" data-i18n="about.mission.h2">Make Earth and other worlds comparable</h2>
+          <p class="mt-4 text-lg leading-8 text-mist max-w-[65ch]" data-i18n="about.mission.p">Facilitate the identification and understanding of terrestrial regions analogous to environments on the Moon and Mars, presenting geospatial information and similarity criteria clearly and usefully for learning and exploration.</p>
         </div>
         <div class="story-card reveal">
-          <h3>En la práctica</h3>
+          <h3 data-i18n="about.mission.card.h3">In practice</h3>
           <ul class="mt-2 list-disc pl-5">
-            <li>Permitir seleccionar ubicación, radio y características de interés.</li>
-            <li>Calcular y mostrar candidatos comparables en el área indicada.</li>
-            <li>Comunicar similitud y campos con trazabilidad cuando provienen de fuentes externas o de estimaciones locales.</li>
+            <li data-i18n="about.mission.li1">Allow selection of location, radius, and characteristics of interest.</li>
+            <li data-i18n="about.mission.li2">Calculate and display comparable candidates in the indicated area.</li>
+            <li data-i18n="about.mission.li3">Communicate similarity and fields with traceability when they come from external sources or local estimates.</li>
           </ul>
         </div>
       </div>
@@ -99,64 +79,46 @@ const valores = [
     <section id="vision" class="zigzag zigzag-alt">
       <div class="zigzag-inner">
         <div class="zigzag-media reveal">
-          <img src="https://images-assets.nasa.gov/image/PIA00256/PIA00256~orig.jpg" alt="Superficie lunar con cráteres" loading="lazy" decoding="async" />
+          <img src="https://images-assets.nasa.gov/image/PIA00256/PIA00256~orig.jpg" alt="Lunar surface with craters" data-i18n-aria="content.img3.alt" loading="lazy" decoding="async" />
         </div>
         <div class="zigzag-copy reveal">
-          <p class="zigzag-kicker">Visión</p>
-          <h2>Una referencia clara para la comparación planetaria</h2>
-          <p>
-            Aspiramos a que Itzamná evolucione como una herramienta cada vez más precisa y transparente para explorar análogos terrestres, integrando progresivamente mejores datos y criterios documentados que apoyen contextos educativos y de planificación exploratoria.
-          </p>
+          <p class="zigzag-kicker" data-i18n="about.vision.kicker">Vision</p>
+          <h2 data-i18n="about.vision.h2">A clear reference for planetary comparison</h2>
+          <p data-i18n="about.vision.p">We aspire for Itzamná to evolve as an increasingly precise and transparent tool for exploring terrestrial analogs, progressively integrating better data and documented criteria that support educational and exploratory planning contexts.</p>
         </div>
       </div>
     </section>
 
     <section id="valores" class="story-section">
       <div class="story-section-inner">
-        <p class="zigzag-kicker">Valores</p>
-        <h2 class="font-display text-3xl font-semibold tracking-tight md:text-4xl mb-6">Principios del proyecto</h2>
+        <p class="zigzag-kicker" data-i18n="about.values.kicker">Values</p>
+        <h2 class="font-display text-3xl font-semibold tracking-tight md:text-4xl mb-6" data-i18n="about.values.h2">Project principles</h2>
         <div class="story-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
-          {valores.map((v) => (
-            <div class="story-card reveal">
-              <h3>{v.t}</h3>
-              <p>{v.d}</p>
-            </div>
-          ))}
+          <div class="story-card reveal"><h3 data-i18n="about.v1.t">Scientific clarity</h3><p data-i18n="about.v1.d">Distinguish queried data, estimates, and calculated results.</p></div>
+          <div class="story-card reveal"><h3 data-i18n="about.v2.t">Usefulness</h3><p data-i18n="about.v2.d">Present understandable comparisons for exploration and learning.</p></div>
+          <div class="story-card reveal"><h3 data-i18n="about.v3.t">Progressive rigor</h3><p data-i18n="about.v3.d">Improve criteria and sources in a verifiable, documented way.</p></div>
+          <div class="story-card reveal"><h3 data-i18n="about.v4.t">Accessibility</h3><p data-i18n="about.v4.d">Make geospatial information easier to explore and understand.</p></div>
         </div>
       </div>
     </section>
 
-    <section id="equipo" class="story-section zigzag-alt">
-      <div class="story-section-inner">
-        <p class="zigzag-kicker">Equipo</p>
-        <h2 class="font-display text-3xl font-semibold tracking-tight md:text-4xl mb-2">Equipo de desarrollo</h2>
-        <p class="muted mb-6 max-w-[65ch]">Espacio preparado para documentar a las personas que contribuyen al proyecto. (Sin nombres, fotografías ni cargos inventados.)</p>
-        <div class="team-grid">
-          {[1,2,3].map((i) => (
-            <div class="team-placeholder reveal" aria-label="Integrante por documentar">
-              <div class="team-avatar" aria-hidden="true"></div>
-              <strong>Integrante {i}</strong>
-              <span class="muted text-sm">Nombre por agregar</span>
-              <span class="muted text-sm">Rol / contribución por documentar</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
 
     <section id="tecnologias" class="zigzag">
       <div class="zigzag-inner reverse">
         <div class="zigzag-media reveal">
-          <img src="https://images-assets.nasa.gov/image/PIA12235/PIA12235~orig.jpg" alt="Visualización topográfica y datos geoespaciales" loading="lazy" decoding="async" />
+          <img src="https://images-assets.nasa.gov/image/PIA12235/PIA12235~orig.jpg" alt="Topographic visualization and geospatial data" data-i18n-aria="content.img4.alt" loading="lazy" decoding="async" />
         </div>
         <div class="zigzag-copy reveal">
-          <p class="zigzag-kicker">Tecnologías</p>
-          <h2>Stack del proyecto</h2>
-          <p>Tecnologías utilizadas actualmente y su responsabilidad dentro de Itzamná:</p>
+          <p class="zigzag-kicker" data-i18n="about.tech.kicker">Technologies</p>
+          <h2 data-i18n="about.tech.h2">Project stack</h2>
+          <p data-i18n="about.tech.p">Technologies currently used and their responsibility within Itzamná:</p>
           <ul>
-            {tech.map((t) => (
-              <li><strong>{t.name}:</strong> {t.role}</li>
-            ))}
+            <li data-i18n-html="about.tech.li1"><strong>Astro:</strong> Frontend and fast page generation.</li>
+            <li data-i18n-html="about.tech.li2"><strong>TypeScript:</strong> Typing and client-side logic.</li>
+            <li data-i18n-html="about.tech.li3"><strong>Tailwind CSS:</strong> Styling and responsive design.</li>
+            <li data-i18n-html="about.tech.li4"><strong>ASP.NET Core:</strong> API/backend that orchestrates queries.</li>
+            <li data-i18n-html="about.tech.li5"><strong>Python:</strong> Processing and computation in the scientific engine.</li>
+            <li data-i18n-html="about.tech.li6"><strong>FastAPI:</strong> Scientific service for analog search and analysis.</li>
           </ul>
         </div>
       </div>
@@ -165,11 +127,9 @@ const valores = [
     <section id="objetivos" class="story-section">
       <div class="story-section-inner">
         <div class="story-card reveal" style="padding:1.75rem;">
-          <p class="zigzag-kicker">Objetivos y evolución</p>
-          <h2 class="font-display text-3xl font-semibold tracking-tight mb-3">Mejora continua y verificable</h2>
-          <p class="text-mist leading-8 max-w-[70ch]">
-            El proyecto busca mejorar de forma gradual la calidad de los datos, los criterios de comparación y la experiencia de exploración, priorizando transparencia sobre el origen de la información (fuentes externas, cálculos o estimaciones) y manteniendo las capacidades existentes mientras se incorporan mejoras documentadas.
-          </p>
+          <p class="zigzag-kicker" data-i18n="about.goals.kicker">Goals and evolution</p>
+          <h2 class="font-display text-3xl font-semibold tracking-tight mb-3" data-i18n="about.goals.h2">Continuous and verifiable improvement</h2>
+          <p class="text-mist leading-8 max-w-[70ch]" data-i18n="about.goals.p">The project seeks to gradually improve data quality, comparison criteria, and the exploration experience, prioritizing transparency about the origin of information (external sources, calculations, or estimates) and maintaining existing capabilities while incorporating documented improvements.</p>
         </div>
       </div>
     </section>
