@@ -161,7 +161,7 @@ export const NASA_EARTH_FALLBACK =
 
 export const NASA_MOON_FALLBACK = "https://images-assets.nasa.gov/image/PIA23210/PIA23210~orig.jpg";
 
-export const NASA_MARS_FALLBACK = "https://images-assets.nasa.gov/image/PIA00001/PIA00001~orig.jpg";
+export const NASA_MARS_FALLBACK = "https://images-assets.nasa.gov/image/PIA02150/PIA02150~orig.jpg";
 
 export const PLANET_IMAGES = {
     tierra: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/The_Earth_seen_from_Apollo_17.jpg/1280px-The_Earth_seen_from_Apollo_17.jpg",
