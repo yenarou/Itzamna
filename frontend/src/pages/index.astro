@@ -282,53 +282,33 @@ const tech = [
     <form
       id="search-panel"
       hidden
-      class="absolute inset-0 z-30 overflow-y-auto bg-deep/95 px-4 pb-44 pt-6 backdrop-blur md:px-10"
+      class="absolute inset-0 z-30 overflow-y-auto px-4 pb-44 pt-6 md:px-10"
     >
       <h2 class="mb-6 text-center font-display text-3xl font-medium">Buscar por características</h2>
-      <div class="mx-auto grid max-w-4xl gap-8 md:grid-cols-2">
+      <div class="mx-auto grid w-full max-w-6xl gap-8 md:grid-cols-2">
         <fieldset class="space-y-4" data-group="earth">
           <legend class="mb-4 font-display text-2xl text-jade">Tierra</legend>
           {
             EARTH_FIELDS.map((f) => (
               <div>
                 <label for={`earth-${f.id}`} class="mb-1.5 block text-sm text-mist">{f.label}</label>
-                <select id={`earth-${f.id}`} name={f.id} class="field-select">
+                <select id={`earth-${f.id}`} name={f.id} class="field-select sr-only" aria-hidden="true" tabindex="-1">
                   <option value="">Cualquiera</option>
                   {f.options.map((o) => <option value={o.value}>{o.label}</option>)}
                 </select>
+                <div class="custom-dd" data-dd-for={`earth-${f.id}`} data-open="false">
+                  <button type="button" class="custom-dd-trigger" data-dd-trigger={`earth-${f.id}`} aria-haspopup="listbox" aria-expanded="false">
+                    <span data-dd-label={`earth-${f.id}`}>Cualquiera</span>
+                    <svg aria-hidden="true" viewBox="0 0 20 20" class="custom-dd-caret"><path d="M5 7l5 6 5-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </button>
+                  <ul class="custom-dd-menu" data-dd-menu={`earth-${f.id}`} role="listbox" aria-label={f.label} hidden>
+                    <li><button type="button" class="custom-dd-option" role="option" data-dd-option data-value="">Cualquiera</button></li>
+                    {f.options.map((o) => <li><button type="button" class="custom-dd-option" role="option" data-dd-option data-value={o.value}>{o.label}</button></li>)}
+                  </ul>
+                </div>
               </div>
             ))
           }
-          <div class="mt-6 border-t border-line pt-4">
-            <p class="mb-3 text-sm font-medium text-chalk">Punto geográfico y rango (opcional)</p>
-            <div class="mb-3 flex flex-wrap items-center gap-2">
-              <button id="use-my-location" type="button" class="rounded-md border border-line px-3 py-1.5 text-sm hover:border-ochre">📍 Usar mi ubicación</button>
-              <span id="user-loc-status" class="text-xs text-mist"></span>
-            </div>
-            <div id="loc-map" class="mb-3 h-72 w-full overflow-hidden rounded-md border border-line md:h-[26rem]" aria-label="Mapa para seleccionar punto en la Tierra"></div>
-            <div class="grid gap-3 sm:grid-cols-3">
-              <div>
-                <label for="loc-lat" class="mb-1.5 block text-sm text-mist">Latitud</label>
-                <input id="loc-lat" name="loc-lat" type="number" step="any" min="-90" max="90" placeholder="ej. -24.5" class="field-select" />
-              </div>
-              <div>
-                <label for="loc-lng" class="mb-1.5 block text-sm text-mist">Longitud</label>
-                <input id="loc-lng" name="loc-lng" type="number" step="any" min="-180" max="180" placeholder="ej. -69.25" class="field-select" />
-              </div>
-              <div>
-                <label for="loc-radius" class="mb-1.5 block text-sm text-mist">Radio</label>
-                <select id="loc-radius" name="loc-radius" class="field-select">
-                  <option value="1">1 km</option>
-                  <option value="10">10 km</option>
-                  <option value="50">50 km</option>
-                  <option value="100">100 km</option>
-                  <option value="500">500 km</option>
-
-                </select>
-              </div>
-            </div>
-            <p class="mt-2 text-xs text-mist">Haz clic en el mapa para elegir un punto de búsqueda y un radio. Si usas tu ubicación, se calcula ruta/accesibilidad desde ahí (OpenStreetMap/OSRM), se evita sugerir sitios justo a tu lado y se priorizan áreas más aisladas (menor interferencia humana) con nombre de lugar cuando está disponible.</p>
-          </div>
         </fieldset>
 
         {
@@ -340,44 +320,118 @@ const tech = [
               {p.fields.map((f) => (
                 <div>
                   <label for={`${p.id}-${f.id}`} class="mb-1.5 block text-sm text-mist">{f.label}</label>
-                  <select id={`${p.id}-${f.id}`} name={f.id} class="field-select">
+                  <select id={`${p.id}-${f.id}`} name={f.id} class="field-select sr-only" aria-hidden="true" tabindex="-1">
                     <option value="">Cualquiera</option>
                     {f.options.map((o) => <option value={o.value}>{o.label}</option>)}
                   </select>
+                  <div class="custom-dd" data-dd-for={`${p.id}-${f.id}`} data-open="false">
+                    <button type="button" class="custom-dd-trigger" data-dd-trigger={`${p.id}-${f.id}`} aria-haspopup="listbox" aria-expanded="false">
+                      <span data-dd-label={`${p.id}-${f.id}`}>Cualquiera</span>
+                      <svg aria-hidden="true" viewBox="0 0 20 20" class="custom-dd-caret"><path d="M5 7l5 6 5-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <ul class="custom-dd-menu" data-dd-menu={`${p.id}-${f.id}`} role="listbox" aria-label={f.label} hidden>
+                      <li><button type="button" class="custom-dd-option" role="option" data-dd-option data-value="">Cualquiera</button></li>
+                      {f.options.map((o) => <li><button type="button" class="custom-dd-option" role="option" data-dd-option data-value={o.value}>{o.label}</button></li>)}
+                    </ul>
+                  </div>
                 </div>
               ))}
             </fieldset>
           ))
         }
-      </div>
-      <div class="mx-auto mt-8 flex max-w-4xl flex-col items-end gap-3">
-        <button
-          id="confirm"
-          type="submit"
-          class="rounded-md bg-jade px-6 py-2.5 font-semibold text-deep transition-colors hover:bg-[#63c498] disabled:opacity-60"
-        >
-          Confirmar
-        </button>
-        <div id="search-loading" hidden class="loading-overlay" role="status" aria-live="polite" aria-label="Buscando zonas similares">
-          <div class="loading-popup">
-            <div class="mb-3 flex items-center justify-center gap-3 text-xl font-semibold text-fog">
-              <span class="inline-block size-8 animate-spin rounded-full border-[3px] border-ochre border-t-transparent" aria-hidden="true"></span>
-              Buscando zonas similares…
+
+        <div class="md:col-span-2">
+          <div class="loc-card">
+            <div class="loc-card-header">
+              <div>
+                <p class="loc-card-kicker">Punto geográfico</p>
+                <h3 class="loc-card-title">Ubicación y radio de búsqueda <span class="loc-optional">(opcional)</span></h3>
+              </div>
+              <button id="use-my-location" type="button" class="loc-action-btn" aria-label="Usar mi ubicación actual">
+                <svg aria-hidden="true" viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/><circle cx="12" cy="12" r="8" opacity=".45"/></svg>
+                <span>Usar mi ubicación</span>
+              </button>
             </div>
-            <p id="search-loading-msg" class="mb-4 text-center text-sm text-mist">Conectando con la API</p>
-            <div class="mb-4 h-3 w-full overflow-hidden rounded-full bg-line/60">
-              <div id="search-loading-bar" class="loading-bar h-full rounded-full bg-ochre" style="width:20%"></div>
+            <p id="user-loc-status" class="loc-status text-xs text-mist" aria-live="polite"></p>
+
+            <div class="loc-map-wrap">
+              <div id="loc-map" class="loc-map" aria-label="Mapa para seleccionar punto en la Tierra"></div>
+              <div class="loc-map-hint" aria-hidden="true">
+                <svg viewBox="0 0 20 20" class="size-4" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M10 2.5a5.5 5.5 0 0 0-5.5 5.5c0 4.1 5.5 9.5 5.5 9.5s5.5-5.4 5.5-9.5A5.5 5.5 0 0 0 10 2.5Z"/><circle cx="10" cy="8" r="1.8"/></svg>
+                <span>Clic en el mapa para fijar el punto</span>
+              </div>
             </div>
-            <div id="search-loading-pct" class="mb-4 text-center text-sm font-medium text-ochre">Iniciando…</div>
-            <div class="grid gap-2">
-              <div class="skeleton h-3 w-11/12 rounded"></div>
-              <div class="skeleton h-3 w-full rounded"></div>
-              <div class="skeleton h-3 w-10/12 rounded"></div>
-              <div class="skeleton h-3 w-9/12 rounded"></div>
+
+            <div class="loc-controls">
+              <div>
+                <label for="loc-lat" class="mb-1.5 block text-sm text-mist">Latitud</label>
+                <input id="loc-lat" name="loc-lat" type="number" step="any" min="-90" max="90" placeholder="ej. -24.5" class="field-select" />
+              </div>
+              <div>
+                <label for="loc-lng" class="mb-1.5 block text-sm text-mist">Longitud</label>
+                <input id="loc-lng" name="loc-lng" type="number" step="any" min="-180" max="180" placeholder="ej. -69.25" class="field-select" />
+              </div>
+              <div>
+                <label for="loc-radius" class="mb-1.5 block text-sm text-mist">Radio de búsqueda</label>
+                <select id="loc-radius" name="loc-radius" class="field-select sr-only" aria-hidden="true" tabindex="-1">
+                  <option value="1">1 km</option>
+                  <option value="10">10 km</option>
+                  <option value="50">50 km</option>
+                  <option value="100">100 km</option>
+                </select>
+                <div class="custom-dd" data-dd-for="loc-radius" data-open="false">
+                  <button type="button" class="custom-dd-trigger" data-dd-trigger="loc-radius" aria-haspopup="listbox" aria-expanded="false">
+                    <span data-dd-label="loc-radius">Sin filtro</span>
+                    <svg aria-hidden="true" viewBox="0 0 20 20" class="custom-dd-caret"><path d="M5 7l5 6 5-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </button>
+                  <ul class="custom-dd-menu" data-dd-menu="loc-radius" role="listbox" aria-label="Radio de búsqueda" hidden>
+                    <li><button type="button" class="custom-dd-option" role="option" data-dd-option data-value="">Sin filtro</button></li>
+                    <li><button type="button" class="custom-dd-option" role="option" data-dd-option data-value="1">1 km</button></li>
+                    <li><button type="button" class="custom-dd-option" role="option" data-dd-option data-value="10">10 km</button></li>
+                    <li><button type="button" class="custom-dd-option" role="option" data-dd-option data-value="50">50 km</button></li>
+                    <li><button type="button" class="custom-dd-option" role="option" data-dd-option data-value="100">100 km</button></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <p class="loc-help">Haz clic en el mapa para elegir un punto y ajusta el radio. Si usas tu ubicación, se calcula ruta/accesibilidad desde ahí (OpenStreetMap/OSRM) y se priorizan áreas con menor interferencia humana.</p>
+            <div class="loc-confirm mt-4">
+              <button
+                id="confirm"
+                type="submit"
+                class="confirm-search-btn group w-full"
+              >
+                <span class="confirm-search-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-3.8-3.8"/></svg>
+                </span>
+                <span class="flex flex-col items-start leading-tight">
+                  <span class="text-base font-semibold">Confirmar y buscar</span>
+                  <span class="text-xs font-medium opacity-80">Buscar zonas similares con estos criterios</span>
+                </span>
+              </button>
+              <p id="search-status" role="status" class="mt-2 min-h-5 text-sm text-mist"></p>
             </div>
           </div>
         </div>
-        <p id="search-status" role="status" class="min-h-5 text-sm text-mist"></p>
+      </div>
+      <div id="search-loading" hidden class="loading-overlay" role="status" aria-live="polite" aria-label="Buscando zonas similares">
+        <div class="loading-popup">
+          <div class="mb-3 flex items-center justify-center gap-3 text-xl font-semibold text-fog">
+            <span class="inline-block size-8 animate-spin rounded-full border-[3px] border-ochre border-t-transparent" aria-hidden="true"></span>
+            Buscando zonas similares…
+          </div>
+          <p id="search-loading-msg" class="mb-4 text-center text-sm text-mist">Conectando con la API</p>
+          <div class="mb-4 h-3 w-full overflow-hidden rounded-full bg-line/60">
+            <div id="search-loading-bar" class="loading-bar h-full rounded-full bg-ochre" style="width:20%"></div>
+          </div>
+          <div id="search-loading-pct" class="mb-4 text-center text-sm font-medium text-ochre">Iniciando…</div>
+          <div class="grid gap-2">
+            <div class="skeleton h-3 w-11/12 rounded"></div>
+            <div class="skeleton h-3 w-full rounded"></div>
+            <div class="skeleton h-3 w-10/12 rounded"></div>
+            <div class="skeleton h-3 w-9/12 rounded"></div>
+          </div>
+        </div>
       </div>
     </form>
 
@@ -386,10 +440,10 @@ const tech = [
       id="results"
       hidden
       aria-labelledby="results-title"
-      class="absolute inset-0 z-30 overflow-y-auto bg-deep"
+      class="results-panel z-30"
     >
-      <div class="sticky top-0 z-10 border-b border-line bg-panel/95 px-4 py-3 backdrop-blur md:px-8">
-        <div class="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-3">
+      <div class="results-bar px-4 py-3 md:px-8">
+        <div class="mx-auto flex max-w-[96rem] flex-wrap items-center gap-x-4 gap-y-3">
           <button
             id="results-close"
             type="button"
@@ -410,20 +464,19 @@ const tech = [
         </div>
       </div>
 
-      <div id="results-print-root" class="mx-auto max-w-6xl px-4 py-8 md:px-8">
+      <div id="results-print-root" class="mx-auto max-w-[96rem] px-4 py-8 md:px-8">
         <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
           <p class="flex items-baseline gap-3">
             <span class="text-sm text-mist">Similitud</span>
             <strong id="result-percent" class="font-display text-5xl font-semibold text-ochre"></strong>
           </p>
-          <label class="flex flex-col gap-1 text-sm">
+          <div class="flex flex-col gap-1 text-sm">
             <span class="text-mist">Vista de datos</span>
-            <select id="data-view" class="field-select min-w-[14rem] py-2 text-sm">
-              <option value="both">Ambas (Tierra y zona)</option>
-              <option value="earth">Solo Tierra</option>
-              <option value="zone">Solo Luna/Marte</option>
-            </select>
-          </label>
+            <div id="data-view" class="data-view-toggle flex gap-2" role="group" aria-label="Vista de datos">
+              <button type="button" data-view-btn="earth" class="view-toggle-btn" aria-pressed="false">Solo Tierra</button>
+              <button type="button" data-view-btn="zone" class="view-toggle-btn is-active" aria-pressed="true">Solo Luna/Marte</button>
+            </div>
+          </div>
         </div>
         <div id="results-skeleton" hidden class="grid gap-8 md:grid-cols-2" aria-hidden="true">
           <div class="space-y-3">
@@ -445,17 +498,17 @@ const tech = [
           <div class="mb-4 flex flex-wrap items-center gap-3">
             <h3 id="info-basic-title" class="font-display text-xl font-semibold">Información general</h3>
             <span class="info-badge info-badge-basic">Sencilla</span>
-            <span class="text-sm text-mist">Resumen clave y correlación por campo</span>
+            <span class="text-sm text-mist">Selecciona Tierra o Luna/Marte para ver su información</span>
           </div>
-          <div id="general" class="grid gap-8 md:grid-cols-2"></div>
+          <div id="general" class="grid grid-cols-1 gap-8"></div>
         </section>
 
         <section id="advanced-panel" aria-labelledby="info-advanced-title" class="info-section info-section-advanced mt-8">
           <div class="flex flex-wrap items-center justify-between gap-3">
             <div class="flex flex-wrap items-center gap-3">
               <h3 id="info-advanced-title" class="font-display text-xl font-semibold">Información avanzada</h3>
-              <span class="info-badge info-badge-advanced">Avanzada</span>
-              <span class="text-sm text-mist">Detalle técnico, fuentes, metodología y fórmulas</span>
+              <span class="info-badge info-badge-advanced">Avanzada · Ambos</span>
+              <span class="text-sm text-mist">Muestra ambos (Tierra y Luna/Marte) con detalle técnico, fuentes, metodología y fórmulas</span>
             </div>
             <button
               id="advanced-toggle"
@@ -468,7 +521,7 @@ const tech = [
             </button>
           </div>
           <p class="mt-2 text-sm text-mist">Incluye descripciones extendidas, parámetros/fórmulas y trazabilidad de datos (APIs o valores calculados/locales).</p>
-          <div id="advanced" hidden class="mt-6 grid gap-8 md:grid-cols-2"></div>
+          <div id="advanced" hidden class="mt-6 grid grid-cols-1 gap-8"></div>
         </section>
       </div>
     </section>
@@ -549,6 +602,56 @@ const tech = [
       // default
       showView('home');
       updateSteps();
+    })();
+
+    // Custom dropdowns para selects de características (sync con selects ocultos)
+    (() => {
+      const initCustomDd = (dd: HTMLElement) => {
+        const id = dd.dataset.ddFor;
+        if (!id) return;
+        const select = document.getElementById(id) as HTMLSelectElement | null;
+        const trigger = dd.querySelector<HTMLElement>('[data-dd-trigger]');
+        const label = dd.querySelector<HTMLElement>('[data-dd-label]');
+        const menu = dd.querySelector<HTMLElement>('[data-dd-menu]');
+        if (!select || !trigger || !label || !menu) return;
+        const options = Array.from(menu.querySelectorAll<HTMLButtonElement>('[data-dd-option]'));
+
+        const syncFromSelect = () => {
+          const opt = select.options[select.selectedIndex] || select.options[0];
+          label.textContent = opt ? (opt.textContent || 'Cualquiera') : 'Cualquiera';
+          options.forEach(b => b.setAttribute('aria-selected', b.dataset.value === select.value ? 'true' : 'false'));
+        };
+        const setOpen = (open: boolean) => {
+          dd.dataset.open = open ? 'true' : 'false';
+          trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+          if (open) menu.removeAttribute('hidden'); else menu.setAttribute('hidden', '');
+        };
+        trigger.addEventListener('click', (e) => {
+          e.preventDefault();
+          const willOpen = dd.dataset.open !== 'true';
+          document.querySelectorAll<HTMLElement>('.custom-dd[data-open="true"], .planet-dd[data-open="true"]').forEach(other => {
+            if (other === dd) return;
+            other.dataset.open = 'false';
+            const t = other.querySelector<HTMLElement>('[aria-expanded="true"]');
+            if (t) t.setAttribute('aria-expanded', 'false');
+            other.querySelector<HTMLElement>('.custom-dd-menu, .planet-dd-menu')?.setAttribute('hidden', '');
+          });
+          setOpen(willOpen);
+        });
+        options.forEach(btn => btn.addEventListener('click', () => {
+          const val = btn.dataset.value || '';
+          select.value = val;
+          select.dispatchEvent(new Event('change', { bubbles: true }));
+          syncFromSelect();
+          setOpen(false);
+          trigger.focus();
+        }));
+        select.addEventListener('change', syncFromSelect);
+        document.addEventListener('click', (e) => { if (!dd.contains(e.target as Node)) setOpen(false); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
+        syncFromSelect();
+      };
+      document.querySelectorAll<HTMLElement>('.custom-dd[data-dd-for]').forEach(initCustomDd);
     })();
 
     // Custom planet dropdown (syncs with hidden #planet-select for compatibility)

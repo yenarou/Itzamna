@@ -48,12 +48,12 @@ const earthCompareCaption = el<HTMLElement>("#earth-compare-caption");
 const reopenResults = document.querySelector<HTMLButtonElement>("#reopen-results");
 const exportCsvBtn = document.querySelector<HTMLButtonElement>("#export-csv");
 const exportPdfBtn = document.querySelector<HTMLButtonElement>("#export-pdf");
-const dataViewSelect = document.querySelector<HTMLSelectElement>("#data-view");
+const dataViewToggle = document.querySelector<HTMLElement>("#data-view");
 
 let planet: PlanetId | "" = "";
 let matches: Match[] = [];
 let active = 0;
-let dataView: "both" | "earth" | "zone" = "both";
+let dataView: "earth" | "zone" = "zone";
 let map: any;
 let marker: any;
 let circle: any;
@@ -268,7 +268,10 @@ function setState(next: State): void {
         }, 50);
     }
     if (next === "selected") clearCompareImages();
-    if (next === "results") results.scrollTo({ top: 0 });
+    if (next === "results") {
+        results.scrollTop = 0;
+        root.scrollIntoView({ block: "start", behavior: "auto" });
+    }
 }
 
 function showPlanet(id: PlanetId | ""): void {
@@ -357,19 +360,11 @@ function bodyColumn(
     void longText;
     const showDescription = opts?.showDescription ?? true;
     const compact = opts?.compact ?? false;
-    const rows = b.fields
+    const visibleFields = b.fields.filter(f => f.label !== "Georreferenciación");
+    const rows = visibleFields
         .map(f => {
-            const isGeo = f.label === "Georreferenciación";
-            const geoCoords = isGeo ? f.value.match(/-?\d+(?:\.\d+)?/g) || [] : [];
-            const geoLink =
-                isGeo && geoCoords.length >= 2
-                    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(geoCoords[0] + "," + geoCoords[1])}`
-                    : null;
             const rawVal = formatValueBlock(f.value);
-            const valueHtml =
-                isGeo && geoLink
-                    ? `<a class="text-base font-semibold text-sky-300 underline decoration-sky-400/40 underline-offset-2 hover:text-sky-200 md:text-lg" href="${esc(geoLink)}" target="_blank" rel="noopener noreferrer">${rawVal} ↗</a>`
-                    : `<span class="${isGeo ? "text-base md:text-lg" : ""}">${rawVal}</span>`;
+            const valueHtml = `<span>${rawVal}</span>`;
             const corr =
                 typeof f.correlation === "number" ? Math.max(0, Math.min(100, Math.round(f.correlation))) : null;
             const barColor =
@@ -384,7 +379,7 @@ function bodyColumn(
                           : "bg-rose-500";
             const corrHtml =
                 corr !== null
-                    ? `<div class="${compact ? "min-w-[7rem]" : "min-w-[9rem]"}"><div class="mb-1 flex items-center justify-between text-xs text-mist"><span>Correlación</span><span class="font-medium text-chalk">${corr} %</span></div><div class="h-2.5 w-full overflow-hidden rounded-full bg-line/60" role="img" aria-label="Correlación ${corr} por ciento"><div class="h-full rounded-full ${barColor}" style="width:${corr}%"></div></div></div>`
+                    ? `<div class="w-full min-w-0"><div class="mb-1 flex items-center justify-between text-xs text-mist"><span>Correlación</span><span class="font-medium text-chalk">${corr} %</span></div><div class="h-2.5 w-full overflow-hidden rounded-full bg-line/60" role="img" aria-label="Correlación ${corr} por ciento"><div class="h-full rounded-full ${barColor}" style="width:${corr}%"></div></div></div>`
                     : `<span class="text-mist">—</span>`;
             const detailCell = showDescription
                 ? `<td class="cell-detail">${f.detail ? fmtFormulas(esc(f.detail)) : `<span class="text-mist">—</span>`}</td>`
@@ -492,27 +487,23 @@ function renderResults(): void {
         parts.length || mapsLink
             ? `<div class="mt-1">${parts.length ? `<p class="text-sm text-mist">${esc(parts.join(" · "))}</p>` : ""}${mapsLink}</div>`
             : "";
-    const showEarth = dataView !== "zone";
-    const showZone = dataView !== "earth";
-    const single = dataView !== "both";
-    const layout = single ? "grid gap-8 items-start" : "grid gap-8 xl:grid-cols-2 items-start";
+    const showEarth = dataView === "earth";
+    const geoField =
+        m.earth.fields.find(field => field.label === "Georreferenciación") ??
+        m.zone.fields.find(field => field.label === "Georreferenciación");
+    const geoCard = geoField
+        ? `<div class="geo-span-card"><div class="geo-span-label">Georreferenciación</div><div class="geo-span-value">${formatValueBlock(geoField.value)}</div></div>`
+        : "";
 
-    // Información general: solo la información de la zona (Luna/Marte)
-    const zoneGeneral = showZone
-        ? bodyColumn(m.zone, true, true, "", { showDescription: true, compact: false })
-        : "";
-    general.className = "grid gap-8 items-start";
-    general.innerHTML = zoneGeneral || (showEarth ? bodyColumn(m.earth, true, true, dist, { showDescription: true, compact: false }) : "");
+    // Vista básica: seleccionar entre Tierra y Luna/Marte
+    const earthBody = bodyColumn(m.earth, true, true, dist, { showDescription: true, compact: false });
+    const zoneBody = bodyColumn(m.zone, true, true, "", { showDescription: true, compact: false });
+    general.className = "grid gap-8 items-start xl:grid-cols-2";
+    general.innerHTML = `${showEarth ? earthBody : zoneBody}${geoCard}`;
 
-    // Información avanzada: todo (Tierra y zona según vista)
-    const earthAdv = showEarth
-        ? bodyColumn(m.earth, true, true, dist, { showDescription: true, compact: false })
-        : "";
-    const zoneAdv = showZone
-        ? bodyColumn(m.zone, true, true, "", { showDescription: true, compact: false })
-        : "";
-    advanced.className = layout;
-    advanced.innerHTML = earthAdv + zoneAdv;
+    // Información avanzada: ambos (Tierra y Luna/Marte)
+    advanced.className = "mt-6 grid gap-8 xl:grid-cols-2 items-start";
+    advanced.innerHTML = `${earthBody}${zoneBody}${geoCard}`;
     setCompareImages(m);
 }
 
@@ -612,38 +603,26 @@ function exportResultsPdf(): void {
     const ubic = lat && lng ? `Punto: ${lat}, ${lng} · Radio: ${radius || "—"} km` : "Sin punto seleccionado";
     const user = userLocation ? ` · Tu ubicación: ${userLocation.lat.toFixed(5)}, ${userLocation.lng.toFixed(5)}` : "";
 
-    const corrBar = (c?: number) => {
-        if (typeof c !== "number") return `<span class="muted">—</span>`;
-        const v = Math.max(0, Math.min(100, Math.round(c)));
-        const cls = v >= 80 ? "g" : v >= 60 ? "b" : v >= 35 ? "a" : "r";
-        return `<div class="corr"><div class="corr-track"><div class="corr-fill ${cls}" style="width:${v}%"></div></div><span>${v}%</span></div>`;
-    };
-
     const renderBody = (b: BodyInfo) => `
-      <div class="body-block">
-        <div class="body-head">
-          ${b.imageUrl ? `<div class="body-img"><img src="${esc(b.imageUrl)}" alt="${esc(b.title)}" crossorigin="anonymous" referrerpolicy="no-referrer" /></div>` : ""}
-          <div>
-            <div class="kicker">${esc(b.kicker)}</div>
-            <h4>${esc(b.title)}</h4>
-          </div>
-        </div>
-        <table>
+      <section class="body-block">
+        <h4>${esc(b.kicker)} — ${esc(b.title)}</h4>
+        ${b.imageUrl ? `<p><img class="body-img" src="${esc(b.imageUrl)}" alt="${esc(b.title)}" referrerpolicy="no-referrer" crossorigin="anonymous" /></p>` : ""}
+        <table class="fields">
           <thead><tr><th>Campo</th><th>Valor</th><th>Correlación</th><th>Descripción</th></tr></thead>
           <tbody>
             ${b.fields
                 .map(
                     f => `<tr>
               <td class="f-label">${esc(f.label)}</td>
-              <td class="f-value">${formatValueBlock(f.value)}</td>
-              <td class="f-corr">${corrBar(f.correlation)}</td>
-              <td class="f-desc">${fmtFormulas(esc(f.detail || ""))}</td>
+              <td>${formatValueBlock(f.value)}</td>
+              <td>${typeof f.correlation === "number" ? `${Math.round(f.correlation)}%` : "—"}</td>
+              <td>${fmtFormulas(esc(f.detail || ""))}</td>
             </tr>`,
                 )
                 .join("")}
           </tbody>
         </table>
-      </div>`;
+      </section>`;
 
     const candidatesHtml = matches
         .map((m, i) => {
@@ -659,22 +638,12 @@ function exportResultsPdf(): void {
                 .filter(Boolean)
                 .join(" · ");
             const coords = candidateCoords(m);
-            const maps = coords
-                ? `<a href="https://www.google.com/maps/search/?api=1&query=${coords.lat},${coords.lon}" target="_blank">Ver en Google Maps</a>`
-                : "";
+            const maps = coords ? ` · Mapa: https://www.google.com/maps/search/?api=1&query=${coords.lat},${coords.lon}` : "";
             return `<section class="candidate">
-          <div class="cand-head">
-            <div>
-              <div class="rank">Candidato ${i + 1}</div>
-              <h3>${esc(label)}</h3>
-              <div class="meta">${esc(meta)}${maps ? ` · ${maps}` : ""}</div>
-            </div>
-            <div class="score">${m.percentage}<span>%</span></div>
-          </div>
-          <div class="bodies">
-            ${renderBody(m.earth)}
-            ${renderBody(m.zone)}
-          </div>
+          <h3>Candidato ${i + 1}: ${esc(label)} — Similitud ${m.percentage}%</h3>
+          <p class="meta">${esc(meta)}${esc(maps)}</p>
+          ${renderBody(m.earth)}
+          ${renderBody(m.zone)}
         </section>`;
         })
         .join("");
@@ -684,56 +653,39 @@ function exportResultsPdf(): void {
 <meta charset="utf-8" />
 <title>Itzamná - Reporte de análogos</title>
 <style>
-  :root{--ink:#0b1220;--muted:#4b5b73;--line:#d8e0ec;--soft:#f4f7fb;--accent:#2563eb;--ok:#059669;--mid:#0284c7;--warn:#d97706;--bad:#dc2626}
-  *{box-sizing:border-box} body{margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);background:#fff;line-height:1.45;font-size:11pt}
-  .page{max-width:1100px;margin:0 auto;padding:28px 32px}
-  .cover{border:1px solid var(--line);border-radius:14px;padding:22px 24px;background:linear-gradient(135deg,#eff6ff,#f8fbff 55%,#eef9ff);margin-bottom:18px}
-  .brand{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:700}
-  h1{margin:6px 0 4px;font-size:26px;line-height:1.15} .sub{color:var(--muted);margin:0 0 10px}
-  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
-  .info{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
-  .info b{display:block;font-size:12px;color:var(--muted);margin-bottom:2px}
-  .candidate{margin:18px 0 22px;page-break-inside:avoid;border:1px solid var(--line);border-radius:14px;overflow:hidden}
-  .cand-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;padding:16px 18px;background:var(--soft);border-bottom:1px solid var(--line)}
-  .rank{font-size:12px;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
-  h3{margin:2px 0 4px;font-size:20px} .meta{color:var(--muted);font-size:12px}
-  .score{font-size:34px;font-weight:800;color:var(--accent);line-height:1;white-space:nowrap}.score span{font-size:18px;color:var(--muted);margin-left:2px}
-  .bodies{padding:14px 16px;display:grid;gap:14px}
-  .body-block{page-break-inside:avoid}
-  .body-head{display:flex;gap:14px;align-items:flex-start;margin-bottom:10px}
-  .body-img{width:180px;min-width:180px;height:112px;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:#eaf1fb;display:flex;align-items:center;justify-content:center}
-  .body-img img{width:100%;height:100%;object-fit:cover;display:block}
-  .kicker{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
-  h4{margin:2px 0 8px;font-size:16px}
-  table{width:100%;border-collapse:collapse;font-size:10.5pt;table-layout:fixed}
-  th,td{border:1px solid var(--line);padding:8px 9px;vertical-align:top;text-align:left;word-break:break-word;overflow-wrap:anywhere}
-  th{background:#f8fafc;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#334155}
-  .f-label{width:18%;font-weight:600}.f-value{width:28%}.f-corr{width:16%}.f-desc{width:38%;color:#1f2937}
-  .metric-stack{display:flex;flex-direction:column;gap:4px;line-height:1.45}
-  .metric-item{display:block;white-space:normal}
-  .corr{display:flex;align-items:center;gap:8px}.corr-track{flex:1;height:8px;background:#e5edf7;border-radius:999px;overflow:hidden;min-width:70px}
-  .corr-fill{height:100%;border-radius:999px}.corr-fill.g{background:var(--ok)}.corr-fill.b{background:var(--mid)}.corr-fill.a{background:var(--warn)}.corr-fill.r{background:var(--bad)}
-  .muted{color:var(--muted)} code.formula{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em;background:#eef4ff;border:1px solid #d9e6ff;border-radius:4px;padding:1px 4px}
-  a{color:var(--accent)}
-  .footer{margin-top:14px;color:var(--muted);font-size:11px}
-  @media print{.page{padding:10mm 8mm;max-width:none} .candidate{break-inside:avoid} tr{break-inside:avoid} @page{margin:12mm}}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Arial,Helvetica,sans-serif;color:#111;background:#fff;line-height:1.5;font-size:11pt}
+  .page{max-width:900px;margin:0 auto;padding:16mm 12mm}
+  h1{font-size:20pt;margin:0 0 3mm}
+  h3{font-size:12.5pt;margin:6mm 0 2mm;page-break-after:avoid}
+  h4{font-size:11pt;margin:4mm 0 2mm;page-break-after:avoid}
+  p{margin:0 0 2.5mm}
+  .meta,.small{color:#333;font-size:10pt}
+  .cover{margin-bottom:5mm;padding-bottom:4mm;border-bottom:1px solid #bbb}
+  .kv{margin:0 0 1.5mm}
+  .candidate{margin:0 0 7mm;page-break-inside:avoid}
+  .body-block{margin:0 0 4mm;page-break-inside:avoid}
+  .body-img{max-width:100%;width:300px;height:auto;display:block;margin:1mm 0 3mm;border:1px solid #ccc}
+  table{width:100%;border-collapse:collapse;margin:1mm 0 3mm;font-size:10pt}
+  th,td{border:1px solid #999;padding:2mm 2.5mm;vertical-align:top;text-align:left;word-break:break-word}
+  th{background:#f3f3f3;font-weight:700}
+  .f-label{width:22%;font-weight:600}
+  code.formula{font-family:ui-monospace,Consolas,monospace;font-size:.95em}
+  .footer{margin-top:5mm;padding-top:3mm;border-top:1px solid #bbb;font-size:9.5pt;color:#444}
+  @media print{.page{padding:10mm 8mm;max-width:none} @page{margin:12mm} tr,img{break-inside:avoid}}
 </style></head><body>
-  <div class="page">
+  <main class="page">
     <header class="cover">
-      <div class="brand">Itzamná · Análogos terrestres</div>
-      <h1>Reporte de análisis de análogos</h1>
-      <p class="sub">Exportación personalizada con resultados, correlaciones y datos de referencia (APIs y/o valores calculados/locales según disponibilidad).</p>
-      <div class="grid">
-        <div class="info"><b>Fecha</b>${esc(fecha)}</div>
-        <div class="info"><b>Planeta/zona objetivo</b>${esc(planetName)}</div>
-        <div class="info"><b>Ubicación de búsqueda</b>${esc(ubic + user)}</div>
-        <div class="info"><b>Filtros aplicados</b>${esc(filtros)}</div>
-      </div>
+      <h1>Itzamná — Reporte de análogos terrestres</h1>
+      <p class="kv"><strong>Fecha:</strong> ${esc(fecha)}</p>
+      <p class="kv"><strong>Planeta/zona objetivo:</strong> ${esc(planetName)}</p>
+      <p class="kv"><strong>Ubicación de búsqueda:</strong> ${esc(ubic + user)}</p>
+      <p class="kv"><strong>Filtros aplicados:</strong> ${esc(filtros)}</p>
+      <p class="small">Reporte en texto estructurado con imágenes y tablas (valores orientativos según fuentes o cálculos locales disponibles).</p>
     </header>
     ${candidatesHtml}
-    <div class="footer">Generado por Itzamná. Las similitudes y correlaciones son orientativas y dependen de las fuentes y modelos disponibles al momento de la consulta.</div>
-  </div>
-  <script>window.onload=()=>setTimeout(()=>window.print(),250);</script>
+    <footer class="footer">Generado por Itzamná. Las similitudes y correlaciones son orientativas.</footer>
+  </main>
 </body></html>`;
 
     const printInFrame = () => {
@@ -747,25 +699,14 @@ function exportResultsPdf(): void {
         iframe.setAttribute("aria-hidden", "true");
         document.body.appendChild(iframe);
         const doc = iframe.contentWindow?.document;
-        if (!doc) {
-            document.body.removeChild(iframe);
-            searchStatus.textContent = "No se pudo generar el PDF en este navegador.";
-            return;
-        }
+        if (!doc) { document.body.removeChild(iframe); searchStatus.textContent = "No se pudo generar el PDF en este navegador."; return; }
         doc.open();
         doc.write(html);
         doc.close();
         const win = iframe.contentWindow;
         setTimeout(() => {
-            try {
-                win?.focus();
-                win?.print();
-            } catch {
-                /* ignore */
-            }
-            setTimeout(() => {
-                iframe.remove();
-            }, 1500);
+            try { win?.focus(); win?.print(); } catch { /* ignore */ }
+            setTimeout(() => { iframe.remove(); }, 1500);
         }, 350);
     };
 
@@ -773,14 +714,8 @@ function exportResultsPdf(): void {
         printInFrame();
     } catch {
         const w = window.open("", "_blank");
-        if (w) {
-            w.document.open();
-            w.document.write(html);
-            w.document.close();
-        } else {
-            searchStatus.textContent =
-                "Permite ventanas emergentes o usa la opción de imprimir del navegador para exportar el PDF.";
-        }
+        if (w) { w.document.open(); w.document.write(html); w.document.close(); }
+        else { searchStatus.textContent = "Permite ventanas emergentes o usa la opción de imprimir del navegador para exportar el PDF."; }
     }
 }
 
@@ -906,12 +841,26 @@ if (reopenResults) {
 }
 
 if (exportCsvBtn) exportCsvBtn.addEventListener("click", exportResultsCsv);
-if (exportPdfBtn) exportPdfBtn.addEventListener("click", exportResultsPdf);
-if (dataViewSelect)
-    dataViewSelect.addEventListener("change", () => {
-        dataView = (dataViewSelect.value as "both" | "earth" | "zone") || "both";
+
+if (dataViewToggle) {
+    const setDataView = (view: "earth" | "zone") => {
+        dataView = view;
+        dataViewToggle.querySelectorAll<HTMLElement>("[data-view-btn]").forEach(btn => {
+            const active = btn.dataset.viewBtn === view;
+            btn.classList.toggle("is-active", active);
+            btn.setAttribute("aria-pressed", active ? "true" : "false");
+        });
         if (matches.length) renderResults();
+    };
+    dataViewToggle.querySelectorAll<HTMLElement>("[data-view-btn]").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const v = btn.dataset.viewBtn === "earth" ? "earth" : "zone";
+            setDataView(v);
+        });
     });
+}
+if (exportPdfBtn) exportPdfBtn.addEventListener("click", exportResultsPdf);
+/* data-view toggle handled above */
 
 if (matchPrev) {
     matchPrev.addEventListener("click", () => {

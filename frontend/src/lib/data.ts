@@ -3,40 +3,50 @@ import type { BodyInfo, FieldDef, PlanetDef } from "./types";
 export const EARTH_FIELDS: FieldDef[] = [
     {
         id: "clima",
-        label: "Clima",
+        label: "Clima (precipitación / temperatura media anual)",
         options: [
+            { value: "hiperarido", label: "Hiperárido" },
             { value: "arido", label: "Árido" },
-            { value: "polar", label: "Polar" },
+            { value: "semiarido", label: "Semiárido" },
             { value: "templado", label: "Templado" },
+            { value: "tundra", label: "Tundra" },
+            { value: "glaciar", label: "Glaciar" },
         ],
     },
     {
         id: "altitud",
-        label: "Altitud",
+        label: "Altitud (m s. n. m.)",
         options: [
-            { value: "baja", label: "Baja (< 500 m)" },
-            { value: "media", label: "Media (500–2000 m)" },
-            { value: "alta", label: "Alta (> 2000 m)" },
+            { value: "nivel-mar", label: "Costa" },
+            { value: "baja", label: "Baja" },
+            { value: "media", label: "Media" },
+            { value: "alta", label: "Alta" },
+            { value: "muy-alta", label: "Muy alta" },
         ],
     },
     {
         id: "suelo",
-        label: "Tipo de suelo",
+        label: "Sustrato superficial (0–15 cm)",
         options: [
             { value: "basaltico", label: "Basáltico" },
+            { value: "ceniza", label: "Ceniza volcánica" },
             { value: "arenoso", label: "Arenoso" },
-            { value: "ferroso", label: "Rico en hierro" },
+            { value: "grava", label: "Pedregoso" },
+            { value: "ferroso", label: "Ferruginoso" },
             { value: "salino", label: "Salino" },
-            { value: "hielo", label: "Hielo y permafrost" },
+            { value: "yeso", label: "Yesoso" },
+            { value: "hielo", label: "Helado" },
         ],
     },
     {
         id: "humedad",
-        label: "Humedad",
+        label: "Humedad relativa media anual (HR)",
         options: [
             { value: "muy-baja", label: "Muy baja" },
             { value: "baja", label: "Baja" },
             { value: "media", label: "Media" },
+            { value: "alta", label: "Alta" },
+            { value: "muy-alta", label: "Muy alta" },
         ],
     },
 ];
@@ -50,33 +60,33 @@ export const PLANETS: PlanetDef[] = [
                 id: "zona",
                 label: "Zona lunar",
                 options: [
-                    { value: "mares", label: "Mares" },
-                    { value: "crateres", label: "Cráteres de impacto" },
+                    { value: "mares", label: "Mares basálticos" },
+                    { value: "crateres", label: "Cráteres y tierras altas" },
                     { value: "polos", label: "Polos" },
                 ],
             },
             {
                 id: "temperatura",
-                label: "Temperatura",
+                label: "Régimen térmico superficial",
                 options: [
-                    { value: "extrema", label: "Extrema (día/noche)" },
-                    { value: "muy-fria", label: "Muy fría (sombra)" },
+                    { value: "extrema", label: "Extrema" },
+                    { value: "muy-fria", label: "Sombra permanente" },
                 ],
             },
             {
                 id: "composicion",
-                label: "Composición",
+                label: "Composición del regolito",
                 options: [
-                    { value: "basalto", label: "Basalto" },
-                    { value: "regolito", label: "Regolito" },
+                    { value: "basalto", label: "Basalto mare" },
+                    { value: "regolito", label: "Regolito fino" },
                     { value: "hielo", label: "Hielo de agua" },
                 ],
             },
             {
                 id: "relieve",
-                label: "Relieve",
+                label: "Relieve (pendiente típica)",
                 options: [
-                    { value: "plano", label: "Llano" },
+                    { value: "plano", label: "Llanura" },
                     { value: "crateres", label: "Con cráteres" },
                 ],
             },
@@ -91,13 +101,13 @@ export const PLANETS: PlanetDef[] = [
                 label: "Zona marciana",
                 options: [
                     { value: "planicies", label: "Planicies" },
-                    { value: "canones", label: "Cañones" },
+                    { value: "canones", label: "Cañones y valles" },
                     { value: "polos", label: "Casquetes polares" },
                 ],
             },
             {
                 id: "temperatura",
-                label: "Temperatura",
+                label: "Régimen térmico superficial",
                 options: [
                     { value: "fria", label: "Fría" },
                     { value: "muy-fria", label: "Muy fría" },
@@ -105,7 +115,7 @@ export const PLANETS: PlanetDef[] = [
             },
             {
                 id: "composicion",
-                label: "Composición",
+                label: "Composición superficial",
                 options: [
                     { value: "oxidos", label: "Óxidos de hierro" },
                     { value: "sulfatos", label: "Sulfatos" },
@@ -114,9 +124,9 @@ export const PLANETS: PlanetDef[] = [
             },
             {
                 id: "relieve",
-                label: "Relieve",
+                label: "Relieve (pendiente típica)",
                 options: [
-                    { value: "plano", label: "Llano" },
+                    { value: "plano", label: "Llanura" },
                     { value: "montanoso", label: "Accidentado" },
                 ],
             },
