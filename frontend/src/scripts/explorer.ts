@@ -498,7 +498,7 @@ function renderResults(): void {
     // Vista básica: seleccionar entre Tierra y Luna/Marte
     const earthBody = bodyColumn(m.earth, true, true, dist, { showDescription: true, compact: false });
     const zoneBody = bodyColumn(m.zone, true, true, "", { showDescription: true, compact: false });
-    general.className = "grid gap-8 items-start xl:grid-cols-2";
+    general.className = "grid gap-8 items-start";
     general.innerHTML = `${showEarth ? earthBody : zoneBody}${geoCard}`;
 
     // Información avanzada: ambos (Tierra y Luna/Marte)
@@ -638,7 +638,9 @@ function exportResultsPdf(): void {
                 .filter(Boolean)
                 .join(" · ");
             const coords = candidateCoords(m);
-            const maps = coords ? ` · Mapa: https://www.google.com/maps/search/?api=1&query=${coords.lat},${coords.lon}` : "";
+            const maps = coords
+                ? ` · Mapa: https://www.google.com/maps/search/?api=1&query=${coords.lat},${coords.lon}`
+                : "";
             return `<section class="candidate">
           <h3>Candidato ${i + 1}: ${esc(label)} — Similitud ${m.percentage}%</h3>
           <p class="meta">${esc(meta)}${esc(maps)}</p>
@@ -699,14 +701,25 @@ function exportResultsPdf(): void {
         iframe.setAttribute("aria-hidden", "true");
         document.body.appendChild(iframe);
         const doc = iframe.contentWindow?.document;
-        if (!doc) { document.body.removeChild(iframe); searchStatus.textContent = "No se pudo generar el PDF en este navegador."; return; }
+        if (!doc) {
+            document.body.removeChild(iframe);
+            searchStatus.textContent = "No se pudo generar el PDF en este navegador.";
+            return;
+        }
         doc.open();
         doc.write(html);
         doc.close();
         const win = iframe.contentWindow;
         setTimeout(() => {
-            try { win?.focus(); win?.print(); } catch { /* ignore */ }
-            setTimeout(() => { iframe.remove(); }, 1500);
+            try {
+                win?.focus();
+                win?.print();
+            } catch {
+                /* ignore */
+            }
+            setTimeout(() => {
+                iframe.remove();
+            }, 1500);
         }, 350);
     };
 
@@ -714,8 +727,14 @@ function exportResultsPdf(): void {
         printInFrame();
     } catch {
         const w = window.open("", "_blank");
-        if (w) { w.document.open(); w.document.write(html); w.document.close(); }
-        else { searchStatus.textContent = "Permite ventanas emergentes o usa la opción de imprimir del navegador para exportar el PDF."; }
+        if (w) {
+            w.document.open();
+            w.document.write(html);
+            w.document.close();
+        } else {
+            searchStatus.textContent =
+                "Permite ventanas emergentes o usa la opción de imprimir del navegador para exportar el PDF.";
+        }
     }
 }
 

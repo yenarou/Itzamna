@@ -1,0 +1,170 @@
+.custom-dd-option:hover {
+    background: rgba(86, 207, 225, 0.12);
+    color: #fff;
+}
+.custom-dd-option[aria-selected="true"] {
+    background: rgba(86, 207, 225, 0.18);
+    color: #fff;
+}
+
+/* Location search card + map (ergonomic/aesthetic) */
+.loc-card {
+    border: 1px solid rgba(120, 190, 255, 0.14);
+    border-radius: 1.1rem;
+    padding: 1rem;
+    background: linear-gradient(160deg, rgba(14, 30, 58, 0.62), rgba(8, 18, 36, 0.72));
+    box-shadow: var(--shadow-raised), var(--shadow-inset);
+    backdrop-filter: blur(10px);
+}
+@media (min-width: 768px) {
+    .loc-card {
+        padding: 1.15rem 1.2rem 1.2rem;
+    }
+}
+.loc-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.35rem;
+}
+.loc-card-kicker {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-jade);
+    margin: 0 0 0.15rem;
+}
+.loc-card-title {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-chalk);
+    margin: 0;
+    line-height: 1.2;
+}
+.loc-optional {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-mist);
+}
+.loc-status {
+    min-height: 1.1rem;
+    margin: 0 0 0.55rem;
+}
+.loc-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.55rem 0.85rem;
+    border-radius: 0.85rem;
+    border: 1px solid rgba(120, 190, 255, 0.22);
+    background: linear-gradient(145deg, rgba(18, 38, 72, 0.75), rgba(10, 22, 44, 0.85));
+    color: var(--color-chalk);
+    font-size: 0.9rem;
+    font-weight: 600;
+    box-shadow:
+        4px 6px 14px rgba(0, 0, 0, 0.25),
+        -2px -2px 8px rgba(120, 190, 255, 0.04),
+        inset 1px 1px 0 rgba(255, 255, 255, 0.05);
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease,
+        background 0.2s ease;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.loc-action-btn:hover {
+    border-color: rgba(120, 190, 255, 0.38);
+    background: linear-gradient(145deg, rgba(24, 48, 88, 0.8), rgba(12, 26, 50, 0.9));
+    box-shadow:
+        6px 8px 18px rgba(0, 0, 0, 0.28),
+        0 0 0 1px rgba(120, 190, 255, 0.08),
+        inset 1px 1px 0 rgba(255, 255, 255, 0.06);
+    transform: translateY(-1px);
+}
+.loc-action-btn:active {
+    transform: translateY(0);
+    box-shadow:
+        inset 2px 3px 8px rgba(0, 0, 0, 0.25),
+        inset -1px -1px 0 rgba(255, 255, 255, 0.04);
+}
+.loc-map-wrap {
+    position: relative;
+    border-radius: 1rem;
+    overflow: hidden;
+    border: 1px solid rgba(120, 190, 255, 0.18);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        0 10px 28px rgba(0, 0, 0, 0.28);
+    margin-bottom: 0.85rem;
+    background: #0b1a33;
+}
+.loc-map {
+    height: 18rem;
+    width: 100%;
+}
+@media (min-width: 640px) {
+    .loc-map {
+        height: 21rem;
+    }
+}
+@media (min-width: 768px) {
+    .loc-map {
+        height: 26rem;
+    }
+}
+.loc-map-hint {
+    position: absolute;
+    left: 0.65rem;
+    bottom: 0.65rem;
+    z-index: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.6rem;
+    border-radius: 0.65rem;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: #e8f4ff;
+    background: rgba(8, 18, 36, 0.72);
+    border: 1px solid rgba(120, 190, 255, 0.18);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+    pointer-events: none;
+}
+.loc-controls {
+    display: grid;
+    gap: 0.75rem;
+}
+@media (min-width: 640px) {
+    .loc-controls {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.85rem;
+    }
+}
+.loc-help {
+    margin: 0.7rem 0 0;
+    font-size: 0.8rem;
+    line-height: 1.55;
+    color: var(--color-mist);
+}
+/* Leaflet theme tweaks */
+.loc-map .leaflet-control-zoom a {
+    background: rgba(10, 22, 44, 0.88) !important;
+    color: #e8f4ff !important;
+    border-color: rgba(120, 190, 255, 0.18) !important;
+    backdrop-filter: blur(6px);
+}
+.loc-map .leaflet-control-zoom a:hover {
+    background: rgba(18, 38, 72, 0.95) !important;
+}
+.loc-map .leaflet-control-attribution {
+    background: rgba(8, 18, 36, 0.6) !important;
+    color: #b8cce6 !important;
+    backdrop-filter: blur(4px);
+    font-size: 10px;
+}

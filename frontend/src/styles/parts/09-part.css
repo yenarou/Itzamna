@@ -1,0 +1,137 @@
+html[data-theme="light"] .formula {
+    color: #0a4a66;
+    background: rgba(14, 165, 198, 0.1);
+    border-color: rgba(14, 165, 198, 0.2);
+}
+
+.loading-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+    background: rgba(5, 11, 26, 0.7);
+    backdrop-filter: blur(8px);
+}
+.loading-overlay[hidden] {
+    display: none !important;
+}
+.loading-popup {
+    width: min(680px, 94vw);
+    border: 1px solid rgba(54, 214, 245, 0.2);
+    border-radius: 1rem;
+    background: linear-gradient(180deg, rgba(12, 24, 48, 0.98), rgba(8, 16, 32, 0.98));
+    box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.55),
+        var(--glow-cyan);
+    padding: 2rem 2.25rem;
+}
+html[data-theme="light"] .loading-overlay {
+    background: rgba(10, 20, 40, 0.3);
+}
+html[data-theme="light"] .loading-popup {
+    background: #fff;
+}
+
+/* ============ Fix de encimado: resultados / avanzada ============ */
+/* El header es fixed (transparente): el contenido de la vista Explorar debe empezar debajo */
+#view-explore {
+    padding-top: 5.25rem;
+}
+#explorer {
+    scroll-margin-top: 5rem;
+}
+/* Paneles superpuestos con fondo OPACO (antes eran translúcidos y se veían Tierra/Luna detrás) */
+#search-panel {
+    background: var(--color-surface) !important;
+    backdrop-filter: none !important;
+}
+#explorer > section.results-panel,
+#results.results-panel {
+    background: var(--color-surface) !important;
+    backdrop-filter: none !important;
+}
+/* En estado "results" el explorador deja de ser una caja fija de 88svh con scroll interno:
+   los resultados fluyen en la página y la barra queda pegada bajo el header */
+#explorer[data-state="results"] {
+    display: block;
+    min-height: 0;
+    overflow: visible;
+    background: var(--color-surface);
+}
+#explorer[data-state="results"] > section:not(#results) {
+    display: none;
+}
+#results.results-panel {
+    position: relative;
+    inset: auto;
+    overflow: visible;
+    border-radius: 1rem;
+}
+.results-bar {
+    position: sticky;
+    top: 4.1rem; /* alto de .site-header-inner */
+    z-index: 20;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-line);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+    border-radius: 1rem 1rem 0 0;
+}
+.info-section-advanced {
+    position: relative;
+    isolation: isolate;
+    overflow: visible;
+}
+
+/* info sections: less boxed, more open glass-neu */
+.info-section {
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 1rem;
+    padding: 1.25rem 1rem;
+    background: linear-gradient(145deg, rgba(14, 30, 58, 0.55), rgba(8, 18, 36, 0.45));
+    backdrop-filter: blur(8px);
+    box-shadow: var(--shadow-inset);
+}
+@media (min-width: 768px) {
+    .info-section {
+        padding: 1.5rem 1.5rem;
+    }
+}
+.info-section-basic {
+    background: linear-gradient(145deg, rgba(14, 30, 58, 0.5), rgba(8, 18, 36, 0.4));
+}
+.info-section-advanced {
+    background: linear-gradient(145deg, rgba(10, 22, 46, 0.45), rgba(8, 18, 36, 0.35));
+    border-style: solid;
+    border-color: rgba(120, 190, 255, 0.1);
+}
+.info-section-advanced.is-open {
+    border-color: rgba(120, 190, 255, 0.22);
+    box-shadow:
+        0 0 0 1px rgba(120, 190, 255, 0.08) inset,
+        var(--shadow-inset);
+}
+.info-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.15rem 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+.info-badge-basic {
+    background: rgba(54, 214, 245, 0.12);
+    color: #bfefff;
+    border: 1px solid rgba(54, 214, 245, 0.28);
+}
+.info-badge-advanced {
+    background: rgba(38, 123, 255, 0.14);
+    color: #cfe0ff;
+    border: 1px solid rgba(38, 123, 255, 0.3);
+}
+
+/* Impresión / PDF */

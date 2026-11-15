@@ -1,0 +1,31 @@
+html[data-theme="light"] .data-table td .formula,
+html[data-theme="light"] .formula {
+    color: #123a70;
+    background: rgba(31,99,224,.08);
+    border-color: rgba(31,99,224,.18);
+}
+
+/* Georeference card (light theme readability) */
+html[data-theme="light"] .geo-span-card {
+    background: rgba(255,255,255,0.75);
+    border-color: rgba(18,58,112,.14);
+}
+html[data-theme="light"] .geo-span-label { color: #35557d; }
+html[data-theme="light"] .geo-span-value,
+html[data-theme="light"] .geo-span-value a {
+    color: #0a1428;
+}
+html[data-theme="light"] .geo-span-value a:hover { color: #1f63e0; }
+
+/* Georeferencia card (info views) - light mode clarity */
+html[data-theme="light"] .geo-span-card {
+    background: linear-gradient(180deg, #ffffff, #f4f8ff);
+    border-color: rgba(18,58,112,.16);
+    box-shadow: 0 6px 16px rgba(18,58,112,.08);
+}
+html[data-theme="light"] .geo-span-label { color: #2f5f98; }
+html[data-theme="light"] .geo-span-value { color: #0b1730; }
+html[data-theme="light"] .geo-span-value a {
+    color: #0b57d0;
+    text-decoration-color: rgba(11,87,208,.45);
+}

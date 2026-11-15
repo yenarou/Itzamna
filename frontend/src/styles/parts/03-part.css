@@ -1,0 +1,161 @@
+.hero {
+    position: relative;
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7rem 1.25rem 4rem;
+    overflow: hidden;
+    isolation: isolate;
+    background:
+        radial-gradient(900px 500px at 50% 20%, rgba(38, 123, 255, 0.28), transparent 60%),
+        radial-gradient(700px 420px at 20% 70%, rgba(54, 217, 192, 0.16), transparent 60%),
+        radial-gradient(600px 360px at 80% 70%, rgba(139, 108, 255, 0.18), transparent 60%),
+        linear-gradient(180deg, #050b1a 0%, #0a1428 60%, #071120 100%);
+}
+.hero-stars,
+.hero-orbits {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+.hero-stars {
+    background-image:
+        radial-gradient(1px 1px at 12% 18%, rgba(244, 247, 255, 0.9) 50%, transparent 52%),
+        radial-gradient(1px 1px at 28% 62%, rgba(244, 247, 255, 0.6) 50%, transparent 52%),
+        radial-gradient(1.5px 1.5px at 46% 28%, rgba(54, 214, 245, 0.9) 50%, transparent 52%),
+        radial-gradient(1px 1px at 66% 44%, rgba(244, 247, 255, 0.7) 50%, transparent 52%),
+        radial-gradient(1px 1px at 82% 22%, rgba(244, 247, 255, 0.6) 50%, transparent 52%),
+        radial-gradient(1.2px 1.2px at 74% 72%, rgba(139, 108, 255, 0.8) 50%, transparent 52%),
+        radial-gradient(1px 1px at 18% 78%, rgba(244, 247, 255, 0.55) 50%, transparent 52%),
+        radial-gradient(1px 1px at 90% 66%, rgba(54, 217, 192, 0.7) 50%, transparent 52%);
+    opacity: 0.8;
+}
+.hero-orbit {
+    position: absolute;
+    border-radius: 999px;
+    border: 1px solid rgba(54, 214, 245, 0.18);
+    left: 50%;
+    top: 46%;
+    transform: translate(-50%, -50%);
+}
+.hero-orbit.o1 {
+    width: min(72vmin, 680px);
+    height: min(72vmin, 680px);
+    animation: orbit-spin 40s linear infinite;
+}
+.hero-orbit.o2 {
+    width: min(54vmin, 520px);
+    height: min(54vmin, 520px);
+    border-color: rgba(139, 108, 255, 0.18);
+    animation: orbit-spin 28s linear infinite reverse;
+}
+.hero-orbit.o3 {
+    width: min(36vmin, 360px);
+    height: min(36vmin, 360px);
+    border-color: rgba(54, 217, 192, 0.22);
+}
+.hero-planet {
+    position: absolute;
+    border-radius: 50%;
+    filter: saturate(1.05);
+    box-shadow:
+        inset -20px -30px 50px rgba(0, 0, 0, 0.45),
+        0 0 60px rgba(38, 123, 255, 0.18);
+}
+.hero-planet.mars {
+    width: min(22vmin, 210px);
+    height: min(22vmin, 210px);
+    right: 8%;
+    top: 18%;
+    background: radial-gradient(circle at 30% 30%, #ffb36b, #c75a2c 45%, #5a2318 75%, #2a120d 100%);
+    animation: float-y 8s ease-in-out infinite;
+}
+.hero-planet.moon {
+    width: min(14vmin, 130px);
+    height: min(14vmin, 130px);
+    left: 10%;
+    bottom: 18%;
+    background: radial-gradient(circle at 30% 30%, #f4f7ff, #b9c7de 45%, #6f7f99 75%, #39465a 100%);
+    box-shadow:
+        inset -14px -18px 30px rgba(0, 0, 0, 0.4),
+        0 0 40px rgba(54, 214, 245, 0.12);
+    animation: float-y 10s ease-in-out infinite reverse;
+}
+.hero-glow {
+    position: absolute;
+    width: 60vmin;
+    height: 60vmin;
+    left: 50%;
+    top: 45%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(38, 123, 255, 0.22), rgba(54, 214, 245, 0.08) 45%, transparent 70%);
+    filter: blur(10px);
+}
+.hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 56rem;
+    text-align: center;
+}
+.hero-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid rgba(54, 214, 245, 0.25);
+    background: rgba(54, 214, 245, 0.08);
+    color: #cfefff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 1.25rem;
+}
+.hero h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    font-size: clamp(2.4rem, 6vw, 4.8rem);
+    line-height: 1.02;
+    color: #f4f7ff;
+    text-wrap: balance;
+}
+.hero p {
+    margin: 1.25rem auto 0;
+    max-width: 42rem;
+    font-size: clamp(1.02rem, 2vw, 1.2rem);
+    line-height: 1.7;
+    color: #bfd0ea;
+}
+.hero-actions {
+    margin-top: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    justify-content: center;
+}
+.btn-primary,
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.85rem 1.25rem;
+    border-radius: 0.9rem;
+    font-weight: 600;
+    font-size: 0.98rem;
+    text-decoration: none;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease;
+    box-shadow:
+        6px 6px 14px rgba(2, 6, 18, 0.55),
+        -4px -4px 10px rgba(120, 190, 255, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}

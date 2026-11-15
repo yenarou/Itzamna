@@ -1,0 +1,155 @@
+#planet-picker {
+    scroll-margin-top: 7rem;
+}
+/* explorer: glass-neu, less harsh boxes */
+#explorer > section,
+#results,
+#search-panel {
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: var(--shadow-raised), var(--shadow-inset);
+    backdrop-filter: blur(8px);
+}
+#explorer > section {
+    background: linear-gradient(160deg, rgba(14, 30, 58, 0.72), rgba(8, 18, 36, 0.78));
+}
+#explorer {
+    background: linear-gradient(180deg, rgba(8, 18, 36, 0.92), rgba(6, 14, 28, 0.96));
+    position: relative;
+}
+#results,
+#search-panel {
+    background: linear-gradient(180deg, rgba(8, 18, 36, 0.86), rgba(6, 14, 28, 0.92));
+    backdrop-filter: blur(12px);
+}
+
+button,
+select,
+input {
+    border-radius: 0.6rem !important;
+}
+button,
+.field-select,
+input[type="number"] {
+    box-shadow:
+        var(--shadow-inset),
+        0 0 0 1px rgba(54, 214, 245, 0.06);
+}
+
+.field-select {
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid rgba(120, 190, 255, 0.22);
+    border-radius: 1rem !important;
+    background: linear-gradient(145deg, rgba(18, 38, 72, 0.82), rgba(10, 22, 44, 0.9));
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23b7c9e6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"),
+        linear-gradient(145deg, rgba(18, 38, 72, 0.82), rgba(10, 22, 44, 0.9));
+    background-repeat: no-repeat, no-repeat;
+    background-position:
+        right 0.95rem center,
+        0 0;
+    background-size: 1.1rem, auto;
+    padding: 0.85rem 2.6rem 0.85rem 1rem;
+    color: var(--color-chalk);
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow:
+        var(--shadow-raised),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+.field-select:hover {
+    border-color: rgba(120, 190, 255, 0.42);
+    box-shadow:
+        0 10px 28px rgba(0, 0, 0, 0.28),
+        0 0 0 1px rgba(120, 190, 255, 0.12) inset;
+}
+.field-select:focus,
+.field-select:focus-visible {
+    outline: 2px solid rgba(56, 189, 248, 0.55);
+    outline-offset: 2px;
+    border-color: rgba(120, 190, 255, 0.42);
+}
+
+input.field-select {
+    background-image: linear-gradient(145deg, rgba(18, 38, 72, 0.82), rgba(10, 22, 44, 0.9));
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    background-size: auto;
+    padding-right: 1rem;
+    cursor: text;
+}
+
+/* Data view toggle buttons (reemplaza dropdown "Ambas") */
+.view-toggle-btn {
+    appearance: none;
+    border: 1px solid rgba(120, 190, 255, 0.22);
+    border-radius: 1rem !important;
+    background: linear-gradient(145deg, rgba(18, 38, 72, 0.82), rgba(10, 22, 44, 0.9));
+    color: var(--color-mist);
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow:
+        var(--shadow-raised),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+.view-toggle-btn:hover {
+    border-color: rgba(120, 190, 255, 0.42);
+    color: var(--color-chalk);
+}
+.view-toggle-btn.is-active,
+.view-toggle-btn[aria-pressed="true"] {
+    border-color: rgba(56, 189, 248, 0.55);
+    color: #fff;
+    background: linear-gradient(145deg, rgba(24, 58, 110, 0.9), rgba(12, 30, 62, 0.95));
+    box-shadow:
+        0 0 0 1px rgba(56, 189, 248, 0.18) inset,
+        0 10px 24px rgba(2, 8, 20, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.view-toggle-btn:focus-visible {
+    outline: 2px solid rgba(56, 189, 248, 0.55);
+    outline-offset: 2px;
+}
+
+button {
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease,
+        background 0.2s ease;
+}
+button:hover {
+    transform: translateY(-1px);
+}
+button:active {
+    transform: translateY(0);
+}
+
+#match-tabs button {
+    border: 1px solid var(--color-line);
+    background: var(--soft-surface);
+    color: var(--color-mist);
+}
+#match-tabs button[aria-selected="true"] {
+    background: rgba(54, 214, 245, 0.14);
+    border-color: rgba(54, 214, 245, 0.35);
+    color: var(--color-chalk);
+}
+#control > div {
+    box-shadow: var(--shadow-raised);
+}
+
+/* Planet picker states (explorador) */
