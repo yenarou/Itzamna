@@ -1,19 +1,15 @@
-version: '3.9'
-
 services:
-  frontend:
+  scientific-engine:
     build:
-      context: ./frontend
+      context: ./scientific-engine
       dockerfile: Dockerfile
-    container_name: itzamna-frontend
+    container_name: itzamna-scientific-engine
     ports:
-      - "4321:4321"
+      - "8001:8000"
     environment:
-      HOST: 0.0.0.0
-      PORT: 4321
-      PUBLIC_API_URL: http://backend:8080
-    depends_on:
-      - backend
+      PYTHONUNBUFFERED: "1"
+      PORT: 8000
+    restart: unless-stopped
     networks:
       - itzamna-network
 
@@ -30,19 +26,25 @@ services:
       ScientificEngine__BaseUrl: http://scientific-engine:8000
     depends_on:
       - scientific-engine
+    restart: unless-stopped
     networks:
       - itzamna-network
 
-  scientific-engine:
+  frontend:
     build:
-      context: ./scientific-engine
+      context: ./frontend
       dockerfile: Dockerfile
-    container_name: itzamna-scientific-engine
+    container_name: itzamna-frontend
     ports:
-      - "8001:8000"
+      - "4321:4321"
     environment:
-      PYTHONUNBUFFERED: "1"
-      PORT: 8000
+      HOST: 0.0.0.0
+      PORT: 4321
+      # URL que usará el navegador (desde la máquina host). Para acceso en LAN, cambiar por http://<IP_DEL_HOST>:5000
+      PUBLIC_API_URL: http://localhost:5000
+    depends_on:
+      - backend
+    restart: unless-stopped
     networks:
       - itzamna-network
 
