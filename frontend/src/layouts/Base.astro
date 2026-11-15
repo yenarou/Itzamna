@@ -52,6 +52,11 @@ const { title, fullscreen = false, transparentHeader = false } = Astro.props;
         var gate = document.getElementById('safety-gate');
         var btn = document.getElementById('safety-gate-accept');
         if (!gate || !btn) return;
+        var key = 'itzamna-safety-accepted';
+        var accepted = false;
+        try {
+          accepted = sessionStorage.getItem(key) === '1' || localStorage.getItem(key) === '1';
+        } catch (e) {}
         function show() {
           document.body.style.overflow = 'hidden';
           gate.hidden = false;
@@ -63,6 +68,14 @@ const { title, fullscreen = false, transparentHeader = false } = Astro.props;
           gate.setAttribute('aria-hidden', 'true');
           gate.style.display = 'none';
           document.body.style.overflow = '';
+          try {
+            sessionStorage.setItem(key, '1');
+            localStorage.setItem(key, '1');
+          } catch (e) {}
+        }
+        if (accepted) {
+          hide();
+          return;
         }
         show();
         btn.addEventListener('click', hide);
