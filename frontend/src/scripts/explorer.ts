@@ -42,6 +42,7 @@ const locLng = el<HTMLInputElement>("#loc-lng");
 const locRadius = el<HTMLSelectElement>("#loc-radius");
 const useMyLocationBtn = el<HTMLButtonElement>("#use-my-location");
 const userLocStatus = el<HTMLElement>("#user-loc-status");
+const accessFilter = el<HTMLSelectElement>("#access-filter");
 const earthCompare = el<HTMLImageElement>("#earth-compare");
 const earthCompareWrap = el<HTMLElement>("#earth-compare-wrap");
 const earthCompareCaption = el<HTMLElement>("#earth-compare-caption");
@@ -789,12 +790,15 @@ searchPanel.addEventListener("submit", async event => {
 
     const location = readLocation();
     const uLoc = readUserLocation();
+    const includePrivatePlaces = accessFilter.value === "include-private";
     const query: SearchQuery = {
         planet,
         earth: readGroup("earth"),
         zone: readGroup("zone"),
         ...(location ? { location } : {}),
-        ...(uLoc ? { userLocation: uLoc, preferIsolated: true, preferAccessible: true } : {}),
+        ...(uLoc ? { userLocation: uLoc } : {}),
+        preferIsolated: true,
+        preferAccessible: !includePrivatePlaces,
     };
     confirmBtn.disabled = true;
     // asegurar que el overlay no quede recortado por contenedores/transform del form
