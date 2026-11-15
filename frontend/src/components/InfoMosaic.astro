@@ -12,24 +12,27 @@ interface Props {
   bottomLabel: Card;
 }
 const { topLabel, topInfo, bottomInfo, bottomLabel } = Astro.props;
-const cardClass = 'rounded-xl border border-line p-6 md:p-8';
 ---
 
-<main class="mx-auto grid w-full max-w-6xl flex-1 gap-4 p-4 md:grid-cols-12 md:p-8">
-  <section class:list={[cardClass, 'bg-panel md:col-span-4']}>
-    <h1 class="font-display text-4xl font-medium">{topLabel.heading}</h1>
-    {topLabel.paragraphs.map((p) => <p class="mt-4 leading-relaxed text-mist">{p}</p>)}
+<main class="info-mosaic mx-auto grid w-full max-w-6xl flex-1 gap-4 p-4 md:grid-cols-12 md:p-8">
+  <section class="info-mosaic__card md:col-span-4">
+    <div class="info-mosaic__tag">Itzamná</div>
+    <h1 class="info-mosaic__title info-mosaic__title--large">{topLabel.heading}</h1>
+    {topLabel.paragraphs.map((p) => <p class="info-mosaic__text">{p}</p>)}
   </section>
-  <section class:list={[cardClass, 'md:col-span-8']}>
-    <h2 class="font-display text-2xl font-medium">{topInfo.heading}</h2>
-    {topInfo.paragraphs.map((p) => <p class="mt-4 max-w-[68ch] leading-relaxed text-mist">{p}</p>)}
+
+  <section class="info-mosaic__card md:col-span-8">
+    <h2 class="info-mosaic__title">{topInfo.heading}</h2>
+    {topInfo.paragraphs.map((p) => <p class="info-mosaic__text">{p}</p>)}
   </section>
-  <section class:list={[cardClass, 'md:col-span-8']}>
-    <h2 class="font-display text-2xl font-medium">{bottomInfo.heading}</h2>
-    {bottomInfo.paragraphs.map((p) => <p class="mt-4 max-w-[68ch] leading-relaxed text-mist">{p}</p>)}
+
+  <section class="info-mosaic__card md:col-span-8">
+    <h2 class="info-mosaic__title">{bottomInfo.heading}</h2>
+    {bottomInfo.paragraphs.map((p) => <p class="info-mosaic__text">{p}</p>)}
   </section>
-  <section class:list={[cardClass, 'bg-panel md:col-span-4']}>
-    <h2 class="font-display text-3xl font-medium">{bottomLabel.heading}</h2>
-    {bottomLabel.paragraphs.map((p) => <p class="mt-4 leading-relaxed text-mist">{p}</p>)}
+
+  <section class="info-mosaic__card md:col-span-4">
+    <h2 class="info-mosaic__title info-mosaic__title--large">{bottomLabel.heading}</h2>
+    {bottomLabel.paragraphs.map((p) => <p class="info-mosaic__text">{p}</p>)}
   </section>
 </main>

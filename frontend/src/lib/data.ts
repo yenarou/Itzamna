@@ -149,7 +149,7 @@ const tone = {
 export const NASA_EARTH_FALLBACK =
     "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/The_Earth_seen_from_Apollo_17.jpg/1280px-The_Earth_seen_from_Apollo_17.jpg";
 
-const EARTH_LOCATION_IMAGES: Record<string, string> = {
+export const EARTH_LOCATION_IMAGES: Record<string, string> = {
     "65.715,-16.754": "https://images-assets.nasa.gov/image/PIA16805/PIA16805~medium.jpg",
     "35.028,-111.023": "https://images-assets.nasa.gov/image/PIA24674/PIA24674~medium.jpg",
     "-77.465,162.520": "https://images-assets.nasa.gov/image/iss046-e-83900/iss046-e-83900~medium.jpg",
@@ -160,13 +160,11 @@ const EARTH_LOCATION_IMAGES: Record<string, string> = {
 export function buildEarthLocationImage(lat: number, lng: number): string {
     const validLat = Number.isFinite(lat) ? lat : 0;
     const validLng = Number.isFinite(lng) ? lng : 0;
-    // Imagen satelital del punto marcado (Esri World Imagery, bbox alrededor de la coordenada)
-    const d = 0.08;
-    const minLon = validLng - d;
-    const minLat = validLat - d / 1.6;
-    const maxLon = validLng + d;
-    const maxLat = validLat + d / 1.6;
-    return `https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/export?bbox=${minLon.toFixed(6)},${minLat.toFixed(6)},${maxLon.toFixed(6)},${maxLat.toFixed(6)}&bboxSR=4326&imageSR=4326&size=640,360&format=jpg&f=image`;
+    const key = `${Number(validLat).toFixed(3)},${Number(validLng).toFixed(3)}`;
+    return (
+        EARTH_LOCATION_IMAGES[key] ??
+        `https://api.nasa.gov/planetary/earth/imagery?lon=${validLng.toFixed(4)}&lat=${validLat.toFixed(4)}&dim=0.15&api_key=DEMO_KEY`
+    );
 }
 
 export const ANALOGS: AnalogSeed[] = [
