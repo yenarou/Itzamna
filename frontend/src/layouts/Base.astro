@@ -21,7 +21,7 @@ const { title, fullscreen = false, transparentHeader = false } = Astro.props;
       name="description"
       content="Itzamná identifies regions on Earth with characteristics comparable to environments on the Moon and Mars through geospatial analysis and scientific criteria."
     />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="/logo-itzamna.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -49,21 +49,14 @@ const { title, fullscreen = false, transparentHeader = false } = Astro.props;
     </div>
     <script is:inline>
       (() => {
-        const key = 'itzamna-safety-accepted';
         const gate = document.getElementById('safety-gate');
         const btn = document.getElementById('safety-gate-accept');
         if (!gate || !btn) return;
-        const accepted = (() => { try { return localStorage.getItem(key) === '1'; } catch { return false; } })();
-        if (accepted) {
-          gate.hidden = true;
-          gate.setAttribute('aria-hidden', 'true');
-          return;
-        }
+        // Siempre mostrar al iniciar la página
         document.body.style.overflow = 'hidden';
         gate.hidden = false;
         gate.setAttribute('aria-hidden', 'false');
         btn.addEventListener('click', () => {
-          try { localStorage.setItem(key, '1'); } catch {}
           gate.hidden = true;
           gate.setAttribute('aria-hidden', 'true');
           document.body.style.overflow = '';
