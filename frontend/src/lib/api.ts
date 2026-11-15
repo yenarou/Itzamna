@@ -437,6 +437,45 @@ async function soilGrids(lat: number, lon: number): Promise<[Record<string, numb
     }
 }
 
+// ---- Definiciones cuantitativas de los filtros de la Tierra ----
+type Range = [number, number];
+const CLIMA_DEF: Record<string, { p?: Range; t?: Range }> = {
+    hiperarido: { p: [0, 100] },
+    arido: { p: [100, 250] },
+    semiarido: { p: [250, 500] },
+    templado: { t: [5, 22], p: [500, Infinity] },
+    tundra: { t: [-10, 2] },
+    glaciar: { t: [-Infinity, -10] },
+    polar: { t: [-Infinity, 2] }, // compatibilidad con valores antiguos
+};
+const CLIMA_SYNTH: Record<string, { t2m: number; tmin: number; tmax: number; prec: number; rh: number }> = {
+    hiperarido: { t2m: 25, tmin: 12, tmax: 40, prec: 0.1, rh: 20 },
+    arido: { t2m: 24, tmin: 11, tmax: 38, prec: 0.48, rh: 30 },
+    semiarido: { t2m: 18, tmin: 6, tmax: 31, prec: 1.0, rh: 42 },
+    templado: { t2m: 14, tmin: 4, tmax: 26, prec: 2.2, rh: 62 },
+    tundra: { t2m: -5, tmin: -22, tmax: 8, prec: 0.8, rh: 70 },
+    glaciar: { t2m: -18, tmin: -35, tmax: -2, prec: 0.5, rh: 72 },
+    polar: { t2m: -8, tmin: -25, tmax: 6, prec: 0.8, rh: 72 },
+};
+const ALT_BANDS: Record<string, Range> = {
+    "nivel-mar": [0, 200],
+    baja: [200, 500],
+    media: [500, 1500],
+    alta: [1500, 3000],
+    "muy-alta": [3000, 6000],
+};
+const HUM_BANDS: Record<string, Range> = {
+    "muy-baja": [0, 25],
+    baja: [25, 40],
+    media: [40, 60],
+    alta: [60, 80],
+    "muy-alta": [80, 100],
+};
+/** Distancia de x a un rango (0 si está dentro). */
+function outside(x: number, [lo, hi]: Range): number {
+    return x < lo ? lo - x : x >= hi ? x - hi : 0;
+}
+
 function hashSeed(s: string): number {
     let h = 2166136261;
     for (let i = 0; i < s.length; i++) {
@@ -466,27 +505,14 @@ function localClimate(lat: number, lon: number, earth: Record<string, string>) {
         prec = 0.4;
         rh = 35;
     }
-    if (earth.clima) {
+    const synth = earth.clima ? CLIMA_SYNTH[earth.clima] : undefined;
+    if (earth.clima && synth) {
         clima = earth.clima;
-        if (clima === "arido") {
-            t2m = 25;
-            tmin = 12;
-            tmax = 39;
-            prec = 0.3;
-            rh = 30;
-        } else if (clima === "polar") {
-            t2m = -10;
-            tmin = -28;
-            tmax = 6;
-            prec = 0.8;
-            rh = 72;
-        } else {
-            t2m = 16;
-            tmin = 5;
-            tmax = 28;
-            prec = 2.2;
-            rh = 58;
-        }
+        t2m = synth.t2m;
+        tmin = synth.tmin;
+        tmax = synth.tmax;
+        prec = synth.prec;
+        rh = synth.rh;
     }
     const h = hashSeed(`clim:${lat.toFixed(4)},${lon.toFixed(4)}`);
     t2m += ((h % 41) - 20) / 10;
@@ -494,6 +520,8 @@ function localClimate(lat: number, lon: number, earth: Record<string, string>) {
     tmax += (((h >>> 12) % 41) - 20) / 10;
     prec = Math.max(0.05, prec + (((h >>> 18) % 31) - 15) / 100);
     rh = Math.min(98, Math.max(10, rh + (((h >>> 23) % 21) - 10)));
+    const hb = earth.humedad ? HUM_BANDS[earth.humedad] : undefined;
+    if (hb) rh = hb[0] + (hb[1] - hb[0]) * (0.2 + 0.6 * (((h >>> 23) % 1000) / 1000));
     return {
         T2M: t2m,
         T2M_MIN: tmin,
@@ -506,12 +534,15 @@ function localClimate(lat: number, lon: number, earth: Record<string, string>) {
     };
 }
 function localElevation(lat: number, lon: number, earth: Record<string, string>) {
-    let base = Math.abs(lat) > 15 ? 1400 : 300;
-    if (earth.altitud === "baja") base = 200;
-    else if (earth.altitud === "media") base = 1200;
-    else if (earth.altitud === "alta") base = 2800;
-    const h = hashSeed(`elev:${lat.toFixed(4)},${lon.toFixed(4)}`) % 500;
-    return base + h - 250;
+    const h = hashSeed(`elev:${lat.toFixed(4)},${lon.toFixed(4)}`);
+    const band = earth.altitud ? ALT_BANDS[earth.altitud] : undefined;
+    if (band) {
+        const span = band[1] - band[0];
+        const hi = Math.min(band[1], band[0] + 3000);
+        return band[0] + span * 0.1 + ((h % 1000) / 1000) * (Math.min(span, hi - band[0]) * 0.8);
+    }
+    const base = Math.abs(lat) > 15 ? 1400 : 300;
+    return base + (h % 500) - 250;
 }
 function localSoil(lat: number, lon: number, power: any, earth: Record<string, string>) {
     let s = earth.suelo;
@@ -563,6 +594,46 @@ function localSoil(lat: number, lon: number, power: any, earth: Record<string, s
             phh2o: v(6.8, 0, 15),
             _tipo: "Derivado basáltico (estimado)",
         };
+    if (s === "ceniza")
+        return {
+            clay: v(10, 3, 0),
+            sand: v(55, 6, 3),
+            silt: v(35, 5, 6),
+            soc: v(3, 2, 9),
+            bdod: v(1.0, 0, 12),
+            phh2o: v(6.5, 0, 15),
+            _tipo: "Ceniza/tefra volcánica (estimado)",
+        };
+    if (s === "grava")
+        return {
+            clay: v(10, 3, 0),
+            sand: v(60, 6, 3),
+            silt: v(30, 5, 6),
+            soc: v(2, 1, 9),
+            bdod: v(1.55, 0, 12),
+            phh2o: v(7.4, 0, 15),
+            _tipo: "Pedregoso/grava (estimado)",
+        };
+    if (s === "ferroso")
+        return {
+            clay: v(32, 5, 0),
+            sand: v(30, 5, 3),
+            silt: v(38, 5, 6),
+            soc: v(4, 2, 9),
+            bdod: v(1.3, 0, 12),
+            phh2o: v(6.0, 0, 15),
+            _tipo: "Rico en óxidos de hierro (estimado)",
+        };
+    if (s === "yeso")
+        return {
+            clay: v(14, 3, 0),
+            sand: v(38, 5, 3),
+            silt: v(48, 5, 6),
+            soc: v(2, 1, 9),
+            bdod: v(1.3, 0, 12),
+            phh2o: v(8.0, 0, 15),
+            _tipo: "Sulfatado/yesoso (estimado)",
+        };
     return {
         clay: v(20, 5, 0),
         sand: v(45, 6, 3),
@@ -570,7 +641,7 @@ function localSoil(lat: number, lon: number, power: any, earth: Record<string, s
         soc: v(8, 3, 9),
         bdod: v(1.3, 0, 12),
         phh2o: v(7.0, 0, 15),
-        _tipo: "Férrico/mixto (estimado)",
+        _tipo: "Mixto (estimado)",
     };
 }
 function aridity(precDay: number | undefined, t2m: number | undefined) {
@@ -641,17 +712,12 @@ function scoreComponents(
         const t = Number(power.T2M),
             p = (Number(power.PRECTOTCORR) || 0) * 365,
             rh = Number(power.RH2M) || 50;
-        if (earth.clima) {
-            const w = earth.clima;
-            const ok =
-                (w === "arido" && p < 400) ||
-                (w === "polar" && t < 2) ||
-                (w === "templado" && t >= 2 && t <= 22 && p >= 300);
-            let base = ok ? 92 : 38;
-            if (w === "arido") base += clamp((400 - p) / 80, -10, 6);
-            else if (w === "polar") base += clamp((2 - t) / 3, -10, 6);
-            else base += clamp(6 - Math.abs(t - 12) / 3, -10, 6);
-            comps.clima = clamp(base, 20, 98);
+        const cdef = earth.clima ? CLIMA_DEF[earth.clima] : undefined;
+        if (cdef) {
+            const dp = cdef.p ? outside(p, cdef.p) / 100 : 0; // por cada 100 mm/año fuera de rango
+            const dt = cdef.t ? outside(t, cdef.t) / 3 : 0; // por cada 3 °C fuera de rango
+            const miss = dp + dt;
+            comps.clima = miss === 0 ? 94 : clamp(60 - miss * 6, 20, 60);
         } else {
             const aridFit = clamp(100 - Math.abs(p - 250) / 10, 25, 95);
             const tempFit = clamp(100 - Math.abs(t - 18) * 2, 20, 95);
@@ -662,23 +728,35 @@ function scoreComponents(
 
     if (elev != null) {
         const e = Number(elev);
-        if (earth.altitud) {
-            const w = earth.altitud;
-            const ok =
-                (w === "baja" && e < 500) || (w === "media" && e >= 500 && e < 2000) || (w === "alta" && e >= 2000);
-            comps.altitud_dem = clamp((ok ? 95 : 32) + clamp((1000 - Math.abs((e % 1000) - 500)) / 120, -8, 4), 20, 99);
+        const band = earth.altitud ? ALT_BANDS[earth.altitud] : undefined;
+        if (band) {
+            const d = outside(e, band);
+            const mid = (band[0] + Math.min(band[1], band[0] + 3000)) / 2;
+            const half = Math.max(1, (Math.min(band[1], band[0] + 3000) - band[0]) / 2);
+            comps.altitud_dem =
+                d === 0
+                    ? clamp(90 + 8 * (1 - Math.min(1, Math.abs(e - mid) / half)), 88, 98)
+                    : clamp(55 - d / 60, 20, 55);
         } else comps.altitud_dem = clamp(55 + Math.min(e, 3500) / 80, 30, 98);
     } else comps.altitud_dem = 35;
 
     if (soil || power?.RH2M != null) {
         if (soil && earth.suelo) {
             const sand = Number(soil.sand ?? 40),
+                clay = Number(soil.clay ?? 20),
+                bd = Number(soil.bdod ?? 1.3),
+                ph = Number(soil.phh2o ?? 7),
+                precY = (Number(power?.PRECTOTCORR) || 0) * 365,
                 w = earth.suelo;
             const ok =
                 (w === "arenoso" && sand >= 50) ||
-                (w === "salino" && (Number(power?.PRECTOTCORR) || 0) * 365 < 350) ||
+                (w === "salino" && precY < 350) ||
                 (w === "hielo" && (Number(power?.T2M) ?? 10) < 0) ||
-                (w === "basaltico" && sand >= 30 && sand <= 55);
+                (w === "basaltico" && sand >= 30 && sand <= 55) ||
+                (w === "ceniza" && sand >= 45 && sand <= 75 && bd <= 1.15) ||
+                (w === "grava" && sand >= 45 && clay <= 16) ||
+                (w === "ferroso" && clay >= 25) ||
+                (w === "yeso" && precY < 350 && ph >= 7.6);
             comps.sustrato_humedad = clamp((ok ? 90 : 45) + (sand - 45) / 10, 20, 98);
         } else {
             const sand = Number(soil?.sand ?? 40),
@@ -697,6 +775,14 @@ function scoreComponents(
         }
     } else comps.sustrato_humedad = 35;
 
+    if (power?.RH2M != null) {
+        const rh = Number(power.RH2M);
+        const hb = earth.humedad ? HUM_BANDS[earth.humedad] : undefined;
+        if (hb) {
+            const d = outside(rh, hb);
+            comps.humedad_rel = d === 0 ? 93 : clamp(62 - d * 2.2, 20, 62);
+        } else comps.humedad_rel = clamp(100 - Math.abs(rh - 35) * 1.2, 20, 95);
+    } else comps.humedad_rel = 35;
     comps.espacial = dist != null && radius ? clamp(100 * (1 - 0.5 * (dist / Math.max(radius, 1e-6))), 20, 100) : 80;
     let acc = 60;
     if (fromUser != null) {
@@ -708,13 +794,14 @@ function scoreComponents(
     comps.interferencia_osm =
         interference === "baja" ? 95 : interference === "media" ? 60 : interference === "alta" ? 25 : 70;
     const weights: any = {
-        zona_objetivo: 0.25,
-        clima: 0.2,
-        altitud_dem: 0.15,
-        sustrato_humedad: 0.15,
-        espacial: 0.1,
+        zona_objetivo: 0.24,
+        clima: 0.18,
+        altitud_dem: 0.14,
+        sustrato_humedad: 0.13,
+        humedad_rel: 0.08,
+        espacial: 0.09,
         accesibilidad: 0.08,
-        interferencia_osm: 0.07,
+        interferencia_osm: 0.06,
     };
     const total = Object.keys(weights).reduce((s, k) => s + (comps[k] ?? 50) * weights[k], 0) + jitter;
     const rounded: any = {};
@@ -838,7 +925,7 @@ function earthBody(
         label: "Humedad y disponibilidad hídrica (cuantitativa)",
         value: hum.join("; ") || "sin datos",
         detail: `Humedad relativa (%), precipitación (mm/año) e índice de aridez (adimensional, fórmula P/(T+10)). ${srcNote(powerOk, "https://power.larc.nasa.gov/")} (índice calculado localmente a partir de esos datos).`,
-        correlation: Math.round(comps.sustrato_humedad ?? 50),
+        correlation: Math.round(comps.humedad_rel ?? 50),
     });
     const compStr = Object.entries(comps)
         .map(([k, v]) => `${k}=${Math.round(Number(v))} %`)
