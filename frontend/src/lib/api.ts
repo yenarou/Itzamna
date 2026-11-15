@@ -1,12 +1,9 @@
 import { buildEarthLocationImage } from "./data";
-import type { BodyInfo, Match, SearchQuery } from "./types";
+import type { BodyInfo, InfoField, Match, SearchQuery } from "./types";
 
 const API_URL: string = import.meta.env.PUBLIC_API_URL ?? "";
+const API_SAT = "API saturada o sin respuesta; se usó valor calculado/local";
 
-/**
- * Busca/identifica análogos terrestres calculados en el momento.
- * Si hay backend, delega el cálculo; si no, usa cálculo local dinámico (sin catálogo preestablecido).
- */
 export async function searchAnalogs(query: SearchQuery): Promise<Match[]> {
     if (API_URL) {
         try {
@@ -17,7 +14,7 @@ export async function searchAnalogs(query: SearchQuery): Promise<Match[]> {
             });
             if (res.ok) return (await res.json()) as Match[];
         } catch {
-            /* se usa el respaldo local */
+            /* respaldo local */
         }
     }
     return mockSearch(query);
@@ -33,180 +30,17 @@ const TONE: Record<string, string> = {
     moonPole: "linear-gradient(160deg,#6f7a86,#1e262e)",
 };
 
-type ZoneProfile = {
-    title: string;
-    kicker: string;
-    tone: string;
-    imageUrl: string;
-    tags: Record<string, string>;
-    fields: [string, string, string][];
-};
+type ZoneProfile = { title: string; kicker: string; tone: string; imageUrl: string; tags: Record<string, string>; fields: [string, string, string][] };
 const ZONE_PROFILES: Record<string, Record<string, ZoneProfile>> = {
     luna: {
-        mares: {
-            title: "Mares lunares (basálticos)",
-            kicker: "Luna · Mares",
-            tone: "moon",
-            imageUrl: "https://images-assets.nasa.gov/image/as11-40-5877/as11-40-5877~medium.jpg",
-            tags: { zona: "mares", temperatura: "extrema", composicion: "basalto", relieve: "plano" },
-            fields: [
-                [
-                    "Litología/regolito",
-                    "Basaltos máficos (FeO/TiO₂), regolito fino",
-                    "Llanuras volcánicas en cuencas de impacto; análogos terrestres: provincias basálticas y campos volcánicos máficos.",
-                ],
-                [
-                    "Condiciones térmicas",
-                    "≈ −173 °C a +127 °C (ciclo día/noche)",
-                    "Sin atmósfera moderadora; alta amplitud térmica y radiación directa.",
-                ],
-                [
-                    "Morfología",
-                    "Planicies de baja pendiente con cráteres",
-                    "Favorable a movilidad relativa; regolito abrasivo presente.",
-                ],
-                [
-                    "Entorno planetario",
-                    "Vacío, g ≈ 0.165 g, radiación",
-                    "Analogía centrada en geología/geomorfología (no en gravedad, presión ni vacío).",
-                ],
-            ],
-        },
-        crateres: {
-            title: "Cráteres de impacto",
-            kicker: "Luna · Cráteres",
-            tone: "moon",
-            imageUrl: "https://images-assets.nasa.gov/image/PIA23210/PIA23210~medium.jpg",
-            tags: { zona: "crateres", temperatura: "extrema", composicion: "regolito", relieve: "crateres" },
-            fields: [
-                [
-                    "Litología/regolito",
-                    "Regolito impactado, brechas y ejecta",
-                    "Productos de gardenado por impactos; análogos: cráteres de impacto terrestres.",
-                ],
-                [
-                    "Condiciones térmicas",
-                    "Gradientes extremos iluminado/sombra",
-                    "Microambientes fríos en sombras locales.",
-                ],
-                [
-                    "Morfología",
-                    "Rim, paredes, fondo y eyecta",
-                    "Útil para navegación y muestreo estratigráfico relativo.",
-                ],
-                [
-                    "Entorno planetario",
-                    "Vacío, g ≈ 0.165 g, radiación",
-                    "Procesos dominados por impactos y meteorización espacial.",
-                ],
-            ],
-        },
-        polos: {
-            title: "Regiones polares en sombra",
-            kicker: "Luna · Polos",
-            tone: "moonPole",
-            imageUrl: "https://images-assets.nasa.gov/image/PIA14021/PIA14021~medium.jpg",
-            tags: { zona: "polos", temperatura: "muy-fria", composicion: "hielo", relieve: "crateres" },
-            fields: [
-                [
-                    "Volátiles/composición",
-                    "Posible H₂O y volátiles fríos en PSR",
-                    "Evidencia remota en trampas frías; análogos: ambientes polares/permafrost (analogía parcial).",
-                ],
-                [
-                    "Condiciones térmicas",
-                    "< −200 °C en sombras permanentes",
-                    "Relevante para preservación de volátiles e ISRU.",
-                ],
-                ["Morfología", "Cráteres profundos de alta latitud", "Topografía que genera sombras persistentes."],
-                [
-                    "Entorno planetario",
-                    "Vacío, g ≈ 0.165 g, radiación",
-                    "Analogía terrestre limitada por atmósfera/hidrosfera terrestre.",
-                ],
-            ],
-        },
+        mares: { title: "Mares lunares (basálticos)", kicker: "Luna · Mares", tone: "moon", imageUrl: "https://images-assets.nasa.gov/image/as11-40-5877/as11-40-5877~medium.jpg", tags: { zona: "mares", temperatura: "extrema", composicion: "basalto", relieve: "plano" }, fields: [["Litología/regolito","Basaltos máficos (FeO/TiO₂), regolito fino","Llanuras volcánicas en cuencas de impacto; análogos: provincias basálticas."],["Condiciones térmicas","≈ −173 °C a +127 °C","Sin atmósfera; alta amplitud térmica y radiación."],["Morfología","Planicies de baja pendiente con cráteres","Favorable a movilidad relativa; regolito abrasivo."],["Entorno planetario","Vacío, g ≈ 0.165 g, radiación","Analogía geológica/geomorfológica."]] },
+        crateres: { title: "Cráteres de impacto", kicker: "Luna · Cráteres", tone: "moon", imageUrl: "https://images-assets.nasa.gov/image/PIA23210/PIA23210~medium.jpg", tags: { zona: "crateres", temperatura: "extrema", composicion: "regolito", relieve: "crateres" }, fields: [["Litología/regolito","Regolito impactado, brechas y ejecta","Análogos: cráteres de impacto terrestres."],["Condiciones térmicas","Gradientes extremos iluminado/sombra","Microambientes fríos en sombras locales."],["Morfología","Rim, paredes, fondo y eyecta","Útil para navegación y muestreo."],["Entorno planetario","Vacío, g ≈ 0.165 g, radiación","Meteorización espacial."]] },
+        polos: { title: "Regiones polares en sombra", kicker: "Luna · Polos", tone: "moonPole", imageUrl: "https://images-assets.nasa.gov/image/PIA14021/PIA14021~medium.jpg", tags: { zona: "polos", temperatura: "muy-fria", composicion: "hielo", relieve: "crateres" }, fields: [["Volátiles/composición","Posible H₂O y volátiles fríos en PSR","Análogos: ambientes polares/permafrost (parcial)."],["Condiciones térmicas","< −200 °C en sombras permanentes","Relevante para ISRU."],["Morfología","Cráteres profundos de alta latitud","Sombras persistentes."],["Entorno planetario","Vacío, g ≈ 0.165 g, radiación","Analogía terrestre limitada."]] },
     },
     marte: {
-        planicies: {
-            title: "Planicies marcianas",
-            kicker: "Marte · Planicies",
-            tone: "rust",
-            imageUrl: "https://images-assets.nasa.gov/image/PIA05112/PIA05112~medium.jpg",
-            tags: { zona: "planicies", temperatura: "fria", composicion: "sulfatos", relieve: "plano" },
-            fields: [
-                [
-                    "Litología/mineralogía",
-                    "Sulfatos, óxidos férricos, basaltos alterados",
-                    "Indicios de interacción agua-roca pasada; análogos: desiertos y evaporitas.",
-                ],
-                [
-                    "Condiciones térmicas",
-                    "≈ −90 °C a 0 °C (variable)",
-                    "Atmósfera tenue (~6 mbar CO₂), gran amplitud diaria y polvo.",
-                ],
-                [
-                    "Morfología",
-                    "Planicies, cráteres, dunas",
-                    "Superficies relevantes para tránsito y operaciones de campo.",
-                ],
-                [
-                    "Entorno planetario",
-                    "g ≈ 0.38 g, P baja, radiación",
-                    "La analogía no replica presión, gravedad ni radiación marciana.",
-                ],
-            ],
-        },
-        canones: {
-            title: "Cañones y valles",
-            kicker: "Marte · Cañones",
-            tone: "rust",
-            imageUrl: "https://images-assets.nasa.gov/image/PIA00422/PIA00422~medium.jpg",
-            tags: { zona: "canones", temperatura: "fria", composicion: "oxidos", relieve: "montanoso" },
-            fields: [
-                [
-                    "Litología/estratigrafía",
-                    "Secuencias estratificadas y minerales hidratados",
-                    "Afloramientos de historia geológica/hídrica; análogos: cañones terrestres.",
-                ],
-                ["Condiciones térmicas", "≈ −110 °C a 0 °C, microclimas locales", "Variación con altitud/topografía."],
-                [
-                    "Morfología",
-                    "Escarpes, taludes, redes de valles",
-                    "Terreno accidentado para estudio estratigráfico y movilidad.",
-                ],
-                [
-                    "Entorno planetario",
-                    "g ≈ 0.38 g, atmósfera tenue",
-                    "Analogía enfocada en relieve y procesos geomorfológicos.",
-                ],
-            ],
-        },
-        polos: {
-            title: "Casquetes polares",
-            kicker: "Marte · Casquetes polares",
-            tone: "ice",
-            imageUrl: "https://images-assets.nasa.gov/image/PIA13163/PIA13163~medium.jpg",
-            tags: { zona: "polos", temperatura: "muy-fria", composicion: "hielo-agua", relieve: "plano" },
-            fields: [
-                [
-                    "Volátiles/composición",
-                    "H₂O hielo, CO₂ estacional, polvo",
-                    "Estratigrafía de hielos; análogos: glaciares/casquetes terrestres.",
-                ],
-                [
-                    "Condiciones térmicas",
-                    "Hasta ~ −125 °C en invierno polar",
-                    "Ciclos de condensación/sublimación de CO₂.",
-                ],
-                ["Morfología", "Mesetas heladas y patrones eólicos", "Dinámica estacional de superficie."],
-                [
-                    "Entorno planetario",
-                    "g ≈ 0.38 g, atmósfera tenue",
-                    "Analogía parcial por diferencias de presión/condiciones atmosféricas.",
-                ],
-            ],
-        },
+        planicies: { title: "Planicies marcianas", kicker: "Marte · Planicies", tone: "rust", imageUrl: "https://images-assets.nasa.gov/image/PIA05112/PIA05112~medium.jpg", tags: { zona: "planicies", temperatura: "fria", composicion: "sulfatos", relieve: "plano" }, fields: [["Litología/mineralogía","Sulfatos, óxidos férricos, basaltos alterados","Análogos: desiertos y evaporitas."],["Condiciones térmicas","≈ −90 °C a 0 °C","Atmósfera tenue, gran amplitud diaria."],["Morfología","Planicies, cráteres, dunas","Tránsito y operaciones de campo."],["Entorno planetario","g ≈ 0.38 g, P baja, radiación","No replica presión/gravedad/radiación."]] },
+        canones: { title: "Cañones y valles", kicker: "Marte · Cañones", tone: "rust", imageUrl: "https://images-assets.nasa.gov/image/PIA00422/PIA00422~medium.jpg", tags: { zona: "canones", temperatura: "fria", composicion: "oxidos", relieve: "montanoso" }, fields: [["Litología/estratigrafía","Secuencias estratificadas y minerales hidratados","Análogos: cañones terrestres."],["Condiciones térmicas","≈ −110 °C a 0 °C","Microclimas locales."],["Morfología","Escarpes, taludes, redes de valles","Terreno accidentado."],["Entorno planetario","g ≈ 0.38 g, atmósfera tenue","Enfoque geomorfológico."]] },
+        polos: { title: "Casquetes polares", kicker: "Marte · Casquetes polares", tone: "ice", imageUrl: "https://images-assets.nasa.gov/image/PIA13163/PIA13163~medium.jpg", tags: { zona: "polos", temperatura: "muy-fria", composicion: "hielo-agua", relieve: "plano" }, fields: [["Volátiles/composición","H₂O hielo, CO₂ estacional, polvo","Análogos: glaciares/casquetes terrestres."],["Condiciones térmicas","Hasta ~ −125 °C","Condensación/sublimación de CO₂."],["Morfología","Mesetas heladas y patrones eólicos","Dinámica estacional."],["Entorno planetario","g ≈ 0.38 g, atmósfera tenue","Analogía parcial."]] },
     },
 };
 
@@ -214,282 +48,208 @@ function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): nu
     const r = 6371;
     const dLat = ((lat2 - lat1) * Math.PI) / 180;
     const dLon = ((lon2 - lon1) * Math.PI) / 180;
-    const a =
-        Math.sin(dLat / 2) ** 2 +
-        Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
     return 2 * r * Math.asin(Math.sqrt(a));
 }
-function destPoint(lat: number, lon: number, bearingDeg: number, distKm: number): [number, number] {
-    const r = 6371,
-        br = (bearingDeg * Math.PI) / 180,
-        lat1 = (lat * Math.PI) / 180,
-        lon1 = (lon * Math.PI) / 180,
-        d = distKm / r;
+function destPoint(lat: number, lon: number, bearing: number, distKm: number): [number, number] {
+    const r = 6371, br = (bearing * Math.PI) / 180, lat1 = (lat * Math.PI) / 180, lon1 = (lon * Math.PI) / 180, d = distKm / r;
     const lat2 = Math.asin(Math.sin(lat1) * Math.cos(d) + Math.cos(lat1) * Math.sin(d) * Math.cos(br));
-    const lon2 =
-        lon1 + Math.atan2(Math.sin(br) * Math.sin(d) * Math.cos(lat1), Math.cos(d) - Math.sin(lat1) * Math.sin(lat2));
-    return [(lat2 * 180) / Math.PI, (((lon2 * 180) / Math.PI + 540) % 360) - 180];
+    const lon2 = lon1 + Math.atan2(Math.sin(br) * Math.sin(d) * Math.cos(lat1), Math.cos(d) - Math.sin(lat1) * Math.sin(lat2));
+    return [(lat2 * 180) / Math.PI, ((((lon2 * 180) / Math.PI) + 540) % 360) - 180];
 }
-function minCompat(radiusKm: number): number {
-    if (radiusKm <= 1) return 65;
-    if (radiusKm <= 10) return 55;
-    if (radiusKm <= 50) return 40;
-    return 25;
-}
-function clamp(v: number, lo: number, hi: number): number {
-    return Math.max(lo, Math.min(hi, v));
-}
+function clamp(v: number, lo: number, hi: number) { return Math.max(lo, Math.min(hi, v)); }
 
-function inferEarth(lat: number, earth: Record<string, string>): Record<string, string> {
-    const al = Math.abs(lat);
-    return {
-        clima: earth.clima ?? (al >= 66 ? "polar" : al <= 23 ? "arido" : "templado"),
-        altitud: earth.altitud ?? (al > 15 ? "media" : "baja"),
-        humedad:
-            earth.humedad ??
-            (earth.clima === "arido" || (!earth.clima && al <= 23) ? "muy-baja" : al >= 66 ? "baja" : "media"),
-        suelo: earth.suelo ?? (al >= 66 ? "hielo" : al <= 23 ? "salino" : "arenoso"),
-    };
+async function fetchJson(url: string, timeoutMs = 5000): Promise<any | null> {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), timeoutMs);
+    try {
+        const res = await fetch(url, { signal: ctrl.signal, headers: { Accept: "application/json" } });
+        if (!res.ok) return null;
+        return await res.json();
+    } catch { return null; } finally { clearTimeout(t); }
 }
+function srcNote(ok: boolean, src: string) { return ok ? `Fuente: ${src}.` : `${API_SAT} (fuente prevista: ${src}).`; }
 
-function pickProfile(planet: string, zone: Record<string, string>): ZoneProfile {
-    const profiles = ZONE_PROFILES[planet] ?? ZONE_PROFILES.marte;
-    if (zone.zona && profiles[zone.zona]) return profiles[zone.zona];
-    let best = Object.values(profiles)[0],
-        bs = -1;
-    for (const p of Object.values(profiles)) {
-        const s = Object.entries(zone).filter(([k, v]) => p.tags[k] === v).length;
-        if (s > bs) {
-            bs = s;
-            best = p;
+async function reverseGeocode(lat: number, lon: number): Promise<[string | null, boolean]> {
+    const q = new URLSearchParams({ format: "jsonv2", lat: String(lat), lon: String(lon), zoom: "10", addressdetails: "1" });
+    const data = await fetchJson(`https://nominatim.openstreetmap.org/reverse?${q}`, 4500);
+    if (!data) return [null, false];
+    const addr = data.address || {};
+    for (const k of ["natural","peak","volcano","desert","valley","water","village","hamlet","town","city","municipality","county","state","region"]) {
+        if (addr[k]) { const name = String(addr[k]); const st = addr.state || addr.region; return [st && st !== name ? `${name}, ${st}` : name, true]; }
+    }
+    const name = data.name || (String(data.display_name || "").split(",")[0].trim() || null);
+    return [name, true];
+}
+async function osrmRoute(ulat: number, ulon: number, lat: number, lon: number): Promise<[number|null, number|null, boolean]> {
+    const data = await fetchJson(`https://router.project-osrm.org/route/v1/driving/${ulon},${ulat};${lon},${lat}?overview=false&alternatives=false`, 4500);
+    try { const r = data.routes[0]; return [r.distance/1000, r.duration/60, true]; } catch { return [null,null,false]; }
+}
+async function overpassInterference(lat: number, lon: number): Promise<[string, boolean, number, boolean]> {
+    const radius = 1200;
+    const query = `[out:json][timeout:6];(way["building"](around:${radius},${lat},${lon});way["highway"](around:${radius},${lat},${lon});node["place"](around:${radius},${lat},${lon}););out count;`;
+    const data = await fetchJson(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`, 6500);
+    if (!data) return ["baja", true, 0, false];
+    let count = 0;
+    try {
+        const els = data.elements || [];
+        if (els[0]?.tags) { const tags = els[0].tags || {}; count = Number(tags.total || tags.ways || tags.nodes || 0); if (!count) count = Number(tags.ways||0)+Number(tags.nodes||0); }
+        else count = els.length || 0;
+    } catch { count = 0; }
+    if (count <= 0) return ["baja", true, 0, true];
+    if (count <= 5) return ["baja", true, count, true];
+    if (count <= 40) return ["media", false, count, true];
+    return ["alta", false, count, true];
+}
+async function nasaPower(lat: number, lon: number): Promise<[Record<string, number>|null, boolean]> {
+    const p = new URLSearchParams({ parameters: "T2M,T2M_MIN,T2M_MAX,PRECTOTCORR,RH2M,WS2M,ALLSKY_SFC_SW_DWN", community:"RE", longitude:String(lon), latitude:String(lat), format:"JSON" });
+    const data = await fetchJson(`https://power.larc.nasa.gov/api/temporal/climatology/point?${p}`, 7000);
+    try {
+        const par = data.properties.parameter; const ann = (k:string)=>{const v=par?.[k]?.ANN; return v==null?null:Number(v);};
+        const keys = ["T2M","T2M_MIN","T2M_MAX","PRECTOTCORR","RH2M","WS2M","ALLSKY_SFC_SW_DWN"]; const out: any = {}; let ok=false;
+        for(const k of keys){const v=ann(k); if(v!=null){out[k]=v; ok=true;}} return [ok?out:null, ok];
+    } catch { return [null,false]; }
+}
+async function openTopo(lat: number, lon: number): Promise<[number|null, boolean]> {
+    for (const ds of ["srtm90m","aster30m"]) {
+        const data = await fetchJson(`https://api.opentopodata.org/v1/${ds}?locations=${lat},${lon}`, 5500);
+        const e = data?.results?.[0]?.elevation;
+        if (e != null) return [Number(e), true];
+    }
+    return [null,false];
+}
+async function soilGrids(lat: number, lon: number): Promise<[Record<string, number>|null, boolean]> {
+    const props = ["clay","sand","silt","soc","bdod","phh2o"]; const depths=["0-5cm","5-15cm"];
+    const q = new URLSearchParams();
+    props.forEach(p=>q.append("property",p)); depths.forEach(d=>q.append("depth",d)); q.set("value","mean"); q.set("lat",String(lat)); q.set("lon",String(lon));
+    const data = await fetchJson(`https://rest.isric.org/soilgrids/v2.0/properties/query?${q}`, 7000);
+    try {
+        const out: any = {};
+        for (const layer of data.properties.layers||[]) {
+            const vals: number[] = [];
+            for (const d of layer.depths||[]) { const m = d.values?.mean; if (m!=null) vals.push(Number(m)); }
+            if (vals.length) out[layer.name] = vals.reduce((a,b)=>a+b,0)/vals.length;
         }
-    }
-    return best;
+        const conv = (n:string,v:number)=> (n==="clay"||n==="sand"||n==="silt")?v/10 : n==="soc"?v/10 : n==="bdod"?v/100 : n==="phh2o"?v/10 : v;
+        const res: any = {}; for(const k of Object.keys(out)) res[k]=conv(k,out[k]);
+        const ok = Object.keys(res).length>0; return [ok?res:null, ok];
+    } catch { return [null,false]; }
 }
 
-function score(
-    earthTags: Record<string, string>,
-    zoneTags: Record<string, string>,
-    earthF: Record<string, string>,
-    zoneF: Record<string, string>,
-    dist?: number,
-    radius?: number,
-): number {
-    const spec: boolean[] = [];
-    for (const k of ["clima", "altitud", "suelo", "humedad"]) if (earthF[k]) spec.push(earthTags[k] === earthF[k]);
-    for (const k of ["zona", "temperatura", "composicion", "relieve"])
-        if (zoneF[k]) spec.push(zoneTags[k] === zoneF[k]);
-    let base = spec.length ? 100 * (spec.filter(Boolean).length / spec.length) : 62;
-    if (dist !== undefined && radius) base -= 8 * (dist / Math.max(radius, 1e-6));
-    return Math.round(clamp(base, 15, 75));
+function hashSeed(s: string): number { let h=2166136261; for(let i=0;i<s.length;i++){h^=s.charCodeAt(i); h=Math.imul(h,16777619);} return h>>>0; }
+function localClimate(lat:number, earth: Record<string,string>){
+  const al=Math.abs(lat); let clima = al>=66?"polar": al<=23?"arido":"templado";
+  let t2m=15,tmin=4,tmax=27,prec=2.0,rh=60;
+  if(clima==="polar"){t2m=-12;tmin=-30;tmax=5;prec=0.7;rh=70;} else if(clima==="arido"){t2m=24;tmin=10;tmax=38;prec=0.4;rh=35;}
+  if(earth.clima){clima=earth.clima; if(clima==="arido"){t2m=25;tmin=12;tmax=39;prec=0.3;rh=30;} else if(clima==="polar"){t2m=-10;tmin=-28;tmax=6;prec=0.8;rh=72;} else {t2m=16;tmin=5;tmax=28;prec=2.2;rh=58;}}
+  return {T2M:t2m,T2M_MIN:tmin,T2M_MAX:tmax,PRECTOTCORR:prec,RH2M:rh,WS2M:3.5,ALLSKY_SFC_SW_DWN:4.5,_clima:clima};
+}
+function localElevation(lat:number, lon:number, earth: Record<string,string>){
+  let base = Math.abs(lat)>15?1400:300;
+  if(earth.altitud==="baja") base=200; else if(earth.altitud==="media") base=1200; else if(earth.altitud==="alta") base=2800;
+  const h = hashSeed(`${lat.toFixed(3)},${lon.toFixed(3)}`)%300; return base+h-150;
+}
+function localSoil(power:any, earth: Record<string,string>){
+  let s = earth.suelo;
+  if(!s){ s = (power.T2M<0)?"hielo": ((power.PRECTOTCORR*365)<350?"salino":"arenoso"); }
+  if(s==="arenoso") return {clay:8,sand:72,silt:20,soc:6,bdod:1.45,phh2o:7.2,_tipo:"Arenoso (estimado)"};
+  if(s==="salino") return {clay:18,sand:40,silt:42,soc:3,bdod:1.35,phh2o:8.1,_tipo:"Salino/evaporítico (estimado)"};
+  if(s==="hielo") return {clay:10,sand:35,silt:55,soc:12,bdod:0.9,phh2o:6.2,_tipo:"Criósuelo/permafrost (estimado)"};
+  if(s==="basaltico") return {clay:22,sand:38,silt:40,soc:9,bdod:1.25,phh2o:6.8,_tipo:"Derivado basáltico (estimado)"};
+  return {clay:20,sand:45,silt:35,soc:8,bdod:1.3,phh2o:7.0,_tipo:"Férrico/mixto (estimado)"};
+}
+function aridity(precDay:number|undefined, t2m:number|undefined){ if(precDay==null||t2m==null) return null; return (precDay*365)/(t2m+10); }
+
+function pickZoneProfile(planet:string, zone:Record<string,string>): ZoneProfile {
+  const profiles = ZONE_PROFILES[planet] || ZONE_PROFILES.marte; const wanted = zone.zona;
+  if (wanted && profiles[wanted]) return profiles[wanted];
+  let best: ZoneProfile | null = null, bestScore=-1;
+  for (const p of Object.values(profiles)) { const s = Object.entries(zone).filter(([k,v])=>p.tags[k]===v).length; if(s>bestScore){bestScore=s; best=p;} }
+  return best || Object.values(profiles)[0];
+}
+function generateCandidates(lat:number, lon:number, radiusKm:number, count:number): [number,number,number][] {
+  const pts:[number,number,number][] = [[lat,lon,0]]; const rings=2;
+  for(let ring=1; ring<=rings; ring++){ const n=Math.max(3, Math.floor(((count-1)*ring)/((rings*(rings+1))/2))); const dist = radiusKm*ring/rings; for(let k=0;k<n;k++){ if(pts.length>=count) break; const b = (360*k)/n + ring*17; const [la,lo]=destPoint(lat,lon,b,dist*0.98); const d=haversineKm(lat,lon,la,lo); if(d<=radiusKm) pts.push([la,lo,d]); }}
+  while(pts.length<count){ const b=(pts.length*57)%360; const [la,lo]=destPoint(lat,lon,b,radiusKm*0.5); pts.push([la,lo,haversineKm(lat,lon,la,lo)]);} return pts.slice(0,count);
+}
+function scoreComponents(profile:ZoneProfile, zone:Record<string,string>, earth:Record<string,string>, dist:number|null, radius:number|null, fromUser:number|null, routeKm:number|null, interference:string|null, power:any, elev:number|null, soil:any){
+  const comps:any = {};
+  const zkeys = ["zona","temperatura","composicion","relieve"].filter(k=>zone[k]);
+  comps.zona_objetivo = zkeys.length? 100*zkeys.filter(k=>profile.tags[k]===zone[k]).length/zkeys.length : 70;
+  if(power?.T2M!=null){ const t=power.T2M, p=(power.PRECTOTCORR||0)*365; if(earth.clima){ const w=earth.clima; const ok=(w==="arido"&&p<400)||(w==="polar"&&t<2)||(w==="templado"&&t>=2&&t<=22&&p>=300); comps.clima=ok?95:35;} else comps.clima=75; } else comps.clima=40;
+  if(elev!=null){ if(earth.altitud){ const w=earth.altitud; const ok=(w==="baja"&&elev<500)||(w==="media"&&elev>=500&&elev<2000)||(w==="alta"&&elev>=2000); comps.altitud_dem=ok?98:30;} else comps.altitud_dem=80; } else comps.altitud_dem=35;
+  if(soil || power?.RH2M!=null){ let base=60; if(soil && earth.suelo){ const sand=soil.sand??40, w=earth.suelo; const ok=(w==="arenoso"&&sand>=50)||(w==="salino"&&((power?.PRECTOTCORR||0)*365<350))||(w==="hielo"&&(power?.T2M??10)<0); base=ok?90:45;} comps.sustrato_humedad=base;} else comps.sustrato_humedad=35;
+  comps.espacial = (dist!=null && radius)? clamp(100*(1-0.5*(dist/Math.max(radius,1e-6))),20,100):80;
+  let acc=60; if(fromUser!=null){ if(fromUser<1.5) acc=25; else if(routeKm!=null) acc=routeKm<=300?85:55; else acc=60; } comps.accesibilidad=acc;
+  comps.interferencia_osm = interference==="baja"?95: interference==="media"?60: interference==="alta"?25:70;
+  const weights:any={zona_objetivo:0.25,clima:0.2,altitud_dem:0.15,sustrato_humedad:0.15,espacial:0.1,accesibilidad:0.08,interferencia_osm:0.07};
+  const total = Object.keys(weights).reduce((s,k)=>s+(comps[k]??50)*weights[k],0);
+  const rounded:any={}; for(const k of Object.keys(comps)) rounded[k]=Math.round(comps[k]*10)/10;
+  return [Math.round(total*100)/100, rounded] as [number, any];
 }
 
-function earthBody(
-    lat: number,
-    lon: number,
-    tags: Record<string, string>,
-    idx: number,
-    fromUserKm?: number,
-    distKm?: number,
-    radiusKm?: number,
-): BodyInfo {
-    const L: Record<string, Record<string, string>> = {
-        clima: { arido: "Árido (BW/BS aprox.)", polar: "Polar/frío (E aprox.)", templado: "Templado (C aprox.)" },
-        altitud: {
-            baja: "Baja (< 500 m s. n. m.)",
-            media: "Media (500–2000 m s. n. m.)",
-            alta: "Alta (> 2000 m s. n. m.)",
-        },
-        suelo: {
-            basaltico: "Basáltico/ígneo máfico",
-            arenoso: "Arenoso/clástico",
-            ferroso: "Rico en óxidos de Fe",
-            salino: "Salino/evaporítico",
-            hielo: "Hielo y permafrost",
-        },
-        humedad: { "muy-baja": "Muy baja (hiperárida)", baja: "Baja (árida-semiárida)", media: "Media (subhúmeda)" },
-    };
-    const lab = (k: string) => L[k]?.[tags[k]] ?? tags[k] ?? "n/d";
-    const toneKey = tags.clima === "polar" ? "ice" : tags.clima === "arido" ? "salt" : "basalt";
-    const fields = [
-        {
-            label: "Georreferenciación",
-            value: `${lat.toFixed(5)}°, ${lon.toFixed(5)}° (WGS84)`,
-            detail: "Coordenadas geodésicas decimales del candidato generado por muestreo dentro del área (no es un sitio preestablecido).",
-        },
-    ];
-    if (distKm !== undefined && radiusKm !== undefined)
-        fields.push({
-            label: "Muestreo espacial",
-            value: `${distKm.toFixed(2)} km del centro · radio ${radiusKm.toFixed(0)} km`,
-            detail: "Candidato calculado radialmente y evaluado contra el perfil objetivo y filtros.",
-        });
-    if (fromUserKm !== undefined)
-        fields.push({
-            label: "Accesibilidad (proxy)",
-            value: `${fromUserKm.toFixed(1)} km geodésicos desde tu ubicación`,
-            detail: "Estimación en modo local (sin ruta OSRM ni conteo de interferencia). En modo con backend se enriquecen ruta y huella antrópica con OpenStreetMap.",
-        });
-    fields.push(
-        {
-            label: "Clima inferido (proxy)",
-            value: lab("clima"),
-            detail: "Estimación heurística por latitud/filtros; no sustituye reanálisis u observaciones (p. ej. NASA POWER/MERRA-2).",
-        },
-        {
-            label: "Altitud estimada",
-            value: lab("altitud"),
-            detail: "Rango aproximado; requiere validación con DEM (SRTM/ASTER) para rigor científico.",
-        },
-        {
-            label: "Sustrato y humedad (proxy)",
-            value: `${lab("suelo")} · ${lab("humedad")}`,
-            detail: "Atributos cualitativos para el índice de similitud; la caracterización real requiere geología/teledetección y datos edáficos.",
-        },
-        {
-            label: "Metodología de similitud",
-            value: "Índice normalizado 0–100, acotado a ≤75%",
-            detail: "Concordancia de criterios Tierra/zona con ajuste por distancia y accesibilidad. Umbrales por radio: 1 km ≥65%, 10 km ≥55%, 50 km ≥40%, ≥100 km ≥25%. Resultado orientativo.",
-        },
-    );
-    return {
-        kicker: `Tierra · Candidato calculado #${idx}`,
-        title: `Candidato en ${lat.toFixed(3)}°, ${lon.toFixed(3)}°`,
-        tone: TONE[toneKey],
-        imageUrl: buildEarthLocationImage(lat, lon),
-        fields,
-    };
+function earthBody(lat:number,lon:number,idx:number,place:string|null,placeOk:boolean,fromUser:number|null,routeKm:number|null,routeMin:number|null,routeOk:boolean,interf:string,isolated:boolean,interfCount:number,overOk:boolean,radius:number|null,dist:number|null,power:any,powerOk:boolean,elev:number|null,elevOk:boolean,soil:any,soilOk:boolean,comps:any): BodyInfo {
+  const toneKey = (elev!=null&&elev>3500)||(power?.T2M!=null&&power.T2M<0)?"ice":"basalt";
+  const fields: InfoField[] = [];
+  fields.push({label:"Toponimia (OpenStreetMap)", value: place || `Coordenada ${lat.toFixed(4)}, ${lon.toFixed(4)} (sin toponimia)`, detail:`Geocodificación inversa Nominatim (OpenStreetMap). ${srcNote(placeOk,"https://nominatim.openstreetmap.org")}`, correlation: (placeOk&&place)?95:50});
+  fields.push({label:"Georreferenciación", value:`${lat.toFixed(5)}°, ${lon.toFixed(5)}° (WGS84)`, detail:"Candidato generado por muestreo dentro del área (no sitio preestablecido).", correlation:100});
+  if(radius!=null && dist!=null) fields.push({label:"Muestreo espacial", value:`${dist.toFixed(2)} km del centro · radio ${radius.toFixed(0)} km`, detail:"Candidato calculado radialmente respecto al perfil objetivo y filtros.", correlation:Math.round(comps.espacial??70)});
+  if(fromUser!=null){
+    const ruta = (routeKm!=null&&routeMin!=null)? `${routeKm.toFixed(1)} km, ~${routeMin.toFixed(0)} min en vehículo (OSRM/OpenStreetMap)` : "sin ruta vehicular (distancia geodésica)";
+    const rd = (routeKm!=null)? `Ruta estimada con OSRM (OpenStreetMap). ${srcNote(routeOk,"https://router.project-osrm.org")}` : `No se obtuvo ruta OSRM; ${API_SAT.toLowerCase()} (distancia geodésica calculada localmente).`;
+    fields.push({label:"Accesibilidad (OpenStreetMap/OSRM)", value:`${fromUser.toFixed(1)} km geodésicos · ${ruta}`, detail:rd, correlation:Math.round(comps.accesibilidad??60)});
+  }
+  fields.push({label:"Interferencia humana (OpenStreetMap/Overpass)", value:`${interf[0].toUpperCase()+interf.slice(1)} · ${isolated?"aislada":"no plenamente aislada"} · n≈${interfCount} en 1.2 km`, detail:`Proxy de antropización desde infraestructura mapeada en OpenStreetMap vía Overpass. ${srcNote(overOk,"https://overpass-api.de")}`, correlation:Math.round(comps.interferencia_osm??60)});
+  const ai = aridity(power?.PRECTOTCORR, power?.T2M); const pYear = power?.PRECTOTCORR!=null? power.PRECTOTCORR*365 : null;
+  const pParts:string[]=[]; if(power?.T2M!=null) pParts.push(`T2M ${power.T2M.toFixed(2)} °C`); if(power?.T2M_MIN!=null&&power?.T2M_MAX!=null) pParts.push(`rango ${power.T2M_MIN.toFixed(2)} a ${power.T2M_MAX.toFixed(2)} °C`); if(pYear!=null) pParts.push(`precip. ${pYear.toFixed(1)} mm/año`); if(power?.RH2M!=null) pParts.push(`HR2M ${power.RH2M.toFixed(1)}%`); if(power?.WS2M!=null) pParts.push(`viento ${power.WS2M.toFixed(2)} m/s`); if(power?.ALLSKY_SFC_SW_DWN!=null) pParts.push(`radiación ${power.ALLSKY_SFC_SW_DWN.toFixed(2)} kWh/m²/día`); if(ai!=null) pParts.push(`aridez P/(T+10) ${ai.toFixed(2)}`);
+  fields.push({label:"Clima (NASA POWER)", value:pParts.join("; ")||"sin datos", detail:`Climatología puntual (NASA POWER, MERRA-2/GEWEX). ${srcNote(powerOk,"https://power.larc.nasa.gov/")}`, correlation:Math.round(comps.clima??60)});
+  fields.push({label:"Elevación (DEM)", value:elev!=null?`${elev.toFixed(1)} m s.n.m.`:"sin datos", detail:`Elevación desde DEM (OpenTopData, SRTM 90 m / ASTER 30 m). ${srcNote(elevOk,"https://www.opentopodata.org")}`, correlation:Math.round(comps.altitud_dem??60)});
+  const sub:string[]=[]; if(soil){ if(soil.clay!=null) sub.push(`arcilla ${soil.clay.toFixed(1)}%`); if(soil.sand!=null) sub.push(`arena ${soil.sand.toFixed(1)}%`); if(soil.silt!=null) sub.push(`limo ${soil.silt.toFixed(1)}%`); if(soil.soc!=null) sub.push(`C org ${soil.soc.toFixed(1)} g/kg`); if(soil.bdod!=null) sub.push(`densidad ${soil.bdod.toFixed(2)} kg/dm³`); if(soil.phh2o!=null) sub.push(`pH ${soil.phh2o.toFixed(2)}`); if(soil._tipo) sub.push(String(soil._tipo)); }
+  fields.push({label:"Sustrato edáfico (SoilGrids, cuantitativo)", value:sub.join("; ")||"sin datos", detail:`Propiedades medias 0–15 cm (ISRIC SoilGrids v2.0). ${srcNote(soilOk,"https://rest.isric.org/soilgrids/v2.0/")}`, correlation:Math.round(comps.sustrato_humedad??50)});
+  const hum:string[]=[]; if(power?.RH2M!=null) hum.push(`HR ${power.RH2M.toFixed(1)}%`); if(pYear!=null) hum.push(`precip. ${pYear.toFixed(1)} mm/año`); if(ai!=null) hum.push(`aridez P/(T+10) ${ai.toFixed(2)}`);
+  fields.push({label:"Humedad y disponibilidad hídrica (cuantitativa)", value:hum.join("; ")||"sin datos", detail:`HR/precipitación e índice de aridez cuantitativo. ${srcNote(powerOk,"https://power.larc.nasa.gov/")}`, correlation:Math.round(comps.sustrato_humedad??50)});
+  const compStr = Object.entries(comps).map(([k,v])=>`${k}=${Math.round(Number(v))}%`).join(", ");
+  fields.push({label:"Metodología de similitud (por componentes)", value:`Componentes: ${compStr}`, detail:"Promedio ponderado de componentes medidos/consultados o calculados localmente cuando una API no responde. Resultado directo sin normalización a un índice acotado.", correlation:undefined as any});
+  return { kicker:`Tierra · Candidato calculado #${idx}`, title: place || `Candidato en ${lat.toFixed(3)}°, ${lon.toFixed(3)}°`, tone: TONE[toneKey], imageUrl: buildEarthLocationImage(lat,lon), fields } as BodyInfo;
+}
+function zoneBody(profile:ZoneProfile, zone:Record<string,string>): BodyInfo {
+  const keys=["composicion","temperatura","relieve","zona"]; const vals = keys.map(k=> zone[k]? (profile.tags[k]===zone[k]?100:45):78);
+  const corrs=[vals[0],vals[1],Math.round((vals[2]+vals[3])/2),72];
+  return { kicker: profile.kicker, title: profile.title, tone: TONE[profile.tone], imageUrl: profile.imageUrl, fields: profile.fields.map((f,i)=>({label:f[0], value:f[1], detail:f[2], correlation:corrs[i]})) } as BodyInfo;
 }
 
-function zoneBody(p: ZoneProfile): BodyInfo {
-    return {
-        kicker: p.kicker,
-        title: p.title,
-        tone: TONE[p.tone],
-        imageUrl: p.imageUrl,
-        fields: p.fields.map(([label, value, detail]) => ({ label, value, detail })),
-    };
-}
-
-function candidates(centerLat: number, centerLon: number, radiusKm: number, count: number): [number, number, number][] {
-    const pts: [number, number, number][] = [[centerLat, centerLon, 0]];
-    for (let ring = 1; ring <= 2 && pts.length < count; ring++) {
-        const n = 4 * ring;
-        const dist = (radiusKm * ring) / 2;
-        for (let k = 0; k < n && pts.length < count; k++) {
-            const [lat, lon] = destPoint(centerLat, centerLon, (360 * k) / n + ring * 17, dist * 0.98);
-            const d = haversineKm(centerLat, centerLon, lat, lon);
-            if (d <= radiusKm) pts.push([lat, lon, d]);
-        }
-    }
-    while (pts.length < count) {
-        const [lat, lon] = destPoint(centerLat, centerLon, (pts.length * 57) % 360, radiusKm * 0.5);
-        pts.push([lat, lon, haversineKm(centerLat, centerLon, lat, lon)]);
-    }
-    return pts.slice(0, count);
-}
-
-function hashNum(s: string): number {
-    let h = 0;
-    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
-    return Math.abs(h);
+async function buildOne(planet:string, idx:number, lat:number, lon:number, dist:number, radiusKm:number, hasLoc:boolean, userLoc:any, preferAccessible:boolean, earth:Record<string,string>, zone:Record<string,string>, profile:ZoneProfile, zb:BodyInfo): Promise<Match|null> {
+  let fromUser:number|null=null, routeKm:number|null=null, routeMin:number|null=null, routeOk=false;
+  if(userLoc){ fromUser = haversineKm(Number(userLoc.lat),Number(userLoc.lng),lat,lon); if(fromUser<1.5) return null; if(preferAccessible){ [routeKm,routeMin,routeOk]=await osrmRoute(Number(userLoc.lat),Number(userLoc.lng),lat,lon); } }
+  const [place, placeOk] = await reverseGeocode(lat,lon);
+  const [interf, isolated, interfCount, overOk] = await overpassInterference(lat,lon);
+  let [power,powerOk] = await nasaPower(lat,lon); if(!powerOk) power = localClimate(lat, earth) as any;
+  let [elev,elevOk] = await openTopo(lat,lon); if(!elevOk) elev = localElevation(lat,lon,earth);
+  let [soil,soilOk] = await soilGrids(lat,lon); if(!soilOk) soil = localSoil(power, earth) as any;
+  const [total, comps] = scoreComponents(profile, zone, earth, hasLoc?dist:null, hasLoc?radiusKm:null, fromUser, routeKm, interf, power, elev, soil);
+  const eb = earthBody(lat,lon,idx,place,placeOk,fromUser,routeKm,routeMin,routeOk,interf,isolated,interfCount,overOk,hasLoc?radiusKm:null,hasLoc?dist:null,power,powerOk,elev,elevOk,soil,soilOk,comps);
+  return { id:`calc-${planet}-${idx}-${Math.abs(hashSeed(`${lat.toFixed(4)},${lon.toFixed(4)},${planet}`))%100000}`, percentage:Math.round(total), earth:eb, zone:zb, distanceKm: hasLoc?Math.round(dist*100)/100:undefined, fromUserKm: fromUser!=null?Math.round(fromUser*100)/100:undefined, routeKm: routeKm!=null?Math.round(routeKm*100)/100:undefined, routeMin: routeMin!=null?Math.round(routeMin*10)/10:undefined, placeName: place||undefined, humanInterference: interf, isolated } as Match;
 }
 
 async function mockSearch(query: SearchQuery): Promise<Match[]> {
-    await new Promise(resolve => setTimeout(resolve, 400));
-    const planet = query.planet === "luna" || query.planet === "marte" ? query.planet : "marte";
-    const earthF = query.earth ?? {};
-    const zoneF = query.zone ?? {};
-    const profile = pickProfile(planet, zoneF);
-    let centerLat: number, centerLon: number, radiusKm: number;
-    if (query.location) {
-        centerLat = query.location.lat;
-        centerLon = query.location.lng;
-        radiusKm = query.location.radiusKm;
-    } else {
-        const h = hashNum(`${planet}|${JSON.stringify(earthF)}|${JSON.stringify(zoneF)}`);
-        centerLat = (h % 14000) / 100 - 70;
-        centerLon = (Math.floor(h / 7) % 36000) / 100 - 180;
-        radiusKm = 50;
-    }
-    let pts = candidates(centerLat, centerLon, radiusKm, 8);
-    const zb = zoneBody(profile);
-    const u = query.userLocation;
-    const mapped = pts
-        .map(([lat, lon, dist]) => {
-            const fromUserKm = u ? haversineKm(u.lat, u.lng, lat, lon) : undefined;
-            const tags = inferEarth(lat, earthF);
-            let pct = score(
-                tags,
-                profile.tags,
-                earthF,
-                zoneF,
-                query.location ? dist : undefined,
-                query.location ? radiusKm : undefined,
-            );
-            if (u && fromUserKm !== undefined) {
-                if (fromUserKm < 1.5) pct -= 18;
-                else if (fromUserKm < 5) pct -= 4;
-                pct = Math.round(clamp(pct, 15, 75));
-            }
-            return { lat, lon, dist, fromUserKm, tags, pct };
-        })
-        .filter(c => !(u && c.fromUserKm !== undefined && c.fromUserKm < 1.5));
-    let results: Match[] = (
-        mapped.length
-            ? mapped
-            : pts
-                  .slice(0, 1)
-                  .map(([lat, lon, dist]) => ({
-                      lat,
-                      lon,
-                      dist,
-                      fromUserKm: u ? haversineKm(u.lat, u.lng, lat, lon) : undefined,
-                      tags: inferEarth(lat, earthF),
-                      pct: 30,
-                  }))
-    )
-        .slice(0, 6)
-        .map((c, i) => {
-            return {
-                id: `calc-${planet}-${i}-${hashNum(`${c.lat},${c.lon}`) % 100000}`,
-                percentage: c.pct,
-                earth: earthBody(
-                    c.lat,
-                    c.lon,
-                    c.tags,
-                    i + 1,
-                    c.fromUserKm,
-                    query.location ? c.dist : undefined,
-                    query.location ? radiusKm : undefined,
-                ),
-                zone: zb,
-                ...(query.location ? { distanceKm: Math.round(c.dist * 100) / 100 } : {}),
-                ...(c.fromUserKm !== undefined ? { fromUserKm: Math.round(c.fromUserKm * 100) / 100 } : {}),
-            };
-        });
-    if (query.location) results = results.filter(m => m.percentage >= minCompat(radiusKm));
-    if (!results.length) {
-        const [lat, lon, dist] = pts[0];
-        const fromUserKm = u ? haversineKm(u.lat, u.lng, lat, lon) : undefined;
-        results = [
-            {
-                id: `calc-${planet}-best`,
-                percentage: query.location ? minCompat(radiusKm) : 30,
-                earth: earthBody(
-                    lat,
-                    lon,
-                    inferEarth(lat, earthF),
-                    1,
-                    fromUserKm,
-                    query.location ? dist : undefined,
-                    query.location ? radiusKm : undefined,
-                ),
-                zone: zb,
-                ...(query.location ? { distanceKm: Math.round(dist * 100) / 100 } : {}),
-                ...(fromUserKm !== undefined ? { fromUserKm: Math.round(fromUserKm * 100) / 100 } : {}),
-            },
-        ];
-    }
-    return results.sort((a, b) => b.percentage - a.percentage);
+  const planet = query.planet in ZONE_PROFILES ? query.planet : "marte";
+  const earth = query.earth || {}; const zone = query.zone || {};
+  const profile = pickZoneProfile(planet, zone);
+  const userLoc = (query as any).userLocation; const preferAccessible = (query as any).preferAccessible !== false;
+  let centerLat:number, centerLon:number, radiusKm:number;
+  if (query.location) { centerLat=query.location.lat; centerLon=query.location.lng; radiusKm=query.location.radiusKm; }
+  else { const seed=hashSeed(`${planet}|${JSON.stringify(earth)}|${JSON.stringify(zone)}`); centerLat=((seed%65535)/65535)*140-70; centerLon=(((Math.floor(seed/65535))%65535)/65535)*360-180; radiusKm=50; }
+  const candidates = generateCandidates(centerLat, centerLon, radiusKm, 4);
+  const zb = zoneBody(profile, zone); const results: Match[] = [];
+  for(const [lat,lon,dist] of candidates){
+    const m = await buildOne(planet, results.length+1, lat,lon,dist,radiusKm, !!query.location, userLoc, preferAccessible, earth, zone, profile, zb);
+    if(m) results.push(m); if(results.length>=4) break;
+  }
+  if(!results.length){
+    const [lat,lon,dist]=candidates[0];
+    const m = await buildOne(planet,1,lat,lon,dist,radiusKm,!!query.location,userLoc,preferAccessible,earth,zone,profile,zb);
+    if(m) results.push(m);
+  }
+  results.sort((a,b)=>b.percentage-a.percentage);
+  return results;
 }

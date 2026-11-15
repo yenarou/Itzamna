@@ -22,6 +22,8 @@ export interface InfoField {
   label: string;
   value: string;
   detail: string;
+  /** Nivel de correlación/similitud del campo (0-100), para la vista general. */
+  correlation?: number;
 }
 
 export interface BodyInfo {

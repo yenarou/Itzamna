@@ -26,6 +26,7 @@ class InfoField(BaseModel):
     label: str
     value: str
     detail: str
+    correlation: int | None = None
 
 
 class BodyInfo(BaseModel):

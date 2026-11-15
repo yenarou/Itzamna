@@ -287,18 +287,31 @@ function readLocation(): LocationQuery | undefined {
 
 function bodyColumn(b: BodyInfo, withImage: boolean, longText: boolean, extra?: string): string {
     const fields = b.fields
-        .map(f =>
-            longText
-                ? `<div class="border-t border-line py-4">
+        .map(f => {
+            if (longText) {
+                return `<div class="border-t border-line py-4">
              <dt class="text-sm text-mist">${esc(f.label)}</dt>
              <dd class="mt-1 font-medium">${esc(f.value)}</dd>
              <dd class="mt-2 max-w-[60ch] leading-relaxed text-mist">${esc(f.detail)}</dd>
-           </div>`
-                : `<div class="rounded-md border border-line bg-panel px-4 py-3">
+           </div>`;
+            }
+            const corr = typeof f.correlation === "number" ? Math.max(0, Math.min(100, Math.round(f.correlation))) : null;
+            const bar = corr !== null
+                ? `<div class="mt-2">
+                     <div class="mb-1 flex items-center justify-between text-xs text-mist"><span>Correlación</span><span class="font-medium text-ochre">${corr}%</span></div>
+                     <div class="h-2 w-full overflow-hidden rounded bg-line/60" role="img" aria-label="Correlación ${corr}%"><div class="h-full rounded bg-ochre" style="width:${corr}%"></div></div>
+                   </div>`
+                : "";
+            const detail = f.detail
+                ? `<dd class="mt-2 text-sm leading-relaxed text-mist">${esc(f.detail)}</dd>`
+                : "";
+            return `<div class="rounded-md border border-line bg-panel px-4 py-3">
              <dt class="text-sm text-mist">${esc(f.label)}</dt>
              <dd class="mt-0.5 font-medium">${esc(f.value)}</dd>
-           </div>`,
-        )
+             ${bar}
+             ${detail}
+           </div>`;
+        })
         .join("");
     const isEarthCoordImage = withImage && !!b.imageUrl && /Tierra|calculad/i.test(b.kicker + " " + b.title);
     const pin = isEarthCoordImage
