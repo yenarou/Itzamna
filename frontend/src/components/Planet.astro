@@ -1,17 +1,13 @@
 ---
+import { PLANET_IMAGES } from '../lib/data';
+
 interface Props {
   body: 'tierra' | 'luna' | 'marte';
 }
 
 const { body } = Astro.props;
 
-const imageByBody = {
-  tierra: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/The_Earth_seen_from_Apollo_17.jpg/1280px-The_Earth_seen_from_Apollo_17.jpg',
-  luna: 'https://images-assets.nasa.gov/image/PIA00405/PIA00405~medium.jpg',
-  marte: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/OSIRIS_Mars_true_color.jpg/1280px-OSIRIS_Mars_true_color.jpg',
-} as const;
-
-const src = imageByBody[body];
+const src = PLANET_IMAGES[body];
 ---
 
 <div class={`planet planet-${body}`} aria-hidden="true">

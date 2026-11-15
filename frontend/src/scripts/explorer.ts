@@ -1,5 +1,5 @@
 import { searchAnalogs } from "../lib/api";
-import { NASA_EARTH_FALLBACK } from "../lib/data";
+import { NASA_EARTH_FALLBACK, NASA_MARS_FALLBACK, NASA_MOON_FALLBACK } from "../lib/data";
 import type { BodyInfo, LocationQuery, Match, PlanetId, SearchQuery, UserLocation } from "../lib/types";
 
 type State = "idle" | "selected" | "searching" | "results";
@@ -46,6 +46,10 @@ let marker: any;
 let circle: any;
 let userMarker: any;
 let userLocation: UserLocation | undefined;
+
+function zoneFallback(p: PlanetId | "" = planet): string {
+    return p === "marte" ? NASA_MARS_FALLBACK : NASA_MOON_FALLBACK;
+}
 
 function esc(text: string): string {
     return text.replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
@@ -314,12 +318,15 @@ function bodyColumn(b: BodyInfo, withImage: boolean, longText: boolean, extra?: 
         })
         .join("");
     const isEarthCoordImage = withImage && !!b.imageUrl && /Tierra|calculad/i.test(b.kicker + " " + b.title);
+    const isPlanetZone = /^Marte\b|^Luna\b/i.test(b.kicker);
+    const fallback = isPlanetZone ? zoneFallback(/^Marte\b/i.test(b.kicker) ? "marte" : "luna") : NASA_EARTH_FALLBACK;
     const pin = isEarthCoordImage
         ? `<span aria-hidden="true" class="pointer-events-none absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-full"><span class="block h-4 w-4 -rotate-45 rounded-full rounded-bl-none border-2 border-white bg-ochre shadow-lg"></span><span class="mx-auto -mt-0.5 block h-2 w-2 rounded-full bg-white/90 shadow"></span></span>`
         : "";
+    const imgAlt = isEarthCoordImage ? `Imagen satelital: ${b.title}` : `Imagen: ${b.title}`;
     const image = withImage
         ? b.imageUrl
-            ? `<div class="${isEarthCoordImage ? "relative" : ""}">${pin}<img class="img-slot w-full object-cover" src="${esc(b.imageUrl)}" alt="Imagen satelital: ${esc(b.title)}" loading="lazy" referrerpolicy="no-referrer" style="background:${b.tone}" onerror="this.onerror=null;this.src='${NASA_EARTH_FALLBACK}';this.alt='Imagen de referencia: ${esc(b.title)}';" /></div>`
+            ? `<div class="${isEarthCoordImage ? "relative" : ""}">${pin}<img class="img-slot w-full object-cover" src="${esc(b.imageUrl)}" alt="${esc(imgAlt)}" loading="lazy" referrerpolicy="no-referrer" style="background:${b.tone}" onerror="this.onerror=null;this.src='${fallback}';this.alt='Imagen de referencia: ${esc(b.title)}';" /></div>`
             : `<div class="img-slot" style="background:${b.tone}" role="img" aria-label="Imagen de referencia: ${esc(b.title)}"></div>`
         : "";
     return `<article class="space-y-4">
@@ -331,6 +338,27 @@ function bodyColumn(b: BodyInfo, withImage: boolean, longText: boolean, extra?: 
       ${image}
       <dl class="${longText ? "" : "space-y-3"}">${fields}</dl>
     </article>`;
+}
+
+function candidateCoords(m: Match): { lat: number; lon: number } | null {
+    const f = m.earth.fields.find((x) => x.label === "Georreferenciación");
+    if (!f) return null;
+    const nums = f.value.match(/-?\d+(?:\.\d+)?/g);
+    if (!nums || nums.length < 2) return null;
+    const lat = Number(nums[0]);
+    const lon = Number(nums[1]);
+    return Number.isFinite(lat) && Number.isFinite(lon) ? { lat, lon } : null;
+}
+
+function googleMapsRouteUrl(dest: { lat: number; lon: number }): string {
+    const d = `${dest.lat},${dest.lon}`;
+    const origin = userLocation
+        ? `${userLocation.lat},${userLocation.lng}`
+        : (locLat.value && locLng.value ? `${Number(locLat.value)},${Number(locLng.value)}` : null);
+    if (origin) {
+        return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(d)}&travelmode=driving`;
+    }
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d)}`;
 }
 
 function renderResults(): void {
@@ -353,7 +381,12 @@ function renderResults(): void {
     if (typeof m.fromUserKm === "number") parts.push(`a ${m.fromUserKm.toFixed(1)} km de ti`);
     if (typeof m.routeKm === "number" && typeof m.routeMin === "number") parts.push(`ruta ~${m.routeKm.toFixed(1)} km (${Math.round(m.routeMin)} min)`);
     if (m.humanInterference) parts.push(`interferencia humana ${m.humanInterference}${m.isolated ? " (aislada)" : ""}`);
-    const dist = parts.length ? `<p class="mt-1 text-sm text-mist">${esc(parts.join(" · "))}</p>` : "";
+    const coords = candidateCoords(m);
+    const mapsUrl = coords ? googleMapsRouteUrl(coords) : null;
+    const mapsLink = mapsUrl
+        ? `<a class="mt-2 inline-flex items-center gap-1 text-sm font-medium text-ochre underline decoration-ochre/40 underline-offset-2 hover:decoration-ochre" href="${esc(mapsUrl)}" target="_blank" rel="noopener noreferrer">Abrir ruta en Google Maps ↗</a>`
+        : "";
+    const dist = parts.length || mapsLink ? `<div class="mt-1">${parts.length ? `<p class="text-sm text-mist">${esc(parts.join(" · "))}</p>` : ""}${mapsLink}</div>` : "";
     general.innerHTML = bodyColumn(m.earth, true, false, dist) + bodyColumn(m.zone, true, false);
     advanced.innerHTML = bodyColumn(m.earth, false, true, dist) + bodyColumn(m.zone, false, true);
     setCompareImages(m);
