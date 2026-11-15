@@ -1,3 +1,4 @@
+import Globe from "globe.gl";
 import { searchAnalogs } from "../lib/api";
 import { NASA_EARTH_FALLBACK, NASA_MARS_FALLBACK, NASA_MOON_FALLBACK } from "../lib/data";
 import type { BodyInfo, LocationQuery, Match, PlanetId, SearchQuery, UserLocation } from "../lib/types";
@@ -46,6 +47,7 @@ const accessFilter = el<HTMLSelectElement>("#access-filter");
 const earthCompare = el<HTMLImageElement>("#earth-compare");
 const earthCompareWrap = el<HTMLElement>("#earth-compare-wrap");
 const earthCompareCaption = el<HTMLElement>("#earth-compare-caption");
+const earthGlobe = el<HTMLElement>("#earth-globe");
 const reopenResults = document.querySelector<HTMLButtonElement>("#reopen-results");
 const exportCsvBtn = document.querySelector<HTMLButtonElement>("#export-csv");
 const exportPdfBtn = document.querySelector<HTMLButtonElement>("#export-pdf");
@@ -60,6 +62,30 @@ let marker: any;
 let circle: any;
 let userMarker: any;
 let userLocation: UserLocation | undefined;
+let globeEarth: any = null;
+
+function initEarthGlobe(): void {
+    if (!earthGlobe || globeEarth) return;
+    try {
+        globeEarth = new Globe(earthGlobe);
+        globeEarth
+            .backgroundColor("rgba(0,0,0,0)")
+            .showAtmosphere(true)
+            .atmosphereColor("#8ec8ff")
+            .atmosphereAltitude(0.16)
+            .showGraticules(true)
+            .graticuleColor("rgba(156, 204, 255, 0.5)")
+            .globeImageUrl("https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg")
+            .bumpImageUrl("https://unpkg.com/three-globe/example/img/earth-topology.png");
+        globeEarth.controls().autoRotate = true;
+        globeEarth.controls().autoRotateSpeed = 0.65;
+        globeEarth.controls().enablePan = false;
+        globeEarth.controls().enableZoom = false;
+        globeEarth.pointOfView({ lat: 18, lng: -18, altitude: 1.6 }, 0);
+    } catch (error) {
+        console.error("No se pudo inicializar Globe.GL", error);
+    }
+}
 
 function zoneFallback(p: PlanetId | "" = planet): string {
     return p === "marte" ? NASA_MARS_FALLBACK : NASA_MOON_FALLBACK;
@@ -191,6 +217,7 @@ function clearCompareImages(): void {
     earthCompare.removeAttribute("src");
     earthCompareCaption.hidden = true;
     earthCompareCaption.textContent = "";
+    if (earthGlobe) earthGlobe.style.display = "";
     document.querySelectorAll<HTMLImageElement>("[data-zone-compare]").forEach(img => {
         img.hidden = true;
         img.removeAttribute("src");
@@ -208,7 +235,6 @@ function clearCompareImages(): void {
 function setCompareImages(m: Match | undefined): void {
     clearCompareImages();
     if (!m) return;
-    const earthPlanet = document.querySelector("#earth-visual .planet") as HTMLElement | null;
     if (m.earth.imageUrl) {
         earthCompare.referrerPolicy = "no-referrer";
         earthCompare.onerror = () => {
@@ -222,7 +248,7 @@ function setCompareImages(m: Match | undefined): void {
         earthCompareWrap.classList.remove("hidden");
         earthCompareCaption.textContent = m.earth.title;
         earthCompareCaption.hidden = false;
-        if (earthPlanet) earthPlanet.style.display = "none";
+        if (earthGlobe) earthGlobe.style.display = "none";
     }
     if (planet) {
         const zImg = document.querySelector<HTMLImageElement>(`[data-zone-compare="${planet}"]`);
@@ -924,4 +950,5 @@ document.addEventListener("keydown", event => {
     if (state === "searching" || state === "results") setState("selected");
 });
 
+initEarthGlobe();
 setState("idle");
