@@ -226,11 +226,22 @@ const paneTitle = 'font-display text-3xl font-medium';
                     <li><button type="button" class="custom-dd-option" role="option" data-dd-option data-value="10">10 km</button></li>
                     <li><button type="button" class="custom-dd-option" role="option" data-dd-option data-value="50">50 km</button></li>
                     <li><button type="button" class="custom-dd-option" role="option" data-dd-option data-value="100">100 km</button></li>
+                    <li><button type="button" class="custom-dd-option" role="option" data-dd-option data-value="500">500 km</button></li>
+
                   </ul>
                 </div>
               </div>
             </div>
             <p class="loc-help">Haz clic en el mapa para elegir un punto y ajusta el radio. Si usas tu ubicación, se calcula ruta/accesibilidad desde ahí (OpenStreetMap/OSRM) y se priorizan áreas con menor interferencia humana.</p>
+
+            <div class="mt-4">
+              <label for="access-filter" class="mb-1.5 block text-sm text-mist">Acceso a lugares</label>
+              <select id="access-filter" class="field-select">
+                <option value="public-only">Solo accesos públicos y no privados</option>
+                <option value="include-private">Incluir lugares privados</option>
+              </select>
+            </div>
+
             <div class="loc-confirm mt-4">
               <button
                 id="confirm"
