@@ -17,21 +17,21 @@ export interface PlanetDef {
   fields: FieldDef[];
 }
 
-/** Campo de información: `value` va en la vista general, `detail` en la avanzada. */
+/** Information field: `value` is shown in the general view, `detail` in the advanced view. */
 export interface InfoField {
   label: string;
   value: string;
   detail: string;
-  /** Nivel de correlación/similitud del campo (0-100), para la vista general. */
+  /** Field correlation/similarity level (0-100), for the general view. */
   correlation?: number;
 }
 
 export interface BodyInfo {
   kicker: string;
   title: string;
-  /** Fondo CSS del marcador de imagen (respaldo). */
+  /** CSS background for the image placeholder (fallback). */
   tone: string;
-  /** URL de imagen real del lugar (opcional). */
+  /** Real image URL of the location (optional). */
   imageUrl?: string;
   fields: InfoField[];
 }
@@ -63,12 +63,12 @@ export interface UserLocation {
 
 export interface SearchQuery {
   planet: PlanetId;
-  /** id de campo -> valor elegido. Los campos vacíos no se envían. */
+  /** field id -> selected value. Empty fields are not sent. */
   earth: Record<string, string>;
   zone: Record<string, string>;
-  /** Punto geográfico en la Tierra y radio de búsqueda (km). */
+  /** Geographic point on Earth and search radius (km). */
   location?: LocationQuery;
-  /** Ubicación actual del usuario (para accesibilidad/ruta y evitar sitios inmediatos). */
+  /** User's current location (for accessibility/route and to avoid immediate sites). */
   userLocation?: UserLocation;
   preferIsolated?: boolean;
   preferAccessible?: boolean;

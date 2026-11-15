@@ -5,13 +5,13 @@ import { EARTH_FIELDS, PLANETS } from '../../lib/data';
 const paneTitle = 'font-display text-3xl font-medium';
 ---
 
-    <section id="view-explore" class="app-view" data-app-view="explore" hidden aria-label="Explorador de análogos">
+    <section id="view-explore" class="app-view" data-app-view="explore" hidden aria-label="Analog explorer">
 
-      <section id="explorador" class="relative" aria-label="Explorador de análogos">
+      <section id="explorador" class="relative" aria-label="Analog explorer">
         <div class="mx-auto max-w-7xl px-4 pt-4 pb-4 md:px-8">
-          <p class="zigzag-kicker">Herramienta</p>
-          <h2 class="font-display text-3xl font-semibold tracking-tight md:text-4xl">Explorar análogos terrestres</h2>
-          <p class="mt-3 max-w-2xl text-mist">Selecciona un planeta, define características y un punto en la Tierra para buscar zonas comparables.</p>
+          <p class="zigzag-kicker">Tool</p>
+          <h2 class="font-display text-3xl font-semibold tracking-tight md:text-4xl" data-i18n="explorer.title">Explore terrestrial analogs</h2>
+          <p class="mt-3 max-w-2xl text-mist">Select a planet, define characteristics, and choose a point on Earth to search for comparable areas.</p>
         </div>
 
         <div class="mx-auto max-w-[110rem] px-2 pb-6 md:px-4">
@@ -20,7 +20,7 @@ const paneTitle = 'font-display text-3xl font-medium';
     data-state="idle"
     class="relative grid min-h-[88svh] grid-rows-2 overflow-hidden rounded-2xl md:grid-cols-2 md:grid-rows-1"
   >
-    <!-- Tierra -->
+    <!-- Earth -->
     <section
       aria-labelledby="earth-title"
       class="flex flex-col items-center justify-center gap-5 bg-[#10303e] p-4"
@@ -33,32 +33,32 @@ const paneTitle = 'font-display text-3xl font-medium';
         </div>
         <p id="earth-compare-caption" hidden class="max-w-[min(38vmin,28rem)] text-center text-sm leading-relaxed text-mist"></p>
       </div>
-      <h2 id="earth-title" class={paneTitle}>Tierra</h2>
+      <h2 id="earth-title" class={paneTitle}>Earth</h2>
     </section>
 
-    <!-- Planeta elegido -->
+    <!-- Selected planet -->
     <section id="planet-pane" class="relative flex flex-col items-center justify-center gap-5 bg-deep p-4">
       <div id="planet-picker" class="z-20 flex flex-col items-center gap-3 transition-all duration-500">
-        <p id="planet-picker-label" class="font-display text-xl text-mist md:text-2xl">Selecciona un planeta</p>
-        <label for="planet-select" class="sr-only">Planeta</label>
+        <p id="planet-picker-label" class="font-display text-xl text-mist md:text-2xl">Select a planet</p>
+        <label for="planet-select" class="sr-only">Planet</label>
         <select id="planet-select" class="sr-only" aria-hidden="true" tabindex="-1">
-          <option value="">Elegir planeta…</option>
+          <option value="">Choose a planet…</option>
           {PLANETS.map((p) => <option value={p.id}>{p.name}</option>)}
         </select>
         <div class="planet-dd" id="planet-dd" data-open="false">
           <button type="button" id="planet-dd-trigger" class="planet-dd-trigger" aria-haspopup="listbox" aria-expanded="false">
-            <span id="planet-dd-label">Elegir planeta…</span>
+            <span id="planet-dd-label">Choose a planet…</span>
             <svg aria-hidden="true" viewBox="0 0 20 20" class="planet-dd-caret"><path d="M5 7l5 6 5-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
-          <ul id="planet-dd-menu" class="planet-dd-menu" role="listbox" aria-label="Planeta" hidden>
-            <li><button type="button" class="planet-dd-option" role="option" data-value="">Elegir planeta…</button></li>
+          <ul id="planet-dd-menu" class="planet-dd-menu" role="listbox" aria-label="Planet" hidden>
+            <li><button type="button" class="planet-dd-option" role="option" data-value="">Choose a planet…</button></li>
             {PLANETS.map((p) => <li><button type="button" class="planet-dd-option" role="option" data-value={p.id}>{p.name}</button></li>)}
           </ul>
         </div>
       </div>
 
       <p id="empty-prompt" class="max-w-xs text-center text-lg leading-snug text-mist">
-        Elige la Luna o Marte para compararlos con la Tierra.
+        Choose the Moon or Mars to compare with Earth.
       </p>
 
       {
@@ -75,13 +75,13 @@ const paneTitle = 'font-display text-3xl font-medium';
       }
     </section>
 
-    <!-- Porcentaje y botón de búsqueda -->
+    <!-- Similarity and search toggle -->
     <div id="control" class="absolute bottom-5 left-1/2 z-40 flex -translate-x-1/2 flex-col items-center gap-2">
       <div
         class="min-w-32 rounded-md border border-line bg-panel px-4 py-1.5 text-center"
         aria-live="polite"
       >
-        <span class="block text-xs text-mist">Similitud</span>
+        <span class="block text-xs text-mist">Similarity</span>
         <strong id="percent-value" class="font-display text-2xl font-semibold text-ochre">—</strong>
       </div>
       <button
@@ -90,7 +90,7 @@ const paneTitle = 'font-display text-3xl font-medium';
         disabled
         aria-expanded="false"
         aria-controls="search-panel"
-        aria-label="Buscar por características"
+        aria-label="Search by characteristics"
         class="grid size-12 place-items-center rounded-md border border-line bg-panel text-chalk transition-colors enabled:hover:border-ochre disabled:opacity-40"
       >
         <svg
@@ -110,34 +110,34 @@ const paneTitle = 'font-display text-3xl font-medium';
           <path d="m5 17 6-6 6 6"></path>
         </svg>
       </button>
-      <button id="reopen-results" type="button" hidden class="rounded-md border border-line bg-panel px-3 py-1.5 text-sm hover:border-ochre">Ver resultados</button>
+      <button id="reopen-results" type="button" hidden class="rounded-md border border-line bg-panel px-3 py-1.5 text-sm hover:border-ochre" data-i18n="explorer.viewResults">View results</button>
     </div>
 
-    <!-- Búsqueda por campos -->
+    <!-- Search by fields -->
     <form
       id="search-panel"
       hidden
       class="absolute inset-0 z-30 overflow-y-auto px-4 pb-44 pt-6 md:px-10"
     >
-      <h2 class="mb-6 text-center font-display text-3xl font-medium">Buscar por características</h2>
+      <h2 class="mb-6 text-center font-display text-3xl font-medium" data-i18n="explorer.searchByFeatures">Search by characteristics</h2>
       <div class="mx-auto grid w-full max-w-6xl gap-8 md:grid-cols-2">
         <fieldset class="space-y-4" data-group="earth">
-          <legend class="mb-4 font-display text-2xl text-jade">Tierra</legend>
+          <legend class="mb-4 font-display text-2xl text-jade">Earth</legend>
           {
             EARTH_FIELDS.map((f) => (
               <div>
                 <label for={`earth-${f.id}`} class="mb-1.5 block text-sm text-mist">{f.label}</label>
                 <select id={`earth-${f.id}`} name={f.id} class="field-select sr-only" aria-hidden="true" tabindex="-1">
-                  <option value="">Cualquiera</option>
+                  <option value="">Any</option>
                   {f.options.map((o) => <option value={o.value}>{o.label}</option>)}
                 </select>
                 <div class="custom-dd" data-dd-for={`earth-${f.id}`} data-open="false">
                   <button type="button" class="custom-dd-trigger" data-dd-trigger={`earth-${f.id}`} aria-haspopup="listbox" aria-expanded="false">
-                    <span data-dd-label={`earth-${f.id}`}>Cualquiera</span>
+                    <span data-dd-label={`earth-${f.id}`}>Any</span>
                     <svg aria-hidden="true" viewBox="0 0 20 20" class="custom-dd-caret"><path d="M5 7l5 6 5-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
                   </button>
                   <ul class="custom-dd-menu" data-dd-menu={`earth-${f.id}`} role="listbox" aria-label={f.label} hidden>
-                    <li><button type="button" class="custom-dd-option" role="option" data-dd-option data-value="">Cualquiera</button></li>
+                    <li><button type="button" class="custom-dd-option" role="option" data-dd-option data-value="">Any</button></li>
                     {f.options.map((o) => <li><button type="button" class="custom-dd-option" role="option" data-dd-option data-value={o.value}>{o.label}</button></li>)}
                   </ul>
                 </div>
@@ -156,16 +156,16 @@ const paneTitle = 'font-display text-3xl font-medium';
                 <div>
                   <label for={`${p.id}-${f.id}`} class="mb-1.5 block text-sm text-mist">{f.label}</label>
                   <select id={`${p.id}-${f.id}`} name={f.id} class="field-select sr-only" aria-hidden="true" tabindex="-1">
-                    <option value="">Cualquiera</option>
+                    <option value="">Any</option>
                     {f.options.map((o) => <option value={o.value}>{o.label}</option>)}
                   </select>
                   <div class="custom-dd" data-dd-for={`${p.id}-${f.id}`} data-open="false">
                     <button type="button" class="custom-dd-trigger" data-dd-trigger={`${p.id}-${f.id}`} aria-haspopup="listbox" aria-expanded="false">
-                      <span data-dd-label={`${p.id}-${f.id}`}>Cualquiera</span>
+                      <span data-dd-label={`${p.id}-${f.id}`}>Any</span>
                       <svg aria-hidden="true" viewBox="0 0 20 20" class="custom-dd-caret"><path d="M5 7l5 6 5-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
                     <ul class="custom-dd-menu" data-dd-menu={`${p.id}-${f.id}`} role="listbox" aria-label={f.label} hidden>
-                      <li><button type="button" class="custom-dd-option" role="option" data-dd-option data-value="">Cualquiera</button></li>
+                      <li><button type="button" class="custom-dd-option" role="option" data-dd-option data-value="">Any</button></li>
                       {f.options.map((o) => <li><button type="button" class="custom-dd-option" role="option" data-dd-option data-value={o.value}>{o.label}</button></li>)}
                     </ul>
                   </div>
@@ -179,37 +179,37 @@ const paneTitle = 'font-display text-3xl font-medium';
           <div class="loc-card">
             <div class="loc-card-header">
               <div>
-                <p class="loc-card-kicker">Punto geográfico</p>
-                <h3 class="loc-card-title">Ubicación y radio de búsqueda <span class="loc-optional">(opcional)</span></h3>
+                <p class="loc-card-kicker">Geographic point</p>
+                <h3 class="loc-card-title">Location and search radius <span class="loc-optional">(optional)</span></h3>
               </div>
-              <button id="use-my-location" type="button" class="loc-action-btn" aria-label="Usar mi ubicación actual">
+              <button id="use-my-location" type="button" class="loc-action-btn" aria-label="Use my current location">
                 <svg aria-hidden="true" viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/><circle cx="12" cy="12" r="8" opacity=".45"/></svg>
-                <span>Usar mi ubicación</span>
+                <span>Use my location</span>
               </button>
             </div>
             <p id="user-loc-status" class="loc-status text-xs text-mist" aria-live="polite"></p>
 
             <div class="loc-map-wrap">
-              <div id="loc-map" class="loc-map" aria-label="Mapa para seleccionar punto en la Tierra"></div>
+              <div id="loc-map" class="loc-map" aria-label="Map to select a point on Earth"></div>
               <div class="loc-map-hint" aria-hidden="true">
                 <svg viewBox="0 0 20 20" class="size-4" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M10 2.5a5.5 5.5 0 0 0-5.5 5.5c0 4.1 5.5 9.5 5.5 9.5s5.5-5.4 5.5-9.5A5.5 5.5 0 0 0 10 2.5Z"/><circle cx="10" cy="8" r="1.8"/></svg>
-                <span>Clic en el mapa para fijar el punto</span>
+                <span>Click on the map to set the point</span>
               </div>
             </div>
 
             <div class="loc-controls">
               <div>
-                <label for="loc-lat" class="mb-1.5 block text-sm text-mist">Latitud</label>
-                <input id="loc-lat" name="loc-lat" type="number" step="any" min="-90" max="90" placeholder="ej. -24.5" class="field-select" />
+                <label for="loc-lat" class="mb-1.5 block text-sm text-mist">Latitude</label>
+                <input id="loc-lat" name="loc-lat" type="number" step="any" min="-90" max="90" placeholder="e.g. -24.5" class="field-select" />
               </div>
               <div>
-                <label for="loc-lng" class="mb-1.5 block text-sm text-mist">Longitud</label>
-                <input id="loc-lng" name="loc-lng" type="number" step="any" min="-180" max="180" placeholder="ej. -69.25" class="field-select" />
+                <label for="loc-lng" class="mb-1.5 block text-sm text-mist">Longitude</label>
+                <input id="loc-lng" name="loc-lng" type="number" step="any" min="-180" max="180" placeholder="e.g. -69.25" class="field-select" />
               </div>
               <div>
-                <label for="loc-radius" class="mb-1.5 block text-sm text-mist">Radio de búsqueda</label>
+                <label for="loc-radius" class="mb-1.5 block text-sm text-mist">Search radius</label>
                 <select id="loc-radius" name="loc-radius" class="field-select sr-only" aria-hidden="true" tabindex="-1">
-                  <option value="">Sin filtro</option>
+                  <option value="">No filter</option>
                   <option value="1">1 km</option>
                   <option value="10">10 km</option>
                   <option value="50">50 km</option>
@@ -217,11 +217,11 @@ const paneTitle = 'font-display text-3xl font-medium';
                 </select>
                 <div class="custom-dd" data-dd-for="loc-radius" data-open="false">
                   <button type="button" class="custom-dd-trigger" data-dd-trigger="loc-radius" aria-haspopup="listbox" aria-expanded="false">
-                    <span data-dd-label="loc-radius">Sin filtro</span>
+                    <span data-dd-label="loc-radius">No filter</span>
                     <svg aria-hidden="true" viewBox="0 0 20 20" class="custom-dd-caret"><path d="M5 7l5 6 5-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
                   </button>
-                  <ul class="custom-dd-menu" data-dd-menu="loc-radius" role="listbox" aria-label="Radio de búsqueda" hidden>
-                    <li><button type="button" class="custom-dd-option" role="option" data-dd-option data-value="">Sin filtro</button></li>
+                  <ul class="custom-dd-menu" data-dd-menu="loc-radius" role="listbox" aria-label="Search radius" hidden>
+                    <li><button type="button" class="custom-dd-option" role="option" data-dd-option data-value="">No filter</button></li>
                     <li><button type="button" class="custom-dd-option" role="option" data-dd-option data-value="1">1 km</button></li>
                     <li><button type="button" class="custom-dd-option" role="option" data-dd-option data-value="10">10 km</button></li>
                     <li><button type="button" class="custom-dd-option" role="option" data-dd-option data-value="50">50 km</button></li>
@@ -233,15 +233,6 @@ const paneTitle = 'font-display text-3xl font-medium';
               </div>
             </div>
             <p class="loc-help">Haz clic en el mapa para elegir un punto y ajusta el radio. Si usas tu ubicación, se calcula ruta/accesibilidad desde ahí (OpenStreetMap/OSRM) y se priorizan áreas con menor interferencia humana.</p>
-
-            <div class="mt-4">
-              <label for="access-filter" class="mb-1.5 block text-sm text-mist">Acceso a lugares</label>
-              <select id="access-filter" class="field-select">
-                <option value="public-only">Solo accesos públicos y no privados</option>
-                <option value="include-private">Incluir lugares privados</option>
-              </select>
-            </div>
-
             <div class="loc-confirm mt-4">
               <button
                 id="confirm"
@@ -252,8 +243,8 @@ const paneTitle = 'font-display text-3xl font-medium';
                   <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-3.8-3.8"/></svg>
                 </span>
                 <span class="flex flex-col items-start leading-tight">
-                  <span class="text-base font-semibold">Confirmar y buscar</span>
-                  <span class="text-xs font-medium opacity-80">Buscar zonas similares con estos criterios</span>
+                  <span class="text-base font-semibold" data-i18n="explorer.confirm">Confirm and search</span>
+                  <span class="text-xs font-medium opacity-80">Search for similar areas with these criteria</span>
                 </span>
               </button>
               <p id="search-status" role="status" class="mt-2 min-h-5 text-sm text-mist"></p>
@@ -261,17 +252,17 @@ const paneTitle = 'font-display text-3xl font-medium';
           </div>
         </div>
       </div>
-      <div id="search-loading" hidden class="loading-overlay" role="status" aria-live="polite" aria-label="Buscando zonas similares">
+      <div id="search-loading" hidden class="loading-overlay" role="status" aria-live="polite" aria-label="Searching for similar areas">
         <div class="loading-popup">
           <div class="mb-3 flex items-center justify-center gap-3 text-xl font-semibold text-fog">
             <span class="inline-block size-8 animate-spin rounded-full border-[3px] border-ochre border-t-transparent" aria-hidden="true"></span>
-            Buscando zonas similares…
+            Searching for similar areas…
           </div>
-          <p id="search-loading-msg" class="mb-4 text-center text-sm text-mist">Conectando con la API</p>
+          <p id="search-loading-msg" class="mb-4 text-center text-sm text-mist">Connecting to the API</p>
           <div class="mb-4 h-3 w-full overflow-hidden rounded-full bg-line/60">
             <div id="search-loading-bar" class="loading-bar h-full rounded-full bg-ochre" style="width:20%"></div>
           </div>
-          <div id="search-loading-pct" class="mb-4 text-center text-sm font-medium text-ochre">Iniciando…</div>
+          <div id="search-loading-pct" class="mb-4 text-center text-sm font-medium text-ochre">Starting…</div>
           <div class="grid gap-2">
             <div class="skeleton h-3 w-11/12 rounded"></div>
             <div class="skeleton h-3 w-full rounded"></div>
@@ -282,7 +273,7 @@ const paneTitle = 'font-display text-3xl font-medium';
       </div>
     </form>
 
-    <!-- Resultados -->
+    <!-- Results -->
     <section
       id="results"
       hidden
@@ -296,17 +287,17 @@ const paneTitle = 'font-display text-3xl font-medium';
             type="button"
             class="rounded-md border border-line px-3 py-1.5 text-sm hover:border-ochre"
           >
-            Volver
+            Back
           </button>
-          <h2 id="results-title" class="font-display text-2xl font-medium">Zonas similares</h2>
+          <h2 id="results-title" class="font-display text-2xl font-medium">Similar areas</h2>
           <div class="flex items-center gap-2">
-            <button id="match-prev" type="button" aria-label="Zona anterior" class="grid size-9 place-items-center rounded-md border border-line text-lg hover:border-ochre disabled:opacity-40">‹</button>
-            <button id="match-next" type="button" aria-label="Zona siguiente" class="grid size-9 place-items-center rounded-md border border-line text-lg hover:border-ochre disabled:opacity-40">›</button>
+            <button id="match-prev" type="button" aria-label="Previous area" class="grid size-9 place-items-center rounded-md border border-line text-lg hover:border-ochre disabled:opacity-40">‹</button>
+            <button id="match-next" type="button" aria-label="Next area" class="grid size-9 place-items-center rounded-md border border-line text-lg hover:border-ochre disabled:opacity-40">›</button>
           </div>
-          <div id="match-tabs" role="tablist" aria-label="Zonas encontradas" class="flex flex-wrap gap-2"></div>
+          <div id="match-tabs" role="tablist" aria-label="Areas found" class="flex flex-wrap gap-2"></div>
           <div class="ml-auto flex flex-wrap gap-2">
-            <button id="export-csv" type="button" class="rounded-md border border-line px-3 py-1.5 text-sm hover:border-ochre">Exportar CSV</button>
-            <button id="export-pdf" type="button" class="rounded-md border border-line px-3 py-1.5 text-sm hover:border-ochre">Exportar PDF</button>
+            <button id="export-csv" type="button" class="rounded-md border border-line px-3 py-1.5 text-sm hover:border-ochre" data-i18n="explorer.exportCsv">Export CSV</button>
+            <button id="export-pdf" type="button" class="rounded-md border border-line px-3 py-1.5 text-sm hover:border-ochre" data-i18n="explorer.exportPdf">Export PDF</button>
           </div>
         </div>
       </div>
@@ -314,14 +305,14 @@ const paneTitle = 'font-display text-3xl font-medium';
       <div id="results-print-root" class="mx-auto max-w-[96rem] px-4 py-8 md:px-8">
         <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
           <p class="flex items-baseline gap-3">
-            <span class="text-sm text-mist">Similitud</span>
+            <span class="text-sm text-mist">Similarity</span>
             <strong id="result-percent" class="font-display text-5xl font-semibold text-ochre"></strong>
           </p>
           <div class="flex flex-col gap-1 text-sm">
-            <span class="text-mist">Vista de datos</span>
-            <div id="data-view" class="data-view-toggle flex gap-2" role="group" aria-label="Vista de datos">
-              <button type="button" data-view-btn="earth" class="view-toggle-btn" aria-pressed="false">Solo Tierra</button>
-              <button type="button" data-view-btn="zone" class="view-toggle-btn is-active" aria-pressed="true">Solo Luna/Marte</button>
+            <span class="text-mist">Data view</span>
+            <div id="data-view" class="data-view-toggle flex gap-2" role="group" aria-label="Data view">
+              <button type="button" data-view-btn="earth" class="view-toggle-btn" aria-pressed="false" data-i18n="explorer.onlyEarth">Earth only</button>
+              <button type="button" data-view-btn="zone" class="view-toggle-btn is-active" aria-pressed="true" data-i18n="explorer.onlyZone">Planet only</button>
             </div>
           </div>
         </div>
@@ -343,9 +334,9 @@ const paneTitle = 'font-display text-3xl font-medium';
         </div>
         <section aria-labelledby="info-basic-title" class="info-section info-section-basic">
           <div class="mb-4 flex flex-wrap items-center gap-3">
-            <h3 id="info-basic-title" class="font-display text-xl font-semibold">Información general</h3>
-            <span class="info-badge info-badge-basic">Sencilla</span>
-            <span class="text-sm text-mist">Selecciona Tierra o Luna/Marte para ver su información</span>
+            <h3 id="info-basic-title" class="font-display text-xl font-semibold" data-i18n="explorer.infoGeneral">General information</h3>
+            <span class="info-badge info-badge-basic">Simple</span>
+            <span class="text-sm text-mist" data-i18n="explorer.infoGeneralHint">Select Earth or Moon/Mars to view its information</span>
           </div>
           <div id="general" class="grid grid-cols-1 gap-8"></div>
         </section>
@@ -353,9 +344,9 @@ const paneTitle = 'font-display text-3xl font-medium';
         <section id="advanced-panel" aria-labelledby="info-advanced-title" class="info-section info-section-advanced mt-8">
           <div class="flex flex-wrap items-center justify-between gap-3">
             <div class="flex flex-wrap items-center gap-3">
-              <h3 id="info-advanced-title" class="font-display text-xl font-semibold">Información avanzada</h3>
-              <span class="info-badge info-badge-advanced">Avanzada · Ambos</span>
-              <span class="text-sm text-mist">Muestra ambos (Tierra y Luna/Marte) con detalle técnico, fuentes, metodología y fórmulas</span>
+              <h3 id="info-advanced-title" class="font-display text-xl font-semibold">Advanced information</h3>
+              <span class="info-badge info-badge-advanced">Advanced · Both</span>
+              <span class="text-sm text-mist" data-i18n="explorer.infoAdvancedHint">Shows both (Earth and Moon/Mars) with technical detail, sources, methodology, and formulas</span>
             </div>
             <button
               id="advanced-toggle"
@@ -364,10 +355,10 @@ const paneTitle = 'font-display text-3xl font-medium';
               aria-controls="advanced"
               class="rounded-md border border-line bg-panel px-4 py-2 text-sm font-medium hover:border-ochre"
             >
-              Mostrar información avanzada
+  <span data-i18n="explorer.showAdvanced">Show advanced information</span>
             </button>
           </div>
-          <p class="mt-2 text-sm text-mist">Incluye descripciones extendidas, parámetros/fórmulas y trazabilidad de datos (APIs o valores calculados/locales).</p>
+          <p class="mt-2 text-sm text-mist">Includes extended descriptions, parameters/formulas, and data traceability (APIs or calculated/local values).</p>
           <div id="advanced" hidden class="mt-6 grid grid-cols-1 gap-8"></div>
         </section>
       </div>

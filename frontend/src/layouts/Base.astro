@@ -13,13 +13,13 @@ const { title, fullscreen = false, transparentHeader = false } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="es" data-theme="dark">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Itzamná identifica zonas de la Tierra con características comparables a zonas de la Luna y Marte mediante análisis geoespacial y criterios científicos."
+      content="Itzamná identifies regions on Earth with characteristics comparable to environments on the Moon and Mars through geospatial analysis and scientific criteria."
     />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -38,13 +38,13 @@ const { title, fullscreen = false, transparentHeader = false } = Astro.props;
     <slot />
     <div id="safety-gate" class="safety-gate" role="dialog" aria-modal="true" aria-labelledby="safety-gate-title" aria-describedby="safety-gate-text">
       <div class="safety-gate-card">
-        <h2 id="safety-gate-title" class="safety-gate-title">AVISO DE SEGURIDAD Y PROPIEDAD PRIVADA</h2>
+        <h2 id="safety-gate-title" class="safety-gate-title" data-i18n="safety.title">SAFETY AND PRIVATE PROPERTY NOTICE</h2>
         <p id="safety-gate-text" class="safety-gate-text">
-          Al continuar, aceptas que debes respetar las leyes locales y los límites de propiedad privada.
+          <span data-i18n="safety.text1">By continuing, you agree that you must respect local laws and private property boundaries.</span>
           <br /><br />
-          Queda estrictamente prohibido invadir terrenos, viviendas o espacios cerrados para interactuar con elementos del juego. El desarrollador no se hace responsable por sanciones legales, accidentes o daños derivados del acceso no autorizado a cualquier inmueble.
+          <span data-i18n="safety.text2">Entering land, homes, or enclosed spaces to interact with game elements is strictly prohibited. The developer is not responsible for legal penalties, accidents, or damages resulting from unauthorized access to any property.</span>
         </p>
-        <button id="safety-gate-accept" type="button" class="btn-primary safety-gate-btn">Acepto y entiendo</button>
+        <button id="safety-gate-accept" type="button" class="btn-primary safety-gate-btn" data-i18n="safety.accept">I accept and understand</button>
       </div>
     </div>
     <script is:inline>
@@ -69,6 +69,9 @@ const { title, fullscreen = false, transparentHeader = false } = Astro.props;
           document.body.style.overflow = '';
         });
       })();
+    </script>
+    <script>
+      import '../scripts/i18nInit';
     </script>
   </body>
 </html>

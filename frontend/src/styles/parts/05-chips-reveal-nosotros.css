@@ -124,7 +124,7 @@ html[data-theme="light"] .chip {
     padding: 1.25rem 1.35rem;
     background: linear-gradient(145deg, rgba(16, 34, 64, 0.62), rgba(8, 18, 36, 0.72));
     box-shadow: var(--shadow-raised), var(--shadow-inset);
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(5px);
 }
 .story-card h3 {
     font-family: var(--font-display);

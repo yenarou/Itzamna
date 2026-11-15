@@ -19,7 +19,7 @@
 #results,
 #search-panel {
     background: linear-gradient(180deg, rgba(8, 18, 36, 0.86), rgba(6, 14, 28, 0.92));
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(6px);
 }
 
 button,
