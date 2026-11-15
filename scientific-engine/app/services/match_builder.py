@@ -9,7 +9,7 @@ from app.services.profiles import ZONE_PROFILES, build_zone_body, pick_zone_prof
 from app.services.scoring import build_earth_body, score_components
 
 
-def build_match(planet, idx, lat, lon, dist, radius_km, query_loc, user_loc, prefer_accessible, earth_filters, zone_filters, profile, zone_body):
+def build_match(planet, idx, lat, lon, dist, radius_km, query_loc, user_loc, prefer_accessible, earth_filters, zone_filters, profile, zone_body, osm_tag_filters=None):
     from_user_km = route_km = route_min = None
     route_ok = False
     if user_loc is not None:
@@ -20,7 +20,7 @@ def build_match(planet, idx, lat, lon, dist, radius_km, query_loc, user_loc, pre
             route_km, route_min, route_ok = route_from_user(float(user_loc.lat), float(user_loc.lng), lat, lon)
 
     place_name, place_ok = reverse_geocode_name(lat, lon)
-    interference, isolated, interference_count, over_ok = human_interference(lat, lon)
+    interference, isolated, interference_count, over_ok = human_interference(lat, lon, tag_filters=osm_tag_filters, prefer_accessible=prefer_accessible)
 
     power, power_ok = fetch_nasa_power(lat, lon)
     if not power_ok:
@@ -53,6 +53,7 @@ def search_analogs(query) -> list[Match]:
     planet = query.planet if query.planet in ZONE_PROFILES else "marte"
     zone_filters = dict(query.zone or {})
     earth_filters = dict(query.earth or {})
+    tag_filters = dict(getattr(query, "tags", {}) or {})
     profile = pick_zone_profile(planet, zone_filters)
     prefer_accessible = bool(getattr(query, "preferAccessible", True))
     user_loc = getattr(query, "userLocation", None)
@@ -62,7 +63,7 @@ def search_analogs(query) -> list[Match]:
         center_lon = float(query.location.lng)
         radius_km = float(query.location.radiusKm)
     else:
-        seed = hashlib.sha1(f"{planet}|{sorted(earth_filters.items())}|{sorted(zone_filters.items())}".encode()).hexdigest()
+        seed = hashlib.sha1(f"{planet}|{sorted(earth_filters.items())}|{sorted(zone_filters.items())}|{sorted(tag_filters.items())}".encode()).hexdigest()
         center_lat = (int(seed[:4], 16) / 65535.0) * 140 - 70
         center_lon = (int(seed[4:8], 16) / 65535.0) * 360 - 180
         radius_km = 50.0
@@ -73,7 +74,7 @@ def search_analogs(query) -> list[Match]:
     zone_body = build_zone_body(profile, zone_filters)
     results = []
     for lat, lon, dist in candidates:
-        m = build_match(planet, len(results) + 1, lat, lon, dist, radius_km, query.location, user_loc, prefer_accessible, earth_filters, zone_filters, profile, zone_body)
+        m = build_match(planet, len(results) + 1, lat, lon, dist, radius_km, query.location, user_loc, prefer_accessible, earth_filters, zone_filters, profile, zone_body, osm_tag_filters=tag_filters)
         if m is not None:
             results.append(m)
         if len(results) >= 6:
@@ -81,7 +82,7 @@ def search_analogs(query) -> list[Match]:
 
     if not results:
         lat, lon, dist = candidates[0]
-        m = build_match(planet, 1, lat, lon, dist, radius_km, query.location, user_loc, prefer_accessible, earth_filters, zone_filters, profile, zone_body)
+        m = build_match(planet, 1, lat, lon, dist, radius_km, query.location, user_loc, prefer_accessible, earth_filters, zone_filters, profile, zone_body, osm_tag_filters=tag_filters)
         if m is not None:
             results.append(m)
 

@@ -47,9 +47,34 @@ def route_from_user(user_lat: float, user_lon: float, lat: float, lon: float) ->
         return (None, None, False)
 
 
-def human_interference(lat: float, lon: float) -> tuple[str, bool, int, bool]:
+def _matches_tag_filters(tags: dict | None, tag_filters: dict[str, str] | None) -> bool:
+    if not tag_filters:
+        return True
+    tags = tags or {}
+    return all(str(tags.get(key, "")).lower() == str(value).lower() for key, value in tag_filters.items())
+
+
+def _is_accessible_tag(tags: dict | None) -> bool:
+    if not tags:
+        return True
+    access = str(tags.get("access") or "").strip().lower()
+    if not access:
+        return True
+    return access not in {"private", "no", "restricted", "military"}
+
+
+def human_interference(lat: float, lon: float, tag_filters: dict[str, str] | None = None, prefer_accessible: bool = True) -> tuple[str, bool, int, bool]:
     radius = 1200
-    query = f'[out:json][timeout:6];(way["building"](around:{radius},{lat},{lon});way["highway"](around:{radius},{lat},{lon});node["place"](around:{radius},{lat},{lon}););out count;'
+    tag_filters = tag_filters or {}
+    filter_parts = []
+    for key, value in tag_filters.items():
+        if value in (None, "", "*"):
+            filter_parts.append(f'["{key}"]')
+        else:
+            filter_parts.append(f'["{key}"="{value}"]')
+    tag_clause = "".join(filter_parts)
+    access_clause = '["access"~"^(yes|permissive|public|destination|customers|permit|unknown)$"]' if prefer_accessible else ""
+    query = f'[out:json][timeout:6];(way["building"]{tag_clause}{access_clause}(around:{radius},{lat},{lon});way["highway"]{tag_clause}{access_clause}(around:{radius},{lat},{lon});node["place"]{tag_clause}{access_clause}(around:{radius},{lat},{lon}););out count;'
     url = "https://overpass-api.de/api/interpreter?data=" + urllib.parse.quote(query)
     data = _http_json(url, timeout=7.0)
     if data is None:
@@ -62,18 +87,20 @@ def human_interference(lat: float, lon: float) -> tuple[str, bool, int, bool]:
         else:
             level, isolated, count = "alta", False, 45 + (h % 60)
         return (level, isolated, count, False)
-    count = 0
+
     try:
         elements = data.get("elements") or []
-        if elements and "tags" in elements[0]:
-            tags = elements[0].get("tags") or {}
-            count = int(tags.get("total") or tags.get("ways") or tags.get("nodes") or 0)
-            if count == 0:
-                count = int(tags.get("ways", 0)) + int(tags.get("nodes", 0))
-        elif elements:
-            count = len(elements)
+        count = 0
+        for element in elements:
+            tags = element.get("tags") or {}
+            if not _matches_tag_filters(tags, tag_filters):
+                continue
+            if prefer_accessible and not _is_accessible_tag(tags):
+                continue
+            count += 1
     except Exception:
         count = 0
+
     if count == 0:
         return ("baja", True, 0, True)
     if count <= 5:

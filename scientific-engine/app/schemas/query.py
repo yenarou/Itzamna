@@ -16,6 +16,7 @@ class SearchQuery(BaseModel):
     planet: str
     earth: dict[str, str] = Field(default_factory=dict)
     zone: dict[str, str] = Field(default_factory=dict)
+    tags: dict[str, str] = Field(default_factory=dict)
     location: LocationQuery | None = None
     userLocation: UserLocation | None = None
     preferIsolated: bool = True
