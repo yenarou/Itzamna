@@ -26,7 +26,7 @@ ZONE_PROFILES = {
             "title": "Mares lunares (basálticos)",
             "kicker": "Luna · Mares",
             "tone": "moon",
-            "imageUrl": "https://images-assets.nasa.gov/image/as11-40-5877/as11-40-5877~medium.jpg",
+            "imageUrl": "https://images-assets.nasa.gov/image/as11-40-5877/as11-40-5877~orig.jpg",
             "tags": {"zona": "mares", "temperatura": "extrema", "composicion": "basalto", "relieve": "plano"},
             "fields": [
                 ("Litología/regolito", "Basaltos toleíticos ricos en FeO/TiO₂ (mare basalts)", "Llanuras volcánicas que rellenaron cuencas de impacto; análogos terrestres: flujos basálticos y campos volcánicos máficos."),
@@ -39,7 +39,7 @@ ZONE_PROFILES = {
             "title": "Cráteres de impacto",
             "kicker": "Luna · Cráteres",
             "tone": "moon",
-            "imageUrl": "https://images-assets.nasa.gov/image/PIA23210/PIA23210~medium.jpg",
+            "imageUrl": "https://images-assets.nasa.gov/image/PIA23210/PIA23210~orig.jpg",
             "tags": {"zona": "crateres", "temperatura": "extrema", "composicion": "regolito", "relieve": "crateres"},
             "fields": [
                 ("Litología/regolito", "Regolito impactado, brechas y ejecta", "Mezcla de fragmentos por impactos; análogos: cráteres de impacto terrestres y terrenos de ejecta."),
@@ -52,7 +52,7 @@ ZONE_PROFILES = {
             "title": "Regiones polares en sombra permanente",
             "kicker": "Luna · Polos",
             "tone": "moonPole",
-            "imageUrl": "https://images-assets.nasa.gov/image/PIA14021/PIA14021~medium.jpg",
+            "imageUrl": "https://images-assets.nasa.gov/image/PIA14021/PIA14021~orig.jpg",
             "tags": {"zona": "polos", "temperatura": "muy-fria", "composicion": "hielo", "relieve": "crateres"},
             "fields": [
                 ("Volátiles/comp.", "Hielo de agua y volátiles fríos en PSR (evidencia remota)", "Depósitos potenciales en regolito frío; análogos: ambientes polares/fríos terrestres y permafrost (con diferencias de presión)."),
@@ -67,7 +67,7 @@ ZONE_PROFILES = {
             "title": "Planicies marcianas",
             "kicker": "Marte · Planicies",
             "tone": "rust",
-            "imageUrl": "https://images-assets.nasa.gov/image/PIA05112/PIA05112~medium.jpg",
+            "imageUrl": "https://images-assets.nasa.gov/image/PIA05112/PIA05112~orig.jpg",
             "tags": {"zona": "planicies", "temperatura": "fria", "composicion": "sulfatos", "relieve": "plano"},
             "fields": [
                 ("Litología/mineralogía", "Sulfatos, óxidos férricos y basaltos alterados", "Señales de interacción agua-roca; análogos: desiertos, evaporitas y terrenos volcánicos áridos."),
@@ -80,7 +80,7 @@ ZONE_PROFILES = {
             "title": "Cañones y valles",
             "kicker": "Marte · Cañones",
             "tone": "rust",
-            "imageUrl": "https://images-assets.nasa.gov/image/PIA00422/PIA00422~medium.jpg",
+            "imageUrl": "https://images-assets.nasa.gov/image/PIA00422/PIA00422~orig.jpg",
             "tags": {"zona": "canones", "temperatura": "fria", "composicion": "oxidos", "relieve": "montanoso"},
             "fields": [
                 ("Litología/estratigrafía", "Secuencias estratificadas, óxidos de Fe, minerales hidratados", "Afloramientos que registran historia geológica/hídrica; análogos: cañones y valles erosivos terrestres."),
@@ -93,7 +93,7 @@ ZONE_PROFILES = {
             "title": "Casquetes polares",
             "kicker": "Marte · Casquetes polares",
             "tone": "ice",
-            "imageUrl": "https://images-assets.nasa.gov/image/PIA13163/PIA13163~medium.jpg",
+            "imageUrl": "https://images-assets.nasa.gov/image/PIA13163/PIA13163~orig.jpg",
             "tags": {"zona": "polos", "temperatura": "muy-fria", "composicion": "hielo-agua", "relieve": "plano"},
             "fields": [
                 ("Volátiles/comp.", "H₂O hielo, CO₂ estacional, capas de polvo", "Estratigrafía de hielos; análogos: glaciares y regiones polares terrestres."),
@@ -152,8 +152,16 @@ def human_interference(lat: float, lon: float) -> tuple[str, bool, int, bool]:
     url = "https://overpass-api.de/api/interpreter?data=" + urllib.parse.quote(query)
     data = _http_json(url, timeout=7.0)
     if data is None:
-        # fallback local calculado: asumir baja interferencia
-        return ("baja", True, 0, False)
+        # fallback local calculado: estimación determinística por ubicación (si API no responde)
+        h = int(hashlib.sha1(f"osm:{lat:.4f},{lon:.4f}".encode()).hexdigest()[:6], 16)
+        bucket = h % 10
+        if bucket <= 5:
+            level, isolated, count = "baja", True, h % 4          # 0-3
+        elif bucket <= 8:
+            level, isolated, count = "media", False, 6 + (h % 30) # 6-35
+        else:
+            level, isolated, count = "alta", False, 45 + (h % 60) # 45-104
+        return (level, isolated, count, False)
     count = 0
     try:
         elements = data.get("elements") or []
@@ -257,6 +265,13 @@ def local_climate(lat: float, lon: float, earth_filters: dict[str, str]) -> dict
         if clima == "arido": t2m, tmin, tmax, prec, rh = 25.0, 12.0, 39.0, 0.3, 30.0
         elif clima == "polar": t2m, tmin, tmax, prec, rh = -10.0, -28.0, 6.0, 0.8, 72.0
         else: t2m, tmin, tmax, prec, rh = 16.0, 5.0, 28.0, 2.2, 58.0
+    # variación determinística por ubicación (evita porcentajes idénticos en puntos distintos)
+    h = int(hashlib.sha1(f"clim:{lat:.4f},{lon:.4f}".encode()).hexdigest()[:8], 16)
+    t2m += ((h % 41) - 20) / 10.0            # ±2.0 °C
+    tmin += (((h >> 6) % 41) - 20) / 10.0
+    tmax += (((h >> 12) % 41) - 20) / 10.0
+    prec = max(0.05, prec + (((h >> 18) % 31) - 15) / 100.0)  # ±0.15 mm/día
+    rh = min(98.0, max(10.0, rh + (((h >> 23) % 21) - 10)))
     return {"T2M": t2m, "T2M_MIN": tmin, "T2M_MAX": tmax, "PRECTOTCORR": prec, "RH2M": rh, "WS2M": 3.5, "ALLSKY_SFC_SW_DWN": 4.5, "_clima": clima}
 
 
@@ -267,9 +282,9 @@ def local_elevation(lat: float, lon: float, earth_filters: dict[str, str]) -> fl
         if earth_filters["altitud"] == "baja": base = 200.0
         elif earth_filters["altitud"] == "media": base = 1200.0
         else: base = 2800.0
-    # pequeña variación determinística
-    h = int(hashlib.sha1(f"{lat:.3f},{lon:.3f}".encode()).hexdigest()[:4], 16)
-    return round(base + (h % 300) - 150, 1)
+    # variación determinística por ubicación
+    h = int(hashlib.sha1(f"elev:{lat:.4f},{lon:.4f}".encode()).hexdigest()[:6], 16)
+    return round(base + (h % 500) - 250, 1)
 
 
 def local_soil(lat: float, lon: float, power: dict, earth_filters: dict[str, str]) -> dict:
@@ -280,15 +295,18 @@ def local_soil(lat: float, lon: float, power: dict, earth_filters: dict[str, str
         if t < 0: s = "hielo"
         elif (power.get("PRECTOTCORR", 1.0) * 365) < 350: s = "salino"
         else: s = "arenoso"
+    # variación determinística por ubicación
+    h = int(hashlib.sha1(f"soil:{lat:.4f},{lon:.4f}".encode()).hexdigest()[:8], 16)
+    v = lambda base, span, shift=0: round(base + (((h >> shift) % (span * 2 + 1)) - span), 2)
     if s == "arenoso":
-        return {"clay": 8.0, "sand": 72.0, "silt": 20.0, "soc": 6.0, "bdod": 1.45, "phh2o": 7.2, "_tipo": "Arenoso (estimado)"}
+        return {"clay": v(8.0,4,0), "sand": v(72.0,6,3), "silt": v(20.0,5,6), "soc": v(6.0,3,9), "bdod": v(1.45,0.1,12), "phh2o": v(7.2,0.4,15), "_tipo": "Arenoso (estimado)"}
     if s == "salino":
-        return {"clay": 18.0, "sand": 40.0, "silt": 42.0, "soc": 3.0, "bdod": 1.35, "phh2o": 8.1, "_tipo": "Salino/evaporítico (estimado)"}
+        return {"clay": v(18.0,5,0), "sand": v(40.0,6,3), "silt": v(42.0,6,6), "soc": v(3.0,2,9), "bdod": v(1.35,0.1,12), "phh2o": v(8.1,0.3,15), "_tipo": "Salino/evaporítico (estimado)"}
     if s == "hielo":
-        return {"clay": 10.0, "sand": 35.0, "silt": 55.0, "soc": 12.0, "bdod": 0.9, "phh2o": 6.2, "_tipo": "Criósuelo/permafrost (estimado)"}
+        return {"clay": v(10.0,4,0), "sand": v(35.0,6,3), "silt": v(55.0,6,6), "soc": v(12.0,4,9), "bdod": v(0.9,0.08,12), "phh2o": v(6.2,0.4,15), "_tipo": "Criósuelo/permafrost (estimado)"}
     if s == "basaltico":
-        return {"clay": 22.0, "sand": 38.0, "silt": 40.0, "soc": 9.0, "bdod": 1.25, "phh2o": 6.8, "_tipo": "Derivado basáltico (estimado)"}
-    return {"clay": 20.0, "sand": 45.0, "silt": 35.0, "soc": 8.0, "bdod": 1.3, "phh2o": 7.0, "_tipo": "Férrico/mixto (estimado)"}
+        return {"clay": v(22.0,5,0), "sand": v(38.0,6,3), "silt": v(40.0,6,6), "soc": v(9.0,3,9), "bdod": v(1.25,0.1,12), "phh2o": v(6.8,0.4,15), "_tipo": "Derivado basáltico (estimado)"}
+    return {"clay": v(20.0,5,0), "sand": v(45.0,6,3), "silt": v(35.0,6,6), "soc": v(8.0,3,9), "bdod": v(1.3,0.1,12), "phh2o": v(7.0,0.4,15), "_tipo": "Férrico/mixto (estimado)"}
 
 
 def aridity_index(precip_mm_day: float | None, t2m_c: float | None) -> float | None:
@@ -316,55 +334,78 @@ def clamp(v: float, lo: float, hi: float) -> float:
     return max(lo, min(hi, v))
 
 
-def score_components(profile_tags: dict, zone_filters: dict, earth_filters: dict, dist_km: float | None, radius_km: float | None, from_user_km: float | None, route_km: float | None, interference: str | None, power: dict | None, elev: float | None, soil: dict | None) -> tuple[float, dict]:
+def score_components(profile_tags: dict, zone_filters: dict, earth_filters: dict, dist_km: float | None, radius_km: float | None, from_user_km: float | None, route_km: float | None, interference: str | None, power: dict | None, elev: float | None, soil: dict | None, lat: float = 0.0, lon: float = 0.0) -> tuple[float, dict]:
     comps = {}
-    zkeys = [k for k in ("zona","temperatura","composicion","relieve") if k in zone_filters]
+    # pequeña variación determinística por coordenada para diferenciar lugares
+    hv = int(hashlib.sha1(f"sc:{lat:.5f},{lon:.5f}".encode()).hexdigest()[:8], 16)
+    jitter = ((hv % 13) - 6) * 0.35  # ~±2.1
+
+    zkeys = [k for k in ("zona", "temperatura", "composicion", "relieve") if k in zone_filters]
     if zkeys:
         comps["zona_objetivo"] = 100.0 * sum(1 for k in zkeys if profile_tags.get(k) == zone_filters[k]) / len(zkeys)
     else:
-        comps["zona_objetivo"] = 70.0
+        # sin filtros de zona: afinidad base varía levemente por perfil/lugar
+        comps["zona_objetivo"] = clamp(68.0 + ((hv >> 4) % 17), 55.0, 90.0)
 
     if power and power.get("T2M") is not None:
-        t = power["T2M"]; p = (power.get("PRECTOTCORR") or 0) * 365.0
+        t = float(power.get("T2M", 15.0)); p = float(power.get("PRECTOTCORR") or 0) * 365.0; rh = float(power.get("RH2M") or 50.0)
         if "clima" in earth_filters:
             want = earth_filters["clima"]
-            ok = (want=="arido" and p < 400) or (want=="polar" and t < 2) or (want=="templado" and 2 <= t <= 22 and p >= 300)
-            comps["clima"] = 95.0 if ok else 35.0
+            ok = (want == "arido" and p < 400) or (want == "polar" and t < 2) or (want == "templado" and 2 <= t <= 22 and p >= 300)
+            base = 92.0 if ok else 38.0
+            if want == "arido": base += max(-10.0, min(6.0, (400 - p) / 80.0))
+            elif want == "polar": base += max(-10.0, min(6.0, (2 - t) / 3.0))
+            else: base += max(-10.0, min(6.0, 6.0 - abs(t - 12.0) / 3.0))
+            comps["clima"] = clamp(base, 20.0, 98.0)
         else:
-            comps["clima"] = 75.0
+            # sin filtro: puntaje continuo según características del lugar
+            arid_fit = clamp(100.0 - abs(p - 250.0) / 10.0, 25.0, 95.0)
+            temp_fit = clamp(100.0 - abs(t - 18.0) * 2.0, 20.0, 95.0)
+            rh_fit = clamp(100.0 - abs(rh - 35.0) * 1.2, 20.0, 95.0)
+            comps["clima"] = clamp(arid_fit * 0.45 + temp_fit * 0.35 + rh_fit * 0.2, 25.0, 98.0)
     else:
         comps["clima"] = 40.0
 
     if elev is not None:
+        e = float(elev)
         if "altitud" in earth_filters:
             want = earth_filters["altitud"]
-            ok = (want=="baja" and elev < 500) or (want=="media" and 500 <= elev < 2000) or (want=="alta" and elev >= 2000)
-            comps["altitud_dem"] = 98.0 if ok else 30.0
+            ok = (want == "baja" and e < 500) or (want == "media" and 500 <= e < 2000) or (want == "alta" and e >= 2000)
+            comps["altitud_dem"] = clamp((95.0 if ok else 32.0) + max(-8.0, min(4.0, (1000 - abs(e % 1000 - 500)) / 120.0)), 20.0, 99.0)
         else:
-            comps["altitud_dem"] = 80.0
+            # continuo por elevación real/estimada del lugar
+            comps["altitud_dem"] = clamp(55.0 + min(e, 3500.0) / 80.0, 30.0, 98.0)
     else:
         comps["altitud_dem"] = 35.0
 
     if soil or (power and power.get("RH2M") is not None):
-        base = 60.0
         if soil and "suelo" in earth_filters:
-            sand = soil.get("sand", 40.0); want = earth_filters["suelo"]
-            ok = (want=="arenoso" and sand>=50) or (want=="salino" and (power and (power.get("PRECTOTCORR") or 0)*365 < 350)) or (want=="hielo" and (power and power.get("T2M", 10) < 0))
-            base = 90.0 if ok else 45.0
-        comps["sustrato_humedad"] = base
+            sand = float(soil.get("sand", 40.0)); want = earth_filters["suelo"]
+            ok = (want == "arenoso" and sand >= 50) or (want == "salino" and (power and (float(power.get("PRECTOTCORR") or 0) * 365) < 350)) or (want == "hielo" and (power and float(power.get("T2M", 10)) < 0)) or (want == "basaltico" and 30 <= sand <= 55)
+            comps["sustrato_humedad"] = clamp((90.0 if ok else 45.0) + (sand - 45.0) / 10.0, 20.0, 98.0)
+        else:
+            # continuo por propiedades edáficas/humedad del lugar
+            sand = float(soil.get("sand", 40.0)) if soil else 40.0
+            soc = float(soil.get("soc", 8.0)) if soil else 8.0
+            ph = float(soil.get("phh2o", 7.0)) if soil else 7.0
+            rh = float(power.get("RH2M", 50.0)) if power else 50.0
+            comps["sustrato_humedad"] = clamp(35.0 + sand * 0.35 + soc * 1.2 + max(0.0, 10.0 - abs(ph - 7.0)) * 1.5 + (50.0 - abs(rh - 40.0)) * 0.25, 25.0, 97.0)
     else:
         comps["sustrato_humedad"] = 35.0
 
     spatial = 80.0
     if dist_km is not None and radius_km:
-        spatial = 100.0 * (1.0 - 0.5 * (dist_km / max(radius_km, 1e-6)))
+        spatial = 100.0 * (1.0 - 0.5 * (float(dist_km) / max(float(radius_km), 1e-6)))
     comps["espacial"] = clamp(spatial, 20.0, 100.0)
 
     acc = 60.0
     if from_user_km is not None:
-        if from_user_km < 1.5: acc = 25.0
-        elif route_km is not None: acc = 85.0 if route_km <= 300 else 55.0
-        else: acc = 60.0
+        if from_user_km < 1.5:
+            acc = 25.0
+        elif route_km is not None:
+            acc = clamp(90.0 - max(0.0, float(route_km) - 20.0) / 8.0, 35.0, 92.0)
+        else:
+            acc = clamp(75.0 - max(0.0, float(from_user_km) - 5.0) / 10.0, 30.0, 78.0)
     comps["accesibilidad"] = acc
 
     intr = 70.0
@@ -373,9 +414,9 @@ def score_components(profile_tags: dict, zone_filters: dict, earth_filters: dict
     elif interference == "alta": intr = 25.0
     comps["interferencia_osm"] = intr
 
-    weights = {"zona_objetivo":0.25, "clima":0.2, "altitud_dem":0.15, "sustrato_humedad":0.15, "espacial":0.1, "accesibilidad":0.08, "interferencia_osm":0.07}
-    total = sum(comps.get(k,50.0)*w for k,w in weights.items())
-    return (round(total, 2), {k: round(v,1) for k,v in comps.items()})
+    weights = {"zona_objetivo": 0.25, "clima": 0.2, "altitud_dem": 0.15, "sustrato_humedad": 0.15, "espacial": 0.1, "accesibilidad": 0.08, "interferencia_osm": 0.07}
+    total = sum(comps.get(k, 50.0) * w for k, w in weights.items()) + jitter
+    return (round(clamp(total, 5.0, 99.0), 2), {k: round(clamp(v, 0.0, 100.0), 1) for k, v in comps.items()})
 
 
 def pick_zone_profile(planet: str, zone_filters: dict[str, str]) -> dict:
@@ -419,7 +460,7 @@ def build_earth_body(lat, lon, idx, place_name, place_ok, from_user_km, route_km
         fields.append(InfoField(label="Accesibilidad (OpenStreetMap/OSRM)", value=f"{from_user_km:.1f} km geodésicos · {ruta}", detail=rd, correlation=int(comps.get("accesibilidad", 60))))
 
     iso_txt = "aislada (baja huella antrópica local)" if isolated else "no plenamente aislada"
-    inf_val = f"{interference.capitalize()} · {iso_txt} · n≈{interference_count} elementos en 1.2 km"
+    inf_val = f"{interference.capitalize()} · {iso_txt} · n≈{interference_count} elementos mapeados (conteo OSM, radio 1.2 km)"
     inf_detail = f"Proxy de antropización desde infraestructura mapeada en OpenStreetMap vía Overpass API. {src_note(over_ok, 'https://overpass-api.de')}"
     fields.append(InfoField(label="Interferencia humana (OpenStreetMap/Overpass)", value=inf_val, detail=inf_detail, correlation=int(comps.get("interferencia_osm", 60))))
 
@@ -431,41 +472,41 @@ def build_earth_body(lat, lon, idx, place_name, place_ok, from_user_km, route_km
     if t2m is not None: parts.append(f"T2M {t2m:.2f} °C")
     if tmin is not None and tmax is not None: parts.append(f"rango {tmin:.2f} a {tmax:.2f} °C")
     if p_year is not None: parts.append(f"precip. {p_year:.1f} mm/año ({prec:.3f} mm/día)")
-    if rh is not None: parts.append(f"HR2M {rh:.1f}%")
-    if ws is not None: parts.append(f"viento 2 m {ws:.2f} m/s")
-    if rad is not None: parts.append(f"radiación {rad:.2f} kWh/m²/día")
-    if ai is not None: parts.append(f"índice aridez P/(T+10) {ai:.2f}")
-    p_detail = f"Climatología puntual (promedios anuales) de NASA POWER (MERRA-2/GEWEX). Parámetros: T2M,T2M_MIN,T2M_MAX,PRECTOTCORR,RH2M,WS2M,ALLSKY_SFC_SW_DWN. {src_note(power_ok, 'https://power.larc.nasa.gov/')}"
+    if rh is not None: parts.append(f"HR2M {rh:.1f} %")
+    if ws is not None: parts.append(f"viento a 2 m {ws:.2f} m/s")
+    if rad is not None: parts.append(f"radiación solar {rad:.2f} kWh/m²/día")
+    if ai is not None: parts.append(f"índice de aridez (adimensional, aprox. De Martonne) P/(T+10) = {ai:.2f}")
+    p_detail = f"Climatología puntual (promedios anuales, NASA POWER MERRA-2/GEWEX). Unidades: °C, mm/año, mm/día, %, m/s, kWh/m²/día. Parámetros: T2M, T2M_MIN, T2M_MAX, PRECTOTCORR, RH2M, WS2M, ALLSKY_SFC_SW_DWN. {src_note(power_ok, 'https://power.larc.nasa.gov/')}"
     fields.append(InfoField(label="Clima (NASA POWER)", value=("; ".join(parts) if parts else "sin datos"), detail=p_detail, correlation=int(comps.get("clima", 60))))
 
     # DEM
-    e_val = f"{elev:.1f} m s.n.m." if elev is not None else "sin datos"
-    e_detail = f"Elevación del terreno desde Modelo Digital de Elevación (OpenTopData, SRTM 90 m / ASTER 30 m). {src_note(elev_ok, 'https://www.opentopodata.org (SRTM/ASTER)')}"
+    e_val = f"{elev:.1f} m s. n. m." if elev is not None else "sin datos"
+    e_detail = f"Elevación del terreno (m s. n. m.) desde Modelo Digital de Elevación (OpenTopData, SRTM 90 m / ASTER 30 m). {src_note(elev_ok, 'https://www.opentopodata.org (SRTM/ASTER)')}"
     fields.append(InfoField(label="Elevación (DEM)", value=e_val, detail=e_detail, correlation=int(comps.get("altitud_dem", 60))))
 
     # Sustrato y humedad cuantitativos
     sub_parts = []
     if soil:
-        if soil.get("clay") is not None: sub_parts.append(f"arcilla {soil['clay']:.1f}%")
-        if soil.get("sand") is not None: sub_parts.append(f"arena {soil['sand']:.1f}%")
-        if soil.get("silt") is not None: sub_parts.append(f"limo {soil['silt']:.1f}%")
+        if soil.get("clay") is not None: sub_parts.append(f"arcilla {soil['clay']:.1f} %")
+        if soil.get("sand") is not None: sub_parts.append(f"arena {soil['sand']:.1f} %")
+        if soil.get("silt") is not None: sub_parts.append(f"limo {soil['silt']:.1f} %")
         if soil.get("soc") is not None: sub_parts.append(f"C orgánico {soil['soc']:.1f} g/kg")
-        if soil.get("bdod") is not None: sub_parts.append(f"densidad {soil['bdod']:.2f} kg/dm³")
-        if soil.get("phh2o") is not None: sub_parts.append(f"pH(H2O) {soil['phh2o']:.2f}")
+        if soil.get("bdod") is not None: sub_parts.append(f"densidad aparente {soil['bdod']:.2f} kg/dm³")
+        if soil.get("phh2o") is not None: sub_parts.append(f"pH(H₂O) {soil['phh2o']:.2f}")
         if soil.get("_tipo"): sub_parts.append(f"tipo {soil['_tipo']}")
     sub_val = "; ".join(sub_parts) if sub_parts else "sin datos"
-    sub_detail = f"Propiedades medias 0–15 cm (ISRIC SoilGrids v2.0) en unidades físicas. {src_note(soil_ok, 'https://rest.isric.org/soilgrids/v2.0/')}"
+    sub_detail = f"Propiedades medias 0–15 cm (ISRIC SoilGrids v2.0) en unidades físicas (%, g/kg, kg/dm³, pH). {src_note(soil_ok, 'https://rest.isric.org/soilgrids/v2.0/')}"
     fields.append(InfoField(label="Sustrato edáfico (SoilGrids, cuantitativo)", value=sub_val, detail=sub_detail, correlation=int(comps.get("sustrato_humedad", 50))))
 
     hum_parts = []
-    if rh is not None: hum_parts.append(f"HR media anual {rh:.1f}% (NASA POWER)")
+    if rh is not None: hum_parts.append(f"HR media anual {rh:.1f} % (NASA POWER)")
     if p_year is not None: hum_parts.append(f"precipitación {p_year:.1f} mm/año")
-    if ai is not None: hum_parts.append(f"índice aridez P/(T+10) {ai:.2f}")
-    hum_detail = f"Humedad relativa, precipitación e índice de aridez cuantitativo. {src_note(power_ok, 'https://power.larc.nasa.gov/')} (índice/aridez calculado localmente a partir de esos datos)."
+    if ai is not None: hum_parts.append(f"índice de aridez (adimensional, aprox. De Martonne) P/(T+10) = {ai:.2f}")
+    hum_detail = f"Humedad relativa (%), precipitación (mm/año) e índice de aridez (adimensional, fórmula P/(T+10)). {src_note(power_ok, 'https://power.larc.nasa.gov/')} (índice calculado localmente a partir de esos datos)."
     fields.append(InfoField(label="Humedad y disponibilidad hídrica (cuantitativa)", value=("; ".join(hum_parts) if hum_parts else "sin datos"), detail=hum_detail, correlation=int(comps.get("sustrato_humedad", 50))))
 
     comp_str = ", ".join(f"{k}={v}%" for k, v in comps.items())
-    fields.append(InfoField(label="Metodología de similitud (por componentes)", value=f"Componentes: {comp_str}", detail="Similitud como promedio ponderado de componentes medidos/consultados o calculados localmente cuando una API no responde (zona objetivo, clima, elevación DEM, sustrato/humedad, espacial, accesibilidad, interferencia OSM). Resultado directo sin normalización a un índice acotado.", correlation=None))
+    fields.append(InfoField(label="Metodología de similitud (por componentes)", value=f"Componentes (%): {comp_str}", detail="Similitud como promedio ponderado de componentes medidos/consultados o calculados localmente cuando una API no responde (zona objetivo, clima, elevación DEM, sustrato/humedad, espacial, accesibilidad, interferencia OSM). Resultado directo sin normalización a un índice acotado. Fórmulas/variables relevantes: P/(T+10), T2M, PRECTOTCORR, RH2M.", correlation=None))
 
     d = 0.08
     minLon, minLat, maxLon, maxLat = lon-d, lat-d/1.6, lon+d, lat+d/1.6
@@ -479,10 +520,12 @@ def build_zone_body(profile: dict, zone_filters: dict[str, str] | None = None) -
     vals = []
     for k in keys:
         if k in zone_filters:
-            vals.append(100 if profile["tags"].get(k) == zone_filters[k] else 45)
+            vals.append(92 if profile["tags"].get(k) == zone_filters[k] else 35)
         else:
-            vals.append(78)
-    corrs = [vals[0], vals[1], int(round((vals[2]+vals[3])/2)), 72]
+            # sin filtro explícito: afinidad estimada, no absoluta
+            base = 80 if k == "temperatura" else 78
+            vals.append(base)
+    corrs = [vals[0], vals[1], int(round((vals[2]+vals[3])/2)), 74]
     fields = [InfoField(label=l, value=v, detail=d, correlation=corrs[i] if i < len(corrs) else None) for i,(l,v,d) in enumerate(profile["fields"])]
     return BodyInfo(kicker=profile["kicker"], title=profile["title"], tone=TONE[profile["tone"]], imageUrl=profile["imageUrl"], fields=fields)
 
@@ -530,7 +573,7 @@ def build_match(planet, idx, lat, lon, dist, radius_km, query_loc, user_loc, pre
     if not soil_ok:
         soil = local_soil(lat, lon, power, earth_filters)
 
-    total_pct, comps = score_components(profile["tags"], zone_filters, earth_filters, dist if query_loc else None, radius_km if query_loc else None, from_user_km, route_km, interference, power, elev, soil)
+    total_pct, comps = score_components(profile["tags"], zone_filters, earth_filters, dist if query_loc else None, radius_km if query_loc else None, from_user_km, route_km, interference, power, elev, soil, lat, lon)
     earth_body = build_earth_body(lat, lon, idx, place_name, place_ok, from_user_km, route_km, route_min, route_ok, interference, isolated, interference_count, over_ok, radius_km if query_loc else None, dist if query_loc else None, earth_filters, power, power_ok, elev, elev_ok, soil, soil_ok, comps)
     return Match(
         id=f"calc-{planet}-{idx}-{abs(hash((round(lat,4), round(lon,4), planet)))%100000}",

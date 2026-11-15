@@ -149,22 +149,26 @@ const tone = {
 export const NASA_EARTH_FALLBACK =
     "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/The_Earth_seen_from_Apollo_17.jpg/1280px-The_Earth_seen_from_Apollo_17.jpg";
 
-export const EARTH_LOCATION_IMAGES: Record<string, string> = {
-    "65.715,-16.754": "https://images-assets.nasa.gov/image/PIA16805/PIA16805~medium.jpg",
-    "35.028,-111.023": "https://images-assets.nasa.gov/image/PIA24674/PIA24674~medium.jpg",
-    "-77.465,162.520": "https://images-assets.nasa.gov/image/iss046-e-83900/iss046-e-83900~medium.jpg",
-    "-24.500,-69.250": "https://images-assets.nasa.gov/image/iss056-e-216739/iss056-e-216739~medium.jpg",
-    "37.694,-6.597": "https://images-assets.nasa.gov/image/iss050-e-177184/iss050-e-177184~medium.jpg",
-};
+export const NASA_MOON_FALLBACK = "https://images-assets.nasa.gov/image/PIA23210/PIA23210~orig.jpg";
 
+export const NASA_MARS_FALLBACK = "https://images-assets.nasa.gov/image/PIA00001/PIA00001~orig.jpg";
+
+export const PLANET_IMAGES = {
+    tierra: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/The_Earth_seen_from_Apollo_17.jpg/1280px-The_Earth_seen_from_Apollo_17.jpg",
+    luna: "https://images-assets.nasa.gov/image/PIA00405/PIA00405~medium.jpg",
+    marte: NASA_MARS_FALLBACK,
+} as const;
+
+// Imagen satelital centrada en la coordenada (Esri World Imagery export; sin API key)
 export function buildEarthLocationImage(lat: number, lng: number): string {
     const validLat = Number.isFinite(lat) ? lat : 0;
     const validLng = Number.isFinite(lng) ? lng : 0;
-    const key = `${Number(validLat).toFixed(3)},${Number(validLng).toFixed(3)}`;
-    return (
-        EARTH_LOCATION_IMAGES[key] ??
-        `https://api.nasa.gov/planetary/earth/imagery?lon=${validLng.toFixed(4)}&lat=${validLat.toFixed(4)}&dim=0.15&api_key=DEMO_KEY`
-    );
+    const d = 0.01; // ~1 km de contexto alrededor del punto
+    const minLon = validLng - d;
+    const maxLon = validLng + d;
+    const minLat = validLat - d;
+    const maxLat = validLat + d;
+    return `https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/export?bbox=${minLon.toFixed(6)},${minLat.toFixed(6)},${maxLon.toFixed(6)},${maxLat.toFixed(6)}&bboxSR=4326&imageSR=4326&size=640,360&format=jpg&f=image`;
 }
 
 export const ANALOGS: AnalogSeed[] = [
