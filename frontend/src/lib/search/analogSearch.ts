@@ -1,9 +1,9 @@
 import type { BodyInfo, InfoField, Match, SearchQuery } from "../types";
 
 const API_URL: string = import.meta.env.PUBLIC_API_URL ?? "";
-const API_SAT = "API saturada o sin respuesta; se usó valor calculado/local";
+const API_SAT = "API saturated or unavailable; a calculated/local value was used";
 
-// Imagen satelital centrada en la coordenada (Esri World Imagery export; sin API key)
+// Satellite image centered on the coordinate (Esri World Imagery export; no API key)
 function buildEarthLocationImage(lat: number, lng: number): string {
     const d = 0.01;
     const minLon = lng - d,
@@ -23,7 +23,7 @@ export async function searchAnalogs(query: SearchQuery): Promise<Match[]> {
             });
             if (res.ok) return (await res.json()) as Match[];
         } catch {
-            /* respaldo local */
+            /* local fallback */
         }
     }
     return mockSearch(query);
@@ -50,115 +50,115 @@ type ZoneProfile = {
 const ZONE_PROFILES: Record<string, Record<string, ZoneProfile>> = {
     luna: {
         mares: {
-            title: "Mares lunares (basálticos)",
-            kicker: "Luna · Mares",
+            title: "Lunar maria (basaltic)",
+            kicker: "Moon · Maria",
             tone: "moon",
             imageUrl: "https://images-assets.nasa.gov/image/as11-40-5877/as11-40-5877~orig.jpg",
             tags: { zona: "mares", temperatura: "extrema", composicion: "basalto", relieve: "plano" },
             fields: [
                 [
-                    "Litología/regolito",
-                    "Basaltos máficos (FeO/TiO₂), regolito fino",
-                    "Llanuras volcánicas en cuencas de impacto; análogos: provincias basálticas.",
+                    "Lithology/regolith",
+                    "Mafic basalts (FeO/TiO₂), fine regolith",
+                    "Volcanic plains in impact basins; analogs: basaltic provinces.",
                 ],
-                ["Condiciones térmicas", "≈ −173 °C a +127 °C", "Sin atmósfera; alta amplitud térmica y radiación."],
+                ["Thermal conditions", "≈ −173 °C to +127 °C", "No atmosphere; high thermal amplitude and radiation."],
                 [
-                    "Morfología",
-                    "Planicies de baja pendiente con cráteres",
-                    "Favorable a movilidad relativa; regolito abrasivo.",
+                    "Morphology",
+                    "Low-slope plains with craters",
+                    "Favorable for relative mobility; abrasive regolith.",
                 ],
-                ["Entorno planetario", "Vacío, g ≈ 0.165 g, radiación", "Analogía geológica/geomorfológica."],
+                ["Planetary environment", "Vacuum, g ≈ 0.165 g, radiation", "Geological/geomorphological analogy."],
             ],
         },
         crateres: {
-            title: "Cráteres de impacto",
-            kicker: "Luna · Cráteres",
+            title: "Impact craters",
+            kicker: "Moon · Craters",
             tone: "moon",
             imageUrl: "https://images-assets.nasa.gov/image/PIA23210/PIA23210~orig.jpg",
             tags: { zona: "crateres", temperatura: "extrema", composicion: "regolito", relieve: "crateres" },
             fields: [
                 [
-                    "Litología/regolito",
-                    "Regolito impactado, brechas y ejecta",
-                    "Análogos: cráteres de impacto terrestres.",
+                    "Lithology/regolith",
+                    "Impacted regolith, breccias, and ejecta",
+                    "Analogs: terrestrial impact craters.",
                 ],
                 [
-                    "Condiciones térmicas",
-                    "Gradientes extremos iluminado/sombra",
-                    "Microambientes fríos en sombras locales.",
+                    "Thermal conditions",
+                    "Extreme sunlit/shadow gradients",
+                    "Cold microenvironments in local shadows.",
                 ],
-                ["Morfología", "Rim, paredes, fondo y eyecta", "Útil para navegación y muestreo."],
-                ["Entorno planetario", "Vacío, g ≈ 0.165 g, radiación", "Meteorización espacial."],
+                ["Morphology", "Rim, walls, floor, and ejecta", "Useful for navigation and sampling."],
+                ["Planetary environment", "Vacuum, g ≈ 0.165 g, radiation", "Space weathering."],
             ],
         },
         polos: {
-            title: "Regiones polares en sombra",
-            kicker: "Luna · Polos",
+            title: "Permanently shadowed polar regions",
+            kicker: "Moon · Poles",
             tone: "moonPole",
             imageUrl: "https://images-assets.nasa.gov/image/PIA14021/PIA14021~orig.jpg",
             tags: { zona: "polos", temperatura: "muy-fria", composicion: "hielo", relieve: "crateres" },
             fields: [
                 [
-                    "Volátiles/composición",
-                    "Posible H₂O y volátiles fríos en PSR",
-                    "Análogos: ambientes polares/permafrost (parcial).",
+                    "Volatiles/composition",
+                    "Possible H₂O and cold volatiles in PSRs",
+                    "Analogs: polar/permafrost environments (partial).",
                 ],
-                ["Condiciones térmicas", "< −200 °C en sombras permanentes", "Relevante para ISRU."],
-                ["Morfología", "Cráteres profundos de alta latitud", "Sombras persistentes."],
-                ["Entorno planetario", "Vacío, g ≈ 0.165 g, radiación", "Analogía terrestre limitada."],
+                ["Thermal conditions", "< −200 °C in permanent shadows", "Relevant for ISRU."],
+                ["Morphology", "Deep high-latitude craters", "Persistent shadows."],
+                ["Planetary environment", "Vacuum, g ≈ 0.165 g, radiation", "Limited terrestrial analogy."],
             ],
         },
     },
     marte: {
         planicies: {
-            title: "Planicies marcianas",
-            kicker: "Marte · Planicies",
+            title: "Martian plains",
+            kicker: "Mars · Plains",
             tone: "rust",
             imageUrl: "https://images-assets.nasa.gov/image/PIA05112/PIA05112~orig.jpg",
             tags: { zona: "planicies", temperatura: "fria", composicion: "sulfatos", relieve: "plano" },
             fields: [
                 [
-                    "Litología/mineralogía",
-                    "Sulfatos, óxidos férricos, basaltos alterados",
-                    "Análogos: desiertos y evaporitas.",
+                    "Lithology/mineralogy",
+                    "Sulfates, ferric oxides, altered basalts",
+                    "Analogs: deserts and evaporites.",
                 ],
-                ["Condiciones térmicas", "≈ −90 °C a 0 °C", "Atmósfera tenue, gran amplitud diaria."],
-                ["Morfología", "Planicies, cráteres, dunas", "Tránsito y operaciones de campo."],
-                ["Entorno planetario", "g ≈ 0.38 g, P baja, radiación", "No replica presión/gravedad/radiación."],
+                ["Thermal conditions", "≈ −90 °C to 0 °C", "Thin atmosphere, large diurnal range."],
+                ["Morphology", "Plains, craters, dunes", "Transit and field operations."],
+                ["Planetary environment", "g ≈ 0.38 g, low pressure, radiation", "Does not replicate pressure/gravity/radiation."],
             ],
         },
         canones: {
-            title: "Cañones y valles",
-            kicker: "Marte · Cañones",
+            title: "Canyons and valleys",
+            kicker: "Mars · Canyons",
             tone: "rust",
             imageUrl: "https://images-assets.nasa.gov/image/PIA00422/PIA00422~orig.jpg",
             tags: { zona: "canones", temperatura: "fria", composicion: "oxidos", relieve: "montanoso" },
             fields: [
                 [
-                    "Litología/estratigrafía",
-                    "Secuencias estratificadas y minerales hidratados",
-                    "Análogos: cañones terrestres.",
+                    "Lithology/stratigraphy",
+                    "Layered sequences and hydrated minerals",
+                    "Analogs: terrestrial canyons.",
                 ],
-                ["Condiciones térmicas", "≈ −110 °C a 0 °C", "Microclimas locales."],
-                ["Morfología", "Escarpes, taludes, redes de valles", "Terreno accidentado."],
-                ["Entorno planetario", "g ≈ 0.38 g, atmósfera tenue", "Enfoque geomorfológico."],
+                ["Thermal conditions", "≈ −110 °C to 0 °C", "Local microclimates."],
+                ["Morphology", "Scarps, slopes, valley networks", "Rugged terrain."],
+                ["Planetary environment", "g ≈ 0.38 g, thin atmosphere", "Geomorphological focus."],
             ],
         },
         polos: {
-            title: "Casquetes polares",
-            kicker: "Marte · Casquetes polares",
+            title: "Polar caps",
+            kicker: "Mars · Polar caps",
             tone: "ice",
             imageUrl: "https://images-assets.nasa.gov/image/PIA13163/PIA13163~orig.jpg",
             tags: { zona: "polos", temperatura: "muy-fria", composicion: "hielo-agua", relieve: "plano" },
             fields: [
                 [
-                    "Volátiles/composición",
-                    "H₂O hielo, CO₂ estacional, polvo",
-                    "Análogos: glaciares/casquetes terrestres.",
+                    "Volatiles/composition",
+                    "Water ice, seasonal CO₂, dust",
+                    "Analogs: terrestrial glaciers/ice caps.",
                 ],
-                ["Condiciones térmicas", "Hasta ~ −125 °C", "Condensación/sublimación de CO₂."],
-                ["Morfología", "Mesetas heladas y patrones eólicos", "Dinámica estacional."],
-                ["Entorno planetario", "g ≈ 0.38 g, atmósfera tenue", "Analogía parcial."],
+                ["Thermal conditions", "Down to ~ −125 °C", "CO₂ condensation/sublimation."],
+                ["Morphology", "Ice plateaus and aeolian patterns", "Seasonal dynamics."],
+                ["Planetary environment", "g ≈ 0.38 g, thin atmosphere", "Partial analogy."],
             ],
         },
     },
@@ -250,7 +250,7 @@ export async function resolveCandidateMetadata({
 
     const [place, placeOk] = placeResult.status === "fulfilled" ? placeResult.value : [null, false];
     const [interf, isolated, interfCount, overOk] =
-        interferenceResult.status === "fulfilled" ? interferenceResult.value : ["baja", true, 0, false];
+        interferenceResult.status === "fulfilled" ? interferenceResult.value : ["low", true, 0, false];
 
     let [power, powerOk] = powerResult.status === "fulfilled" ? powerResult.value : [null, false];
     if (!powerOk) power = localClimate(lat, lon, earth) as any;
@@ -278,7 +278,7 @@ export async function resolveCandidateMetadata({
 }
 
 function srcNote(ok: boolean, src: string) {
-    return ok ? `Fuente: ${src}.` : `${API_SAT} (fuente prevista: ${src}).`;
+    return ok ? `Source: ${src}.` : `${API_SAT} (expected source: ${src}).`;
 }
 
 async function reverseGeocode(lat: number, lon: number): Promise<[string | null, boolean]> {
@@ -343,7 +343,7 @@ async function overpassInterference(lat: number, lon: number): Promise<[string, 
     const radius = 1200;
     const query = `[out:json][timeout:6];(way["building"](around:${radius},${lat},${lon});way["highway"](around:${radius},${lat},${lon});node["place"](around:${radius},${lat},${lon}););out count;`;
     const data = await fetchJson(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`, 6500);
-    if (!data) return ["baja", true, 0, false];
+    if (!data) return ["low", true, 0, false];
     let count = 0;
     try {
         const els = data.elements || [];
@@ -355,10 +355,10 @@ async function overpassInterference(lat: number, lon: number): Promise<[string, 
     } catch {
         count = 0;
     }
-    if (count <= 0) return ["baja", true, 0, true];
-    if (count <= 5) return ["baja", true, count, true];
-    if (count <= 40) return ["media", false, count, true];
-    return ["alta", false, count, true];
+    if (count <= 0) return ["low", true, 0, true];
+    if (count <= 5) return ["low", true, count, true];
+    if (count <= 40) return ["medium", false, count, true];
+    return ["high", false, count, true];
 }
 async function nasaPower(lat: number, lon: number): Promise<[Record<string, number> | null, boolean]> {
     const p = new URLSearchParams({
@@ -437,7 +437,7 @@ async function soilGrids(lat: number, lon: number): Promise<[Record<string, numb
     }
 }
 
-// ---- Definiciones cuantitativas de los filtros de la Tierra ----
+// ---- Quantitative definitions of Earth filters ----
 type Range = [number, number];
 const CLIMA_DEF: Record<string, { p?: Range; t?: Range }> = {
     hiperarido: { p: [0, 100] },
@@ -446,7 +446,7 @@ const CLIMA_DEF: Record<string, { p?: Range; t?: Range }> = {
     templado: { t: [5, 22], p: [500, Infinity] },
     tundra: { t: [-10, 2] },
     glaciar: { t: [-Infinity, -10] },
-    polar: { t: [-Infinity, 2] }, // compatibilidad con valores antiguos
+    polar: { t: [-Infinity, 2] }, // compatibility with legacy values
 };
 const CLIMA_SYNTH: Record<string, { t2m: number; tmin: number; tmax: number; prec: number; rh: number }> = {
     hiperarido: { t2m: 25, tmin: 12, tmax: 40, prec: 0.1, rh: 20 },
@@ -471,7 +471,7 @@ const HUM_BANDS: Record<string, Range> = {
     alta: [60, 80],
     "muy-alta": [80, 100],
 };
-/** Distancia de x a un rango (0 si está dentro). */
+/** Distance of x from a range (0 if inside). */
 function outside(x: number, [lo, hi]: Range): number {
     return x < lo ? lo - x : x >= hi ? x - hi : 0;
 }
@@ -562,7 +562,7 @@ function localSoil(lat: number, lon: number, power: any, earth: Record<string, s
             soc: v(6, 3, 9),
             bdod: v(1.45, 0, 12),
             phh2o: v(7.2, 0, 15),
-            _tipo: "Arenoso (estimado)",
+            _tipo: "Sandy (estimated)",
         };
     if (s === "salino")
         return {
@@ -572,7 +572,7 @@ function localSoil(lat: number, lon: number, power: any, earth: Record<string, s
             soc: v(3, 2, 9),
             bdod: v(1.35, 0, 12),
             phh2o: v(8.1, 0, 15),
-            _tipo: "Salino/evaporítico (estimado)",
+            _tipo: "Saline/evaporitic (estimated)",
         };
     if (s === "hielo")
         return {
@@ -582,7 +582,7 @@ function localSoil(lat: number, lon: number, power: any, earth: Record<string, s
             soc: v(12, 4, 9),
             bdod: v(0.9, 0, 12),
             phh2o: v(6.2, 0, 15),
-            _tipo: "Criósuelo/permafrost (estimado)",
+            _tipo: "Cryosol/permafrost (estimated)",
         };
     if (s === "basaltico")
         return {
@@ -592,7 +592,7 @@ function localSoil(lat: number, lon: number, power: any, earth: Record<string, s
             soc: v(9, 3, 9),
             bdod: v(1.25, 0, 12),
             phh2o: v(6.8, 0, 15),
-            _tipo: "Derivado basáltico (estimado)",
+            _tipo: "Basalt-derived (estimated)",
         };
     if (s === "ceniza")
         return {
@@ -602,7 +602,7 @@ function localSoil(lat: number, lon: number, power: any, earth: Record<string, s
             soc: v(3, 2, 9),
             bdod: v(1.0, 0, 12),
             phh2o: v(6.5, 0, 15),
-            _tipo: "Ceniza/tefra volcánica (estimado)",
+            _tipo: "Volcanic ash/tephra (estimated)",
         };
     if (s === "grava")
         return {
@@ -612,7 +612,7 @@ function localSoil(lat: number, lon: number, power: any, earth: Record<string, s
             soc: v(2, 1, 9),
             bdod: v(1.55, 0, 12),
             phh2o: v(7.4, 0, 15),
-            _tipo: "Pedregoso/grava (estimado)",
+            _tipo: "Gravelly/stony (estimated)",
         };
     if (s === "ferroso")
         return {
@@ -622,7 +622,7 @@ function localSoil(lat: number, lon: number, power: any, earth: Record<string, s
             soc: v(4, 2, 9),
             bdod: v(1.3, 0, 12),
             phh2o: v(6.0, 0, 15),
-            _tipo: "Rico en óxidos de hierro (estimado)",
+            _tipo: "Iron oxide-rich (estimated)",
         };
     if (s === "yeso")
         return {
@@ -632,7 +632,7 @@ function localSoil(lat: number, lon: number, power: any, earth: Record<string, s
             soc: v(2, 1, 9),
             bdod: v(1.3, 0, 12),
             phh2o: v(8.0, 0, 15),
-            _tipo: "Sulfatado/yesoso (estimado)",
+            _tipo: "Sulfate-rich/gypsiferous (estimated)",
         };
     return {
         clay: v(20, 5, 0),
@@ -641,7 +641,7 @@ function localSoil(lat: number, lon: number, power: any, earth: Record<string, s
         soc: v(8, 3, 9),
         bdod: v(1.3, 0, 12),
         phh2o: v(7.0, 0, 15),
-        _tipo: "Mixto (estimado)",
+        _tipo: "Mixed (estimated)",
     };
 }
 function aridity(precDay: number | undefined, t2m: number | undefined) {
@@ -705,8 +705,8 @@ function scoreComponents(
     const jitter = ((hv % 13) - 6) * 0.35;
     const zkeys = ["zona", "temperatura", "composicion", "relieve"].filter(k => zone[k]);
     if (zkeys.length)
-        comps.zona_objetivo = (100 * zkeys.filter(k => profile.tags[k] === zone[k]).length) / zkeys.length;
-    else comps.zona_objetivo = clamp(68 + ((hv >>> 4) % 17), 55, 90);
+        comps.target_zone = (100 * zkeys.filter(k => profile.tags[k] === zone[k]).length) / zkeys.length;
+    else comps.target_zone = clamp(68 + ((hv >>> 4) % 17), 55, 90);
 
     if (power?.T2M != null) {
         const t = Number(power.T2M),
@@ -714,17 +714,17 @@ function scoreComponents(
             rh = Number(power.RH2M) || 50;
         const cdef = earth.clima ? CLIMA_DEF[earth.clima] : undefined;
         if (cdef) {
-            const dp = cdef.p ? outside(p, cdef.p) / 100 : 0; // por cada 100 mm/año fuera de rango
-            const dt = cdef.t ? outside(t, cdef.t) / 3 : 0; // por cada 3 °C fuera de rango
+            const dp = cdef.p ? outside(p, cdef.p) / 100 : 0; // per 100 mm/year outside range
+            const dt = cdef.t ? outside(t, cdef.t) / 3 : 0; // per 3 °C outside range
             const miss = dp + dt;
-            comps.clima = miss === 0 ? 94 : clamp(60 - miss * 6, 20, 60);
+            comps.climate = miss === 0 ? 94 : clamp(60 - miss * 6, 20, 60);
         } else {
             const aridFit = clamp(100 - Math.abs(p - 250) / 10, 25, 95);
             const tempFit = clamp(100 - Math.abs(t - 18) * 2, 20, 95);
             const rhFit = clamp(100 - Math.abs(rh - 35) * 1.2, 20, 95);
-            comps.clima = clamp(aridFit * 0.45 + tempFit * 0.35 + rhFit * 0.2, 25, 98);
+            comps.climate = clamp(aridFit * 0.45 + tempFit * 0.35 + rhFit * 0.2, 25, 98);
         }
-    } else comps.clima = 40;
+    } else comps.climate = 40;
 
     if (elev != null) {
         const e = Number(elev);
@@ -733,12 +733,12 @@ function scoreComponents(
             const d = outside(e, band);
             const mid = (band[0] + Math.min(band[1], band[0] + 3000)) / 2;
             const half = Math.max(1, (Math.min(band[1], band[0] + 3000) - band[0]) / 2);
-            comps.altitud_dem =
+            comps.elevation_dem =
                 d === 0
                     ? clamp(90 + 8 * (1 - Math.min(1, Math.abs(e - mid) / half)), 88, 98)
                     : clamp(55 - d / 60, 20, 55);
-        } else comps.altitud_dem = clamp(55 + Math.min(e, 3500) / 80, 30, 98);
-    } else comps.altitud_dem = 35;
+        } else comps.elevation_dem = clamp(55 + Math.min(e, 3500) / 80, 30, 98);
+    } else comps.elevation_dem = 35;
 
     if (soil || power?.RH2M != null) {
         if (soil && earth.suelo) {
@@ -757,13 +757,13 @@ function scoreComponents(
                 (w === "grava" && sand >= 45 && clay <= 16) ||
                 (w === "ferroso" && clay >= 25) ||
                 (w === "yeso" && precY < 350 && ph >= 7.6);
-            comps.sustrato_humedad = clamp((ok ? 90 : 45) + (sand - 45) / 10, 20, 98);
+            comps.substrate_moisture = clamp((ok ? 90 : 45) + (sand - 45) / 10, 20, 98);
         } else {
             const sand = Number(soil?.sand ?? 40),
                 soc = Number(soil?.soc ?? 8),
                 ph = Number(soil?.phh2o ?? 7),
                 rh = Number(power?.RH2M ?? 50);
-            comps.sustrato_humedad = clamp(
+            comps.substrate_moisture = clamp(
                 35 +
                     sand * 0.35 +
                     soc * 1.2 +
@@ -773,35 +773,35 @@ function scoreComponents(
                 97,
             );
         }
-    } else comps.sustrato_humedad = 35;
+    } else comps.substrate_moisture = 35;
 
     if (power?.RH2M != null) {
         const rh = Number(power.RH2M);
         const hb = earth.humedad ? HUM_BANDS[earth.humedad] : undefined;
         if (hb) {
             const d = outside(rh, hb);
-            comps.humedad_rel = d === 0 ? 93 : clamp(62 - d * 2.2, 20, 62);
-        } else comps.humedad_rel = clamp(100 - Math.abs(rh - 35) * 1.2, 20, 95);
-    } else comps.humedad_rel = 35;
-    comps.espacial = dist != null && radius ? clamp(100 * (1 - 0.5 * (dist / Math.max(radius, 1e-6))), 20, 100) : 80;
+            comps.relative_humidity = d === 0 ? 93 : clamp(62 - d * 2.2, 20, 62);
+        } else comps.relative_humidity = clamp(100 - Math.abs(rh - 35) * 1.2, 20, 95);
+    } else comps.relative_humidity = 35;
+    comps.spatial = dist != null && radius ? clamp(100 * (1 - 0.5 * (dist / Math.max(radius, 1e-6))), 20, 100) : 80;
     let acc = 60;
     if (fromUser != null) {
         if (fromUser < 1.5) acc = 25;
         else if (routeKm != null) acc = clamp(90 - Math.max(0, routeKm - 20) / 8, 35, 92);
         else acc = clamp(75 - Math.max(0, fromUser - 5) / 10, 30, 78);
     }
-    comps.accesibilidad = acc;
-    comps.interferencia_osm =
-        interference === "baja" ? 95 : interference === "media" ? 60 : interference === "alta" ? 25 : 70;
+    comps.accessibility = acc;
+    comps.human_interference_osm =
+        interference === "low" ? 95 : interference === "medium" ? 60 : interference === "high" ? 25 : 70;
     const weights: any = {
-        zona_objetivo: 0.24,
-        clima: 0.18,
-        altitud_dem: 0.14,
-        sustrato_humedad: 0.13,
-        humedad_rel: 0.08,
-        espacial: 0.09,
-        accesibilidad: 0.08,
-        interferencia_osm: 0.06,
+        target_zone: 0.24,
+        climate: 0.18,
+        elevation_dem: 0.14,
+        substrate_moisture: 0.13,
+        relative_humidity: 0.08,
+        spatial: 0.09,
+        accessibility: 0.08,
+        human_interference_osm: 0.06,
     };
     const total = Object.keys(weights).reduce((s, k) => s + (comps[k] ?? 50) * weights[k], 0) + jitter;
     const rounded: any = {};
@@ -836,109 +836,110 @@ function earthBody(
     const toneKey = (elev != null && elev > 3500) || (power?.T2M != null && power.T2M < 0) ? "ice" : "basalt";
     const fields: InfoField[] = [];
     fields.push({
-        label: "Toponimia (OpenStreetMap)",
-        value: place || `Coordenada ${lat.toFixed(4)}, ${lon.toFixed(4)} (sin toponimia)`,
-        detail: `Geocodificación inversa Nominatim (OpenStreetMap). ${srcNote(placeOk, "https://nominatim.openstreetmap.org")}`,
+        label: "Toponymy (OpenStreetMap)",
+        value: place || `Coordinate ${lat.toFixed(4)}, ${lon.toFixed(4)} (no toponymy)`,
+        detail: `Nominatim reverse geocoding (OpenStreetMap). ${srcNote(placeOk, "https://nominatim.openstreetmap.org")}`,
         correlation: placeOk && place ? 95 : 50,
     });
     fields.push({
-        label: "Georreferenciación",
+        label: "Georeferencing",
         value: `${lat.toFixed(5)}°, ${lon.toFixed(5)}° (WGS84)`,
-        detail: "Candidato generado por muestreo dentro del área (no sitio preestablecido).",
+        detail: "Candidate generated by sampling within the area (not a pre-established site).",
         correlation: 100,
     });
     if (radius != null && dist != null)
         fields.push({
-            label: "Muestreo espacial",
-            value: `${dist.toFixed(2)} km del centro · radio ${radius.toFixed(0)} km`,
-            detail: "Candidato calculado radialmente respecto al perfil objetivo y filtros.",
-            correlation: Math.round(comps.espacial ?? 70),
+            label: "Spatial sampling",
+            value: `${dist.toFixed(2)} km from center · radius ${radius.toFixed(0)} km`,
+            detail: "Candidate calculated radially relative to the target profile and filters.",
+            correlation: Math.round(comps.spatial ?? 70),
         });
     if (fromUser != null) {
-        const ruta =
+        const routeStr =
             routeKm != null && routeMin != null
-                ? `${routeKm.toFixed(1)} km, ~${routeMin.toFixed(0)} min en vehículo (OSRM/OpenStreetMap)`
-                : "sin ruta vehicular (distancia geodésica)";
+                ? `${routeKm.toFixed(1)} km, ~${routeMin.toFixed(0)} min by vehicle (OSRM/OpenStreetMap)`
+                : "no vehicle route (geodesic distance)";
         const rd =
             routeKm != null
-                ? `Ruta estimada con OSRM (OpenStreetMap). ${srcNote(routeOk, "https://router.project-osrm.org")}`
-                : `No se obtuvo ruta OSRM; ${API_SAT.toLowerCase()} (distancia geodésica calculada localmente).`;
+                ? `Route estimated with OSRM (OpenStreetMap). ${srcNote(routeOk, "https://router.project-osrm.org")}`
+                : `No OSRM route obtained; ${API_SAT.toLowerCase()} (geodesic distance calculated locally).`;
         fields.push({
-            label: "Accesibilidad (OpenStreetMap/OSRM)",
-            value: `${fromUser.toFixed(1)} km geodésicos · ${ruta}`,
+            label: "Accessibility (OpenStreetMap/OSRM)",
+            value: `${fromUser.toFixed(1)} km geodesic · ${routeStr}`,
             detail: rd,
-            correlation: Math.round(comps.accesibilidad ?? 60),
+            correlation: Math.round(comps.accessibility ?? 60),
         });
     }
+    const interfLabel = interf[0].toUpperCase() + interf.slice(1);
     fields.push({
-        label: "Interferencia humana (OpenStreetMap/Overpass)",
-        value: `${interf[0].toUpperCase() + interf.slice(1)} · ${isolated ? "aislada" : "no plenamente aislada"} · n≈${interfCount} elementos mapeados (conteo OSM, radio 1.2 km)`,
-        detail: `Proxy de antropización desde infraestructura mapeada en OpenStreetMap vía Overpass. ${srcNote(overOk, "https://overpass-api.de")}`,
-        correlation: Math.round(comps.interferencia_osm ?? 60),
+        label: "Human interference (OpenStreetMap/Overpass)",
+        value: `${interfLabel} · ${isolated ? "isolated" : "not fully isolated"} · n≈${interfCount} mapped elements (OSM count, 1.2 km radius)`,
+        detail: `Proxy for anthropization from infrastructure mapped in OpenStreetMap via Overpass. ${srcNote(overOk, "https://overpass-api.de")}`,
+        correlation: Math.round(comps.human_interference_osm ?? 60),
     });
     const ai = aridity(power?.PRECTOTCORR, power?.T2M);
     const pYear = power?.PRECTOTCORR != null ? power.PRECTOTCORR * 365 : null;
     const pParts: string[] = [];
     if (power?.T2M != null) pParts.push(`T2M ${Number(power.T2M).toFixed(2)} °C`);
     if (power?.T2M_MIN != null && power?.T2M_MAX != null)
-        pParts.push(`rango ${Number(power.T2M_MIN).toFixed(2)} a ${Number(power.T2M_MAX).toFixed(2)} °C`);
+        pParts.push(`range ${Number(power.T2M_MIN).toFixed(2)} to ${Number(power.T2M_MAX).toFixed(2)} °C`);
     if (pYear != null)
-        pParts.push(`precip. ${pYear.toFixed(1)} mm/año (${Number(power.PRECTOTCORR).toFixed(3)} mm/día)`);
-    if (power?.RH2M != null) pParts.push(`HR2M ${Number(power.RH2M).toFixed(1)} %`);
-    if (power?.WS2M != null) pParts.push(`viento a 2 m ${Number(power.WS2M).toFixed(2)} m/s`);
+        pParts.push(`precip. ${pYear.toFixed(1)} mm/year (${Number(power.PRECTOTCORR).toFixed(3)} mm/day)`);
+    if (power?.RH2M != null) pParts.push(`RH2M ${Number(power.RH2M).toFixed(1)} %`);
+    if (power?.WS2M != null) pParts.push(`wind at 2 m ${Number(power.WS2M).toFixed(2)} m/s`);
     if (power?.ALLSKY_SFC_SW_DWN != null)
-        pParts.push(`radiación solar ${Number(power.ALLSKY_SFC_SW_DWN).toFixed(2)} kWh/m²/día`);
-    if (ai != null) pParts.push(`índice de aridez (adimensional, aprox. De Martonne) P/(T+10) = ${ai.toFixed(2)}`);
+        pParts.push(`solar radiation ${Number(power.ALLSKY_SFC_SW_DWN).toFixed(2)} kWh/m²/day`);
+    if (ai != null) pParts.push(`aridity index (dimensionless, approx. De Martonne) P/(T+10) = ${ai.toFixed(2)}`);
     fields.push({
-        label: "Clima (NASA POWER)",
-        value: pParts.join("; ") || "sin datos",
-        detail: `Climatología puntual (NASA POWER, MERRA-2/GEWEX). Unidades: °C, mm/año, mm/día, %, m/s, kWh/m²/día. Parámetros: T2M, T2M_MIN, T2M_MAX, PRECTOTCORR, RH2M, WS2M, ALLSKY_SFC_SW_DWN. ${srcNote(powerOk, "https://power.larc.nasa.gov/")}`,
-        correlation: Math.round(comps.clima ?? 60),
+        label: "Climate (NASA POWER)",
+        value: pParts.join("; ") || "no data",
+        detail: `Point climatology (NASA POWER, MERRA-2/GEWEX). Units: °C, mm/year, mm/day, %, m/s, kWh/m²/day. Parameters: T2M, T2M_MIN, T2M_MAX, PRECTOTCORR, RH2M, WS2M, ALLSKY_SFC_SW_DWN. ${srcNote(powerOk, "https://power.larc.nasa.gov/")}`,
+        correlation: Math.round(comps.climate ?? 60),
     });
     fields.push({
-        label: "Elevación (DEM)",
-        value: elev != null ? `${Number(elev).toFixed(1)} m s. n. m.` : "sin datos",
-        detail: `Elevación del terreno (m s. n. m.) desde DEM (OpenTopData, SRTM 90 m / ASTER 30 m). ${srcNote(elevOk, "https://www.opentopodata.org")}`,
-        correlation: Math.round(comps.altitud_dem ?? 60),
+        label: "Elevation (DEM)",
+        value: elev != null ? `${Number(elev).toFixed(1)} m a.s.l.` : "no data",
+        detail: `Terrain elevation (m a.s.l.) from DEM (OpenTopData, SRTM 90 m / ASTER 30 m). ${srcNote(elevOk, "https://www.opentopodata.org")}`,
+        correlation: Math.round(comps.elevation_dem ?? 60),
     });
     const sub: string[] = [];
     if (soil) {
-        if (soil.clay != null) sub.push(`arcilla ${Number(soil.clay).toFixed(1)} %`);
-        if (soil.sand != null) sub.push(`arena ${Number(soil.sand).toFixed(1)} %`);
-        if (soil.silt != null) sub.push(`limo ${Number(soil.silt).toFixed(1)} %`);
-        if (soil.soc != null) sub.push(`C orgánico ${Number(soil.soc).toFixed(1)} g/kg`);
-        if (soil.bdod != null) sub.push(`densidad aparente ${Number(soil.bdod).toFixed(2)} kg/dm³`);
+        if (soil.clay != null) sub.push(`clay ${Number(soil.clay).toFixed(1)} %`);
+        if (soil.sand != null) sub.push(`sand ${Number(soil.sand).toFixed(1)} %`);
+        if (soil.silt != null) sub.push(`silt ${Number(soil.silt).toFixed(1)} %`);
+        if (soil.soc != null) sub.push(`organic C ${Number(soil.soc).toFixed(1)} g/kg`);
+        if (soil.bdod != null) sub.push(`bulk density ${Number(soil.bdod).toFixed(2)} kg/dm³`);
         if (soil.phh2o != null) sub.push(`pH(H₂O) ${Number(soil.phh2o).toFixed(2)}`);
         if (soil._tipo) sub.push(String(soil._tipo));
     }
     fields.push({
-        label: "Sustrato edáfico (SoilGrids, cuantitativo)",
-        value: sub.join("; ") || "sin datos",
-        detail: `Propiedades medias 0–15 cm (ISRIC SoilGrids v2.0) en unidades físicas (%, g/kg, kg/dm³, pH). ${srcNote(soilOk, "https://rest.isric.org/soilgrids/v2.0/")}`,
-        correlation: Math.round(comps.sustrato_humedad ?? 50),
+        label: "Soil substrate (SoilGrids, quantitative)",
+        value: sub.join("; ") || "no data",
+        detail: `Mean properties 0–15 cm (ISRIC SoilGrids v2.0) in physical units (%, g/kg, kg/dm³, pH). ${srcNote(soilOk, "https://rest.isric.org/soilgrids/v2.0/")}`,
+        correlation: Math.round(comps.substrate_moisture ?? 50),
     });
     const hum: string[] = [];
-    if (power?.RH2M != null) hum.push(`HR media anual ${Number(power.RH2M).toFixed(1)} %`);
-    if (pYear != null) hum.push(`precipitación ${pYear.toFixed(1)} mm/año`);
-    if (ai != null) hum.push(`índice de aridez (adimensional, aprox. De Martonne) P/(T+10) = ${ai.toFixed(2)}`);
+    if (power?.RH2M != null) hum.push(`mean annual RH ${Number(power.RH2M).toFixed(1)} %`);
+    if (pYear != null) hum.push(`precipitation ${pYear.toFixed(1)} mm/year`);
+    if (ai != null) hum.push(`aridity index (dimensionless, approx. De Martonne) P/(T+10) = ${ai.toFixed(2)}`);
     fields.push({
-        label: "Humedad y disponibilidad hídrica (cuantitativa)",
-        value: hum.join("; ") || "sin datos",
-        detail: `Humedad relativa (%), precipitación (mm/año) e índice de aridez (adimensional, fórmula P/(T+10)). ${srcNote(powerOk, "https://power.larc.nasa.gov/")} (índice calculado localmente a partir de esos datos).`,
-        correlation: Math.round(comps.humedad_rel ?? 50),
+        label: "Humidity and water availability (quantitative)",
+        value: hum.join("; ") || "no data",
+        detail: `Relative humidity (%), precipitation (mm/year), and aridity index (dimensionless, formula P/(T+10)). ${srcNote(powerOk, "https://power.larc.nasa.gov/")} (index calculated locally from these data).`,
+        correlation: Math.round(comps.relative_humidity ?? 50),
     });
     const compStr = Object.entries(comps)
         .map(([k, v]) => `${k}=${Math.round(Number(v))} %`)
         .join("; ");
     fields.push({
-        label: "Metodología de similitud (por componentes)",
-        value: `Componentes (%): ${compStr}`,
-        detail: "Promedio ponderado de componentes medidos/consultados o calculados localmente cuando una API no responde. Resultado directo sin normalización a un índice acotado. Fórmulas/variables relevantes: P/(T+10), T2M, PRECTOTCORR, RH2M.",
+        label: "Similarity methodology (by components)",
+        value: `Components (%): ${compStr}`,
+        detail: "Weighted average of components measured/queried or calculated locally when an API does not respond. Direct result without normalization to a bounded index. Relevant formulas/variables: P/(T+10), T2M, PRECTOTCORR, RH2M.",
         correlation: undefined as any,
     });
     return {
-        kicker: `Tierra · Candidato calculado #${idx}`,
-        title: place || `Candidato en ${lat.toFixed(3)}°, ${lon.toFixed(3)}°`,
+        kicker: `Earth · Calculated candidate #${idx}`,
+        title: place || `Candidate at ${lat.toFixed(3)}°, ${lon.toFixed(3)}°`,
         tone: TONE[toneKey],
         imageUrl: buildEarthLocationImage(lat, lon),
         fields,

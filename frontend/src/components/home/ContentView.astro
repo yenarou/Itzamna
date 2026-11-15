@@ -1,13 +1,6 @@
 ---
-const tech = [
-  { name: "Astro", desc: "interfaz web estática/modular y composición de vistas." },
-  { name: "TypeScript", desc: "lógica de interacción, tipado y utilidades del explorador." },
-  { name: "Tailwind CSS", desc: "estilos y sistema visual responsivo." },
-  { name: "ASP.NET Core (.NET)", desc: "API gateway/proxy y endpoints de salud/búsqueda." },
-  { name: "Python (FastAPI)", desc: "motor científico de búsqueda y cálculo de análogos." },
-];
 ---
-    <section id="view-content" class="app-view" data-app-view="content" hidden aria-label="Contenido del proyecto">
+    <section id="view-content" class="app-view" data-app-view="content" hidden aria-label="Project content">
       <div class="content-shell">
         <div class="content-topbar">
           <div class="content-progress" aria-live="polite"><span id="content-step-label">1 / 6</span></div>
@@ -16,12 +9,12 @@ const tech = [
         <!-- Hero dentro de contenido -->
         <section class="content-hero reveal is-visible" data-content-step="0">
           <div class="content-hero-inner">
-            <p class="hero-kicker">Itzamná · Misión y contexto</p>
-            <h2>De la superficie terrestre a la exploración planetaria</h2>
-            <p>Conoce el propósito, análisis y tecnología detrás de la plataforma en secciones breves, una a la vez.</p>
+            <p class="hero-kicker" data-i18n="content.hero.kicker">Itzamná · Mission and context</p>
+            <h2 data-i18n="content.hero.title">From Earth's surface to planetary exploration</h2>
+            <p data-i18n="content.hero.subtitle">Learn about the purpose, analysis, and technology behind the platform in short sections, one at a time.</p>
             <div class="hero-actions">
-              <button type="button" class="btn-primary" data-content-next>Siguiente</button>
-              <button type="button" class="btn-secondary" data-show-view="explore" data-focus-picker="true">Explorar ahora</button>
+              <button type="button" class="btn-primary" data-content-next data-i18n="content.next">Next</button>
+              <button type="button" class="btn-secondary" data-show-view="explore" data-focus-picker="true" data-i18n="content.exploreNow">Explore now</button>
             </div>
           </div>
         </section>
@@ -31,17 +24,13 @@ const tech = [
     <section class="zigzag" id="que-es" data-content-step="1">
       <div class="zigzag-inner">
         <div class="zigzag-media reveal is-visible">
-          <img src="https://images-assets.nasa.gov/image/PIA18033/PIA18033~orig.jpg" alt="La Tierra vista desde el espacio, con océanos y continentes iluminados" loading="lazy" decoding="async" />
+          <img src="https://images-assets.nasa.gov/image/PIA18033/PIA18033~orig.jpg" alt="Earth from space" data-i18n-aria="content.img1.alt" loading="lazy" decoding="async" />
         </div>
         <div class="zigzag-copy reveal is-visible">
-          <p class="zigzag-kicker">Plataforma</p>
-          <h2>¿Qué es Itzamná?</h2>
-          <p>
-            <strong>Itzamná (Integrated Terrestrial-Zonal Analog &amp; Multi-factor Nearest Atlas)</strong> es una plataforma que ayuda a localizar y comparar regiones de la Tierra con rasgos similares a zonas de la Luna y Marte.
-          </p>
-          <p>
-            A partir de un punto geográfico, un radio y características seleccionadas, calcula candidatos análogos y presenta información georreferenciada, similitud por criterios y datos de apoyo para la exploración y el análisis.
-          </p>
+          <p class="zigzag-kicker" data-i18n="content.s1.kicker">Platform</p>
+          <h2 data-i18n="content.s1.title">What is Itzamná?</h2>
+          <p data-i18n-html="content.s1.p1"><strong>Itzamná (Integrated Terrestrial-Zonal Analog &amp; Multi-factor Nearest Atlas)</strong> is a platform that helps locate and compare regions on Earth with features similar to areas on the Moon and Mars.</p>
+          <p data-i18n="content.s1.p2">From a geographic point, a radius, and selected characteristics, it calculates analog candidates and presents georeferenced information, similarity by criteria, and supporting data for exploration and analysis.</p>
         </div>
       </div>
     </section>
@@ -50,17 +39,13 @@ const tech = [
     <section class="zigzag zigzag-alt" id="proposito" data-content-step="2" hidden>
       <div class="zigzag-inner reverse">
         <div class="zigzag-media reveal is-visible">
-          <img src="https://images-assets.nasa.gov/image/PIA17944/PIA17944~orig.jpg" alt="Superficie de Marte en el cráter Gale, vista por el rover Curiosity" loading="lazy" decoding="async" />
+          <img src="https://images-assets.nasa.gov/image/PIA17944/PIA17944~orig.jpg" alt="Mars surface at Gale Crater" data-i18n-aria="content.img2.alt" loading="lazy" decoding="async" />
         </div>
         <div class="zigzag-copy reveal is-visible">
-          <p class="zigzag-kicker">Propósito</p>
-          <h2>Nuestro propósito</h2>
-          <p>
-            Encontrar análogos terrestres permite estudiar, en nuestro propio planeta, condiciones y paisajes comparables a entornos extraterrestres. Esto facilita preparar observaciones, entrenamientos y análisis en lugares accesibles antes de pensar en escenarios lunares o marcianos.
-          </p>
-          <p>
-            Itzamná busca hacer esa comparación más clara: reunir ubicación, contexto ambiental y criterios de similitud en una sola vista para apoyar la toma de decisiones y el aprendizaje.
-          </p>
+          <p class="zigzag-kicker" data-i18n="content.s2.kicker">Purpose</p>
+          <h2 data-i18n="content.s2.title">Our purpose</h2>
+          <p data-i18n="content.s2.p1">Finding terrestrial analogs makes it possible to study, on our own planet, conditions and landscapes comparable to extraterrestrial environments. This helps prepare observations, training, and analysis in accessible places before considering lunar or Martian scenarios.</p>
+          <p data-i18n="content.s2.p2">Itzamná aims to make that comparison clearer: bringing together location, environmental context, and similarity criteria in a single view to support decision-making and learning.</p>
         </div>
       </div>
     </section>
@@ -69,17 +54,13 @@ const tech = [
     <section class="zigzag" id="analisis" data-content-step="3" hidden>
       <div class="zigzag-inner">
         <div class="zigzag-media reveal is-visible">
-          <img src="https://images-assets.nasa.gov/image/PIA00256/PIA00256~orig.jpg" alt="Superficie lunar con cráteres y mares basálticos" loading="lazy" decoding="async" />
+          <img src="https://images-assets.nasa.gov/image/PIA00256/PIA00256~orig.jpg" alt="Lunar surface with craters and basaltic maria" data-i18n-aria="content.img3.alt" loading="lazy" decoding="async" />
         </div>
         <div class="zigzag-copy reveal is-visible">
-          <p class="zigzag-kicker">Análisis geoespacial</p>
-          <h2>Exploración y análisis</h2>
-          <p>
-            La plataforma permite seleccionar un planeta y una zona de interés, elegir un punto en el mapa y definir un radio de búsqueda. Con esos parámetros genera candidatos calculados en el área y muestra su similitud, distancia y correlación por campo.
-          </p>
-          <p>
-            Los resultados combinan datos de consulta (cuando las fuentes responden) con estimaciones locales marcadas como tales, ofreciendo una lectura transparente entre datos obtenidos y valores calculados.
-          </p>
+          <p class="zigzag-kicker" data-i18n="content.s3.kicker">Geospatial analysis</p>
+          <h2 data-i18n="content.s3.title">Exploration and analysis</h2>
+          <p data-i18n="content.s3.p1">The platform lets you select a planet and an area of interest, choose a point on the map, and define a search radius. With these parameters it generates calculated candidates in the area and shows their similarity, distance, and correlation by field.</p>
+          <p data-i18n="content.s3.p2">Results combine query data (when sources respond) with local estimates marked as such, offering a transparent reading between retrieved data and calculated values.</p>
         </div>
       </div>
     </section>
@@ -88,19 +69,21 @@ const tech = [
     <section class="zigzag zigzag-alt" id="tecnologia" data-content-step="4" hidden>
       <div class="zigzag-inner reverse">
         <div class="zigzag-media reveal is-visible">
-          <img src="https://images-assets.nasa.gov/image/PIA12235/PIA12235~orig.jpg" alt="Mapa topográfico y relieve representando análisis de superficie" loading="lazy" decoding="async" />
+          <img src="https://images-assets.nasa.gov/image/PIA12235/PIA12235~orig.jpg" alt="Topographic map representing surface analysis" data-i18n-aria="content.img4.alt" loading="lazy" decoding="async" />
         </div>
         <div class="zigzag-copy reveal is-visible">
-          <p class="zigzag-kicker">Arquitectura</p>
-          <h2>Tecnología</h2>
-          <p>Itzamná integra componentes web y de cálculo científico, cada uno con una responsabilidad definida:</p>
+          <p class="zigzag-kicker" data-i18n="content.s4.kicker">Architecture</p>
+          <h2 data-i18n="content.s4.title">Technology</h2>
+          <p data-i18n="content.s4.intro">Itzamná integrates web and scientific computing components, each with a defined responsibility:</p>
           <ul>
-            {tech.map((t) => (
-              <li><strong>{t.name}:</strong> {t.desc}</li>
-            ))}
+            <li data-i18n-html="content.s4.t1"><strong>Astro:</strong> static/modular web interface and view composition.</li>
+            <li data-i18n-html="content.s4.t2"><strong>TypeScript:</strong> interaction logic, typing, and explorer utilities.</li>
+            <li data-i18n-html="content.s4.t3"><strong>Tailwind CSS:</strong> styling and responsive visual system.</li>
+            <li data-i18n-html="content.s4.t4"><strong>ASP.NET Core (.NET):</strong> API gateway/proxy and health/search endpoints.</li>
+            <li data-i18n-html="content.s4.t5"><strong>Python (FastAPI):</strong> scientific search engine and analog calculation.</li>
           </ul>
-          <div class="chip-row" aria-label="Tecnologías del proyecto">
-            {tech.map((t) => <span class="chip">{t.name}</span>)}
+          <div class="chip-row" aria-label="Project technologies">
+            <span class="chip">Astro</span><span class="chip">TypeScript</span><span class="chip">Tailwind CSS</span><span class="chip">ASP.NET Core</span><span class="chip">Python/FastAPI</span>
           </div>
         </div>
       </div>
@@ -110,28 +93,22 @@ const tech = [
     <section class="zigzag" id="vision-futuro" data-content-step="5" hidden>
       <div class="zigzag-inner">
         <div class="zigzag-media reveal is-visible">
-          <img src="https://images-assets.nasa.gov/image/PIA03654/PIA03654~orig.jpg" alt="Concepto de exploración planetaria y terreno rocoso" loading="lazy" decoding="async" />
+          <img src="https://images-assets.nasa.gov/image/PIA03654/PIA03654~orig.jpg" alt="Planetary exploration concept and rocky terrain" data-i18n-aria="content.img5.alt" loading="lazy" decoding="async" />
         </div>
         <div class="zigzag-copy reveal is-visible">
-          <p class="zigzag-kicker">Evolución</p>
-          <h2>Visión a futuro</h2>
-          <p>
-            La visión del proyecto es fortalecer la precisión y utilidad de las comparaciones, incorporando de forma progresiva mejores fuentes de datos y criterios de análisis documentados, para que la herramienta sea cada vez más útil en contextos educativos y de planificación exploratoria.
-          </p>
-          <p>
-            Cualquier nueva capacidad se incorporará de manera gradual y verificable, manteniendo clara la distinción entre resultados calculados, estimaciones y datos provenientes de fuentes externas.
-          </p>
+          <p class="zigzag-kicker" data-i18n="content.s5.kicker">Evolution</p>
+          <h2 data-i18n="content.s5.title">Looking ahead</h2>
+          <p data-i18n="content.s5.p1">The project's vision is to strengthen the accuracy and usefulness of comparisons by progressively incorporating better data sources and documented analysis criteria, making the tool increasingly useful in educational and exploratory planning contexts.</p>
+          <p data-i18n="content.s5.p2">Any new capability will be incorporated gradually and verifiably, maintaining a clear distinction between calculated results, estimates, and data from external sources.</p>
         </div>
       </div>
     </section>
         </div>
 
         <div class="content-nav">
-          <button type="button" class="btn-secondary" data-content-prev>Anterior</button>
-          <button type="button" class="btn-primary" data-content-next>Siguiente</button>
-          <button type="button" class="btn-primary" id="content-to-explore" hidden data-show-view="explore" data-focus-picker="true">Ir al explorador</button>
+          <button type="button" class="btn-secondary" data-content-prev data-i18n="content.prev">Previous</button>
+          <button type="button" class="btn-primary" data-content-next data-i18n="content.next">Next</button>
+          <button type="button" class="btn-primary" id="content-to-explore" hidden data-show-view="explore" data-focus-picker="true" data-i18n="content.goExplore">Go to explorer</button>
         </div>
       </div>
     </section>
-
-    <!-- VIEW: EXPLORE (herramienta, funcionalidad preservada) -->

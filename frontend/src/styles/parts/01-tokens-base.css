@@ -112,9 +112,9 @@ body::before {
         radial-gradient(60% 50% at 15% 20%, rgba(80, 170, 255, 0.35), transparent 60%),
         radial-gradient(40% 40% at 70% 10%, rgba(54, 214, 245, 0.18), transparent 60%),
         radial-gradient(45% 35% at 50% 60%, rgba(139, 108, 255, 0.14), transparent 65%);
-    filter: blur(40px);
+    filter: blur(28px);
     opacity: 0.9;
-    animation: aurora-drift 18s ease-in-out infinite alternate;
+    animation: aurora-drift 36s ease-in-out infinite alternate;
 }
 @keyframes aurora-drift {
     0% {
@@ -159,7 +159,7 @@ body::before {
     left: 0;
     right: 0;
     background: rgba(4, 8, 22, 0.72);
-    backdrop-filter: blur(14px) saturate(140%);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    backdrop-filter: blur(8px) saturate(140%);
+    -webkit-backdrop-filter: blur(8px) saturate(140%);
     border-bottom-color: var(--color-line);
 }

@@ -24,7 +24,7 @@ const closeCustom = () => {
     const options = Array.from(menu.querySelectorAll<HTMLButtonElement>('.planet-dd-option'));
     function syncFromSelect() {
         const opt = select.options[select.selectedIndex] || select.options[0];
-        label.textContent = opt ? (opt.textContent || 'Elegir planeta…') : 'Elegir planeta…';
+        label.textContent = opt ? (opt.textContent || 'Choose a planet…') : 'Choose a planet…';
         options.forEach((b) => b.setAttribute('aria-selected', b.dataset.value === select.value ? 'true' : 'false'));
     }
     function setOpen(open: boolean) {

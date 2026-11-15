@@ -1,0 +1,20 @@
+/* immersive micro-animations (performant) */
+@keyframes fade-up-soft { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes glow-pulse { 0%,100% { box-shadow: 0 0 0 rgba(86,207,225,0); } 50% { box-shadow: 0 0 18px rgba(86,207,225,.18); } }
+.hero .hero-kicker, .hero h1, .hero p, .hero .hero-actions { animation: fade-up-soft .7s ease both; }
+.hero h1 { animation-delay: .08s; } .hero p { animation-delay: .16s; } .hero .hero-actions { animation-delay: .24s; }
+.btn-primary:hover, .btn-secondary:hover { transform: translateY(-1px); }
+.btn-primary:active, .btn-secondary:active { transform: translateY(0); }
+.story-card, .zigzag-media img, .loc-card, .confirm-search-btn { transition: transform .25s ease, box-shadow .25s ease; }
+.story-card:hover { transform: translateY(-3px); }
+.zigzag-media img:hover { transform: scale(1.01); }
+[data-content-step].is-visible .zigzag-copy > * { animation: fade-up-soft .55s ease both; }
+[data-content-step].is-visible .zigzag-copy > *:nth-child(2) { animation-delay: .06s; }
+[data-content-step].is-visible .zigzag-copy > *:nth-child(3) { animation-delay: .12s; }
+[data-content-step].is-visible .zigzag-copy > *:nth-child(4) { animation-delay: .18s; }
+.custom-dd[data-open="true"] .custom-dd-trigger { animation: glow-pulse 1.8s ease 1; }
+.app-view { animation: fade-up-soft .35s ease; }
+@media (prefers-reduced-motion: reduce) {
+  .hero .hero-kicker, .hero h1, .hero p, .hero .hero-actions, [data-content-step].is-visible .zigzag-copy > *, .app-view { animation: none !important; }
+  .story-card:hover, .zigzag-media img:hover, .btn-primary:hover, .btn-secondary:hover { transform: none !important; }
+}
