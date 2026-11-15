@@ -21,8 +21,11 @@
 
 /* Earth globe sizing (Globe.GL canvas) */
 .earth-globe {
-  width: min(38vmin, 22rem);
-  height: min(38vmin, 22rem);
+  width: min(38vmin, 28rem);
+  max-width: 100%;
+  aspect-ratio: 1 / 1;
+  height: auto;
+  margin: 0 auto;
   position: relative;
 }
 .earth-globe canvas {

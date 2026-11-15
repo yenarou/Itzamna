@@ -194,8 +194,18 @@ function updateMapMarker(): void {
         }
     } else {
         const ll: [number, number] = [lat, lng];
-        if (!marker) marker = L.marker(ll).addTo(map);
-        else marker.setLatLng(ll);
+        if (!marker) {
+            marker = L.circleMarker(ll, {
+                radius: 8,
+                color: "#ffffff",
+                weight: 2,
+                fillColor: "#e0a84a",
+                fillOpacity: 1,
+            }).addTo(map);
+            marker.bindTooltip("Selected point");
+        } else {
+            marker.setLatLng(ll);
+        }
 
         const r = Number(locRadius.value || "100");
         if (Number.isFinite(r) && r > 0) {
