@@ -1,4 +1,3 @@
-import Globe from "globe.gl";
 import { searchAnalogs } from "../lib/api";
 import { NASA_EARTH_FALLBACK, NASA_MARS_FALLBACK, NASA_MOON_FALLBACK } from "../lib/data";
 import type { BodyInfo, LocationQuery, Match, PlanetId, SearchQuery, UserLocation } from "../lib/types";
@@ -64,83 +63,6 @@ let userMarker: any;
 let userLocation: UserLocation | undefined;
 let globeEarth: any = null;
 
-function fallbackGlobeTexture(): string {
-    try {
-        const c = document.createElement("canvas");
-        c.width = 512;
-        c.height = 256;
-        const ctx = c.getContext("2d");
-        if (!ctx) return "";
-        const g = ctx.createLinearGradient(0, 0, 0, c.height);
-        g.addColorStop(0, "#1e4fa3");
-        g.addColorStop(0.5, "#1b7f6b");
-        g.addColorStop(1, "#17408a");
-        ctx.fillStyle = g;
-        ctx.fillRect(0, 0, c.width, c.height);
-        ctx.fillStyle = "rgba(255,255,255,0.08)";
-        for (let i = 0; i < 180; i++) {
-            ctx.beginPath();
-            ctx.arc(Math.random() * c.width, Math.random() * c.height, Math.random() * 18 + 2, 0, Math.PI * 2);
-            ctx.fill();
-        }
-        return c.toDataURL("image/jpeg", 0.85);
-    } catch {
-        return "";
-    }
-}
-
-function resizeEarthGlobe(): void {
-    if (!globeEarth || !earthGlobe) return;
-    const w = earthGlobe.clientWidth || 300;
-    const h = earthGlobe.clientHeight || w;
-    try {
-        globeEarth.width(w);
-        globeEarth.height(h);
-    } catch {}
-}
-
-function initEarthGlobe(): void {
-    if (!earthGlobe || globeEarth) return;
-    if (earthGlobe.clientWidth === 0) {
-        requestAnimationFrame(initEarthGlobe);
-        return;
-    }
-    try {
-        const fallback = fallbackGlobeTexture();
-        globeEarth = new Globe(earthGlobe);
-        globeEarth
-            .backgroundColor("rgba(0,0,0,0)")
-            .showAtmosphere(true)
-            .atmosphereColor("#8ec8ff")
-            .atmosphereAltitude(0.16)
-            .showGraticules(true)
-            .graticuleColor("rgba(156, 204, 255, 0.45)");
-        if (fallback) globeEarth.globeImageUrl(fallback);
-        resizeEarthGlobe();
-        // Try to load detailed Earth texture (may fail offline); fallback remains visible meanwhile
-        const tex = new Image();
-        tex.crossOrigin = "anonymous";
-        tex.onload = () => {
-            try {
-                globeEarth && globeEarth.globeImageUrl(tex.src);
-            } catch {}
-        };
-        tex.src = "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg";
-        globeEarth.controls().autoRotate = true;
-        globeEarth.controls().autoRotateSpeed = 0.65;
-        globeEarth.controls().enablePan = false;
-        globeEarth.controls().enableZoom = false;
-        globeEarth.pointOfView({ lat: 18, lng: -18, altitude: 1.6 }, 0);
-        try {
-            if (typeof ResizeObserver !== "undefined") {
-                new ResizeObserver(() => resizeEarthGlobe()).observe(earthGlobe);
-            }
-        } catch {}
-        window.addEventListener("resize", resizeEarthGlobe);
-    } catch (error) {
-        console.error("No se pudo inicializar Globe.GL", error);
-    }
-}
 
 function zoneFallback(p: PlanetId | "" = planet): string {
     return p === "marte" ? NASA_MARS_FALLBACK : NASA_MOON_FALLBACK;
@@ -197,6 +119,7 @@ function updateMapMarker(): void {
             map.removeLayer(circle);
             circle = null;
         }
+        updateGoogleMapsLink();
     } else {
         const ll: [number, number] = [lat, lng];
         if (!marker) {
@@ -215,6 +138,8 @@ function updateMapMarker(): void {
         else map.panTo(ll);
 
         const r = Number(locRadius.value || "100");
+        // update maps link
+        updateGoogleMapsLink();
         if (Number.isFinite(r) && r > 0) {
             if (!circle)
                 circle = L.circle(ll, {
@@ -496,7 +421,7 @@ function bodyColumn(
             </tr>`;
         })
         .join("");
-    const isEarthCoordImage = withImage && !!b.imageUrl && /Earth|calculat/i.test(b.kicker + " " + b.title);
+    const isEarthCoordImage = withImage && !!b.imageUrl && (b.kicker.includes("Tierra") || /Earth|Tierra|calcul|candidat|coord/i.test(b.kicker + " " + b.title) || b.fields.some(f => f.label === "Georeferencing" || f.label === "Georreferenciación"));
     const isPlanetZone = /^Mars\b|^Moon\b/i.test(b.kicker);
     const fallback = isPlanetZone ? zoneFallback(/^Mars\b/i.test(b.kicker) ? "marte" : "luna") : NASA_EARTH_FALLBACK;
     const pin = isEarthCoordImage
@@ -1030,5 +955,4 @@ document.addEventListener("keydown", event => {
     if (state === "searching" || state === "results") setState("selected");
 });
 
-initEarthGlobe();
 setState("idle");

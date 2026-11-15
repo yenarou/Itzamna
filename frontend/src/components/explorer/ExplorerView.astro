@@ -26,7 +26,9 @@ const paneTitle = 'font-display text-3xl font-medium';
       class="flex flex-col items-center justify-center gap-5 bg-[#10303e] p-4"
     >
       <div id="earth-visual" class="flex flex-col items-center gap-3">
-        <div id="earth-globe" class="earth-globe" aria-label="Globo terráqueo interactivo"></div>
+        <div id="earth-globe" class="flex items-center justify-center">
+          <Planet body="tierra" />
+        </div>
         <div id="earth-compare-wrap" class="relative hidden w-full max-w-[min(38vmin,28rem)]">
           <img id="earth-compare" alt="" hidden referrerpolicy="no-referrer" class="aspect-video w-full rounded-xl border border-line/60 object-cover shadow-2xl" />
           <span aria-hidden="true" class="pointer-events-none absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-full"><span class="block h-4 w-4 -rotate-45 rounded-full rounded-bl-none border-2 border-white bg-ochre shadow-lg"></span><span class="mx-auto -mt-0.5 block h-2 w-2 rounded-full bg-white/90 shadow"></span></span>
@@ -205,6 +207,9 @@ const paneTitle = 'font-display text-3xl font-medium';
               <div>
                 <label for="loc-lng" class="mb-1.5 block text-sm text-mist">Longitude</label>
                 <input id="loc-lng" name="loc-lng" type="number" step="any" min="-180" max="180" placeholder="e.g. -69.25" class="field-select" />
+              </div>
+              <div class="md:col-span-2">
+                <a id="open-google-maps" class="loc-action-btn inline-flex w-fit opacity-50 pointer-events-none" href="#" target="_blank" rel="noopener noreferrer" aria-disabled="true">Open in Google Maps ↗</a>
               </div>
               <div>
                 <label for="loc-radius" class="mb-1.5 block text-sm text-mist">Search radius</label>
