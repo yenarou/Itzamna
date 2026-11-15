@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
-from app.schemas.search import Match, SearchQuery
+from app.schemas.match import Match
+from app.schemas.query import SearchQuery
 from app.services.analogs import search_analogs
 
 router = APIRouter()
