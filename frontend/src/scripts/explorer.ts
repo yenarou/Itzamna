@@ -76,10 +76,13 @@ function ensureMap(): void {
         maxZoom: 19,
         attribution: "Tiles &copy; Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
     }).addTo(map);
-    L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}", {
-        maxZoom: 19,
-        attribution: "",
-    }).addTo(map);
+    L.tileLayer(
+        "https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
+        {
+            maxZoom: 19,
+            attribution: "",
+        },
+    ).addTo(map);
     map.on("click", (e: any) => {
         const { lat, lng } = e.latlng;
         locLat.value = lat.toFixed(5);
@@ -310,7 +313,9 @@ function readLocation(): LocationQuery | undefined {
 function fmtFormulas(text: string): string {
     // aplica formato a expresiones/fórmulas comunes sin romper HTML ya escapado
     let out = text;
-    const wrap = (re: RegExp) => { out = out.replace(re, (m) => `<code class="formula">${m}</code>`); };
+    const wrap = (re: RegExp) => {
+        out = out.replace(re, m => `<code class="formula">${m}</code>`);
+    };
     wrap(/P\/\(T\+10\)/g);
     wrap(/\bALLSKY_SFC_SW_DWN\b/g);
     wrap(/\bPRECTOTCORR\b/g);
@@ -325,24 +330,62 @@ function fmtFormulas(text: string): string {
     return out;
 }
 
-function bodyColumn(b: BodyInfo, withImage: boolean, longText: boolean, extra?: string, opts?: { showDescription?: boolean; compact?: boolean }): string {
+function formatValueBlock(raw: string): string {
+    const text = raw.trim();
+    if (!text) return "";
+    const parts = text
+        .split(/;\s*/)
+        .map(part => part.trim())
+        .filter(Boolean);
+
+    if (parts.length <= 1) {
+        return fmtFormulas(esc(text));
+    }
+
+    return `<div class="metric-stack">${parts
+        .map(part => `<span class="metric-item">${fmtFormulas(esc(part))}</span>`)
+        .join("")}</div>`;
+}
+
+function bodyColumn(
+    b: BodyInfo,
+    withImage: boolean,
+    longText: boolean,
+    extra?: string,
+    opts?: { showDescription?: boolean; compact?: boolean },
+): string {
     void longText;
     const showDescription = opts?.showDescription ?? true;
     const compact = opts?.compact ?? false;
     const rows = b.fields
         .map(f => {
             const isGeo = f.label === "Georreferenciación";
-            const geoCoords = isGeo ? (f.value.match(/-?\d+(?:\.\d+)?/g) || []) : [];
-            const geoLink = isGeo && geoCoords.length >= 2 ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(geoCoords[0] + "," + geoCoords[1])}` : null;
-            const rawVal = fmtFormulas(esc(f.value));
-            const valueHtml = isGeo && geoLink
-                ? `<a class="text-base font-semibold text-sky-300 underline decoration-sky-400/40 underline-offset-2 hover:text-sky-200 md:text-lg" href="${esc(geoLink)}" target="_blank" rel="noopener noreferrer">${rawVal} ↗</a>`
-                : `<span class="${isGeo ? "text-base md:text-lg" : ""}">${rawVal}</span>`;
-            const corr = typeof f.correlation === "number" ? Math.max(0, Math.min(100, Math.round(f.correlation))) : null;
-            const barColor = corr === null ? "bg-ochre" : corr >= 75 ? "bg-emerald-500" : corr >= 50 ? "bg-sky-500" : corr >= 25 ? "bg-amber-500" : "bg-rose-500";
-            const corrHtml = corr !== null
-                ? `<div class="${compact ? "min-w-[7rem]" : "min-w-[9rem]"}"><div class="mb-1 flex items-center justify-between text-xs text-mist"><span>Correlación</span><span class="font-medium text-chalk">${corr} %</span></div><div class="h-2.5 w-full overflow-hidden rounded-full bg-line/60" role="img" aria-label="Correlación ${corr} por ciento"><div class="h-full rounded-full ${barColor}" style="width:${corr}%"></div></div></div>`
-                : `<span class="text-mist">—</span>`;
+            const geoCoords = isGeo ? f.value.match(/-?\d+(?:\.\d+)?/g) || [] : [];
+            const geoLink =
+                isGeo && geoCoords.length >= 2
+                    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(geoCoords[0] + "," + geoCoords[1])}`
+                    : null;
+            const rawVal = formatValueBlock(f.value);
+            const valueHtml =
+                isGeo && geoLink
+                    ? `<a class="text-base font-semibold text-sky-300 underline decoration-sky-400/40 underline-offset-2 hover:text-sky-200 md:text-lg" href="${esc(geoLink)}" target="_blank" rel="noopener noreferrer">${rawVal} ↗</a>`
+                    : `<span class="${isGeo ? "text-base md:text-lg" : ""}">${rawVal}</span>`;
+            const corr =
+                typeof f.correlation === "number" ? Math.max(0, Math.min(100, Math.round(f.correlation))) : null;
+            const barColor =
+                corr === null
+                    ? "bg-ochre"
+                    : corr >= 75
+                      ? "bg-emerald-500"
+                      : corr >= 50
+                        ? "bg-sky-500"
+                        : corr >= 25
+                          ? "bg-amber-500"
+                          : "bg-rose-500";
+            const corrHtml =
+                corr !== null
+                    ? `<div class="${compact ? "min-w-[7rem]" : "min-w-[9rem]"}"><div class="mb-1 flex items-center justify-between text-xs text-mist"><span>Correlación</span><span class="font-medium text-chalk">${corr} %</span></div><div class="h-2.5 w-full overflow-hidden rounded-full bg-line/60" role="img" aria-label="Correlación ${corr} por ciento"><div class="h-full rounded-full ${barColor}" style="width:${corr}%"></div></div></div>`
+                    : `<span class="text-mist">—</span>`;
             const detailCell = showDescription
                 ? `<td class="cell-detail">${f.detail ? fmtFormulas(esc(f.detail)) : `<span class="text-mist">—</span>`}</td>`
                 : "";
@@ -363,8 +406,8 @@ function bodyColumn(b: BodyInfo, withImage: boolean, longText: boolean, extra?: 
     const imgAlt = isEarthCoordImage ? `Imagen satelital: ${b.title}` : `Imagen: ${b.title}`;
     const image = withImage
         ? b.imageUrl
-            ? `<div class="${isEarthCoordImage ? "relative" : ""}">${pin}<img class="img-slot w-full object-cover" src="${esc(b.imageUrl)}" alt="${esc(imgAlt)}" loading="lazy" referrerpolicy="no-referrer" style="background:${b.tone}" onerror="this.onerror=null;this.src='${fallback}';this.alt='Imagen de referencia: ${esc(b.title)}';" /></div>`
-            : `<div class="img-slot" style="background:${b.tone}" role="img" aria-label="Imagen de referencia: ${esc(b.title)}"></div>`
+            ? `<div class="${isEarthCoordImage ? "relative " : ""}img-frame mb-0 overflow-hidden rounded-xl border border-line/50" style="aspect-ratio:16/9">${pin}<img class="img-slot block h-full w-full object-cover" src="${esc(b.imageUrl)}" alt="${esc(imgAlt)}" loading="lazy" referrerpolicy="no-referrer" style="background:${b.tone}" onerror="this.onerror=null;this.src='${fallback}';this.alt='Imagen de referencia: ${esc(b.title)}';" /></div>`
+            : `<div class="img-slot img-slot-empty mb-0" style="background:${b.tone};aspect-ratio:16/9" role="img" aria-label="Imagen de referencia: ${esc(b.title)}"></div>`
         : "";
     const thead = showDescription
         ? `<thead><tr><th>Campo</th><th>Valor</th><th>Correlación</th><th>Descripción</th></tr></thead>`
@@ -373,14 +416,14 @@ function bodyColumn(b: BodyInfo, withImage: boolean, longText: boolean, extra?: 
         ? `<colgroup><col class="col-label" /><col class="col-value" /><col class="col-corr" /><col class="col-detail" /></colgroup>`
         : `<colgroup><col class="col-label" /><col class="col-value" /><col class="col-corr" /></colgroup>`;
     const tableClass = compact ? "data-table data-table-compact" : "data-table";
-    return `<article class="space-y-4 min-w-0">
-      <header>
+    return `<article class="body-card grid min-w-0 gap-4 content-start" style="grid-template-rows:auto auto 1fr">
+      <header class="min-h-[8.5rem]">
         <p class="text-sm text-mist">${esc(b.kicker)}</p>
         <h3 class="font-display text-2xl font-medium">${esc(b.title)}</h3>
-        ${extra ?? ""}
+        <div class="mt-1 min-h-[3.25rem]">${extra ?? ""}</div>
       </header>
       ${image}
-      <div class="data-table-wrap">
+      <div class="data-table-wrap self-start">
         <table class="${tableClass}">
           ${colgroup}
           ${thead}
@@ -391,7 +434,7 @@ function bodyColumn(b: BodyInfo, withImage: boolean, longText: boolean, extra?: 
 }
 
 function candidateCoords(m: Match): { lat: number; lon: number } | null {
-    const f = m.earth.fields.find((x) => x.label === "Georreferenciación");
+    const f = m.earth.fields.find(x => x.label === "Georreferenciación");
     if (!f) return null;
     const nums = f.value.match(/-?\d+(?:\.\d+)?/g);
     if (!nums || nums.length < 2) return null;
@@ -404,7 +447,9 @@ function googleMapsRouteUrl(dest: { lat: number; lon: number }): string {
     const d = `${dest.lat},${dest.lon}`;
     const origin = userLocation
         ? `${userLocation.lat},${userLocation.lng}`
-        : (locLat.value && locLng.value ? `${Number(locLat.value)},${Number(locLng.value)}` : null);
+        : locLat.value && locLng.value
+          ? `${Number(locLat.value)},${Number(locLng.value)}`
+          : null;
     if (origin) {
         return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(d)}&travelmode=driving`;
     }
@@ -429,41 +474,66 @@ function renderResults(): void {
 
     resultPercent.textContent = `${m.percentage}%`;
     const pct = m.percentage;
-    const pctClass = pct >= 75 ? "text-emerald-400" : pct >= 55 ? "text-sky-400" : pct >= 35 ? "text-amber-400" : "text-rose-400";
+    const pctClass =
+        pct >= 75 ? "text-emerald-400" : pct >= 55 ? "text-sky-400" : pct >= 35 ? "text-amber-400" : "text-rose-400";
     resultPercent.className = `font-display text-5xl font-semibold ${pctClass}`;
     const parts: string[] = [];
     if (typeof m.distanceKm === "number") parts.push(`A ~${m.distanceKm.toFixed(1)} km del punto de búsqueda`);
     if (typeof m.fromUserKm === "number") parts.push(`a ${m.fromUserKm.toFixed(1)} km de ti`);
-    if (typeof m.routeKm === "number" && typeof m.routeMin === "number") parts.push(`ruta ~${m.routeKm.toFixed(1)} km (${Math.round(m.routeMin)} min en vehículo)`);
+    if (typeof m.routeKm === "number" && typeof m.routeMin === "number")
+        parts.push(`ruta ~${m.routeKm.toFixed(1)} km (${Math.round(m.routeMin)} min en vehículo)`);
     if (m.humanInterference) parts.push(`interferencia humana ${m.humanInterference}${m.isolated ? " (aislada)" : ""}`);
     const coords = candidateCoords(m);
     const mapsUrl = coords ? googleMapsRouteUrl(coords) : null;
     const mapsLink = mapsUrl
         ? `<a class="mt-2 inline-flex items-center gap-1 text-sm font-medium text-sky-300 underline decoration-sky-400/40 underline-offset-2 hover:text-sky-200" href="${esc(mapsUrl)}" target="_blank" rel="noopener noreferrer">Abrir ruta en Google Maps ↗</a>`
         : "";
-    const dist = parts.length || mapsLink ? `<div class="mt-1">${parts.length ? `<p class="text-sm text-mist">${esc(parts.join(" · "))}</p>` : ""}${mapsLink}</div>` : "";
-    // vistas diferenciadas: sencilla (resumen) vs avanzada (detalle/descripciones)
+    const dist =
+        parts.length || mapsLink
+            ? `<div class="mt-1">${parts.length ? `<p class="text-sm text-mist">${esc(parts.join(" · "))}</p>` : ""}${mapsLink}</div>`
+            : "";
     const showEarth = dataView !== "zone";
     const showZone = dataView !== "earth";
     const single = dataView !== "both";
-    const generalLayout = single ? "grid gap-8" : "grid gap-8 xl:grid-cols-2";
-    const advancedLayout = "grid gap-8"; // avanzada: ancho completo para legibilidad de descripciones
+    const layout = single ? "grid gap-8 items-start" : "grid gap-8 xl:grid-cols-2 items-start";
 
-    const earthGeneral = showEarth ? bodyColumn(m.earth, true, false, dist, { showDescription: false, compact: !single }) : "";
-    const zoneGeneral = showZone ? bodyColumn(m.zone, true, false, "", { showDescription: false, compact: !single }) : "";
-    const earthAdvanced = showEarth ? bodyColumn(m.earth, true, true, dist, { showDescription: true, compact: false }) : "";
-    const zoneAdvanced = showZone ? bodyColumn(m.zone, true, true, "", { showDescription: true, compact: false }) : "";
+    // Información general: solo la información de la zona (Luna/Marte)
+    const zoneGeneral = showZone
+        ? bodyColumn(m.zone, true, true, "", { showDescription: true, compact: false })
+        : "";
+    general.className = "grid gap-8 items-start";
+    general.innerHTML = zoneGeneral || (showEarth ? bodyColumn(m.earth, true, true, dist, { showDescription: true, compact: false }) : "");
 
-    general.className = generalLayout;
-    advanced.className = advancedLayout;
-    general.innerHTML = earthGeneral + zoneGeneral;
-    advanced.innerHTML = earthAdvanced + zoneAdvanced;
+    // Información avanzada: todo (Tierra y zona según vista)
+    const earthAdv = showEarth
+        ? bodyColumn(m.earth, true, true, dist, { showDescription: true, compact: false })
+        : "";
+    const zoneAdv = showZone
+        ? bodyColumn(m.zone, true, true, "", { showDescription: true, compact: false })
+        : "";
+    advanced.className = layout;
+    advanced.innerHTML = earthAdv + zoneAdv;
     setCompareImages(m);
 }
 
 function exportResultsCsv(): void {
     if (!matches.length) return;
-    const rows: string[][] = [["candidato","similitud_%","distancia_km","desde_usuario_km","ruta_km","ruta_min","interferencia","seccion","campo","valor","correlacion_%","descripcion"]];
+    const rows: string[][] = [
+        [
+            "candidato",
+            "similitud_%",
+            "distancia_km",
+            "desde_usuario_km",
+            "ruta_km",
+            "ruta_min",
+            "interferencia",
+            "seccion",
+            "campo",
+            "valor",
+            "correlacion_%",
+            "descripcion",
+        ],
+    ];
     matches.forEach((m, i) => {
         const label = m.placeName || m.earth.title || `Candidato ${i + 1}`;
         const meta = [
@@ -475,15 +545,28 @@ function exportResultsCsv(): void {
             m.humanInterference ?? "",
         ];
         const pushBody = (section: string, b: BodyInfo) => {
-            b.fields.forEach(f => rows.push([label, ...meta, section, f.label, f.value, f.correlation != null ? String(f.correlation) : "", f.detail]));
+            b.fields.forEach(f =>
+                rows.push([
+                    label,
+                    ...meta,
+                    section,
+                    f.label,
+                    f.value,
+                    f.correlation != null ? String(f.correlation) : "",
+                    f.detail,
+                ]),
+            );
         };
         pushBody("Tierra", m.earth);
         pushBody("Zona", m.zone);
     });
-    const csv = rows.map(r => r.map(c => `"${String(c ?? "").replace(/"/g,'""')}"`).join(",")).join("\r\n");
-    const blob = new Blob(["\ufeff"+csv], { type: "text/csv;charset=utf-8;" });
+    const csv = rows.map(r => r.map(c => `"${String(c ?? "").replace(/"/g, '""')}"`).join(",")).join("\r\n");
+    const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = "itzamna_resultados.csv"; a.click();
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "itzamna_resultados.csv";
+    a.click();
     URL.revokeObjectURL(url);
 }
 
@@ -513,11 +596,20 @@ function exportResultsPdf(): void {
     const alt = readFormLabel("earth-altitud");
     const suelo = readFormLabel("earth-suelo");
     const hum = readFormLabel("earth-humedad");
-    const filtros = [
-        zona && `Zona: ${zona}`, temp && `Temperatura: ${temp}`, comp && `Composición: ${comp}`, rel && `Relieve: ${rel}`,
-        clima && `Clima: ${clima}`, alt && `Altitud: ${alt}`, suelo && `Suelo: ${suelo}`, hum && `Humedad: ${hum}`
-    ].filter(Boolean).join(" · ") || "Sin filtros específicos";
-    const ubic = (lat && lng) ? `Punto: ${lat}, ${lng} · Radio: ${radius || "—"} km` : "Sin punto seleccionado";
+    const filtros =
+        [
+            zona && `Zona: ${zona}`,
+            temp && `Temperatura: ${temp}`,
+            comp && `Composición: ${comp}`,
+            rel && `Relieve: ${rel}`,
+            clima && `Clima: ${clima}`,
+            alt && `Altitud: ${alt}`,
+            suelo && `Suelo: ${suelo}`,
+            hum && `Humedad: ${hum}`,
+        ]
+            .filter(Boolean)
+            .join(" · ") || "Sin filtros específicos";
+    const ubic = lat && lng ? `Punto: ${lat}, ${lng} · Radio: ${radius || "—"} km` : "Sin punto seleccionado";
     const user = userLocation ? ` · Tu ubicación: ${userLocation.lat.toFixed(5)}, ${userLocation.lng.toFixed(5)}` : "";
 
     const corrBar = (c?: number) => {
@@ -530,6 +622,7 @@ function exportResultsPdf(): void {
     const renderBody = (b: BodyInfo) => `
       <div class="body-block">
         <div class="body-head">
+          ${b.imageUrl ? `<div class="body-img"><img src="${esc(b.imageUrl)}" alt="${esc(b.title)}" crossorigin="anonymous" referrerpolicy="no-referrer" /></div>` : ""}
           <div>
             <div class="kicker">${esc(b.kicker)}</div>
             <h4>${esc(b.title)}</h4>
@@ -538,29 +631,38 @@ function exportResultsPdf(): void {
         <table>
           <thead><tr><th>Campo</th><th>Valor</th><th>Correlación</th><th>Descripción</th></tr></thead>
           <tbody>
-            ${b.fields.map(f => `<tr>
+            ${b.fields
+                .map(
+                    f => `<tr>
               <td class="f-label">${esc(f.label)}</td>
-              <td class="f-value">${fmtFormulas(esc(f.value))}</td>
+              <td class="f-value">${formatValueBlock(f.value)}</td>
               <td class="f-corr">${corrBar(f.correlation)}</td>
               <td class="f-desc">${fmtFormulas(esc(f.detail || ""))}</td>
-            </tr>`).join("")}
+            </tr>`,
+                )
+                .join("")}
           </tbody>
         </table>
       </div>`;
 
-    const candidatesHtml = matches.map((m, i) => {
-        const label = m.placeName || m.earth.title || `Candidato ${i + 1}`;
-        const meta = [
-            `Similitud: ${m.percentage}%`,
-            m.distanceKm != null ? `Distancia: ${m.distanceKm} km` : null,
-            m.fromUserKm != null ? `Desde tu ubicación: ${m.fromUserKm} km` : null,
-            m.routeKm != null ? `Ruta: ${m.routeKm} km` : null,
-            m.routeMin != null ? `${m.routeMin} min` : null,
-            m.humanInterference ? `Interferencia: ${m.humanInterference}` : null,
-        ].filter(Boolean).join(" · ");
-        const coords = candidateCoords(m);
-        const maps = coords ? `<a href="https://www.google.com/maps/search/?api=1&query=${coords.lat},${coords.lon}" target="_blank">Ver en Google Maps</a>` : "";
-        return `<section class="candidate">
+    const candidatesHtml = matches
+        .map((m, i) => {
+            const label = m.placeName || m.earth.title || `Candidato ${i + 1}`;
+            const meta = [
+                `Similitud: ${m.percentage}%`,
+                m.distanceKm != null ? `Distancia: ${m.distanceKm} km` : null,
+                m.fromUserKm != null ? `Desde tu ubicación: ${m.fromUserKm} km` : null,
+                m.routeKm != null ? `Ruta: ${m.routeKm} km` : null,
+                m.routeMin != null ? `${m.routeMin} min` : null,
+                m.humanInterference ? `Interferencia: ${m.humanInterference}` : null,
+            ]
+                .filter(Boolean)
+                .join(" · ");
+            const coords = candidateCoords(m);
+            const maps = coords
+                ? `<a href="https://www.google.com/maps/search/?api=1&query=${coords.lat},${coords.lon}" target="_blank">Ver en Google Maps</a>`
+                : "";
+            return `<section class="candidate">
           <div class="cand-head">
             <div>
               <div class="rank">Candidato ${i + 1}</div>
@@ -574,7 +676,8 @@ function exportResultsPdf(): void {
             ${renderBody(m.zone)}
           </div>
         </section>`;
-    }).join("");
+        })
+        .join("");
 
     const html = `<!doctype html>
 <html lang="es"><head>
@@ -597,12 +700,17 @@ function exportResultsPdf(): void {
   .score{font-size:34px;font-weight:800;color:var(--accent);line-height:1;white-space:nowrap}.score span{font-size:18px;color:var(--muted);margin-left:2px}
   .bodies{padding:14px 16px;display:grid;gap:14px}
   .body-block{page-break-inside:avoid}
+  .body-head{display:flex;gap:14px;align-items:flex-start;margin-bottom:10px}
+  .body-img{width:180px;min-width:180px;height:112px;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:#eaf1fb;display:flex;align-items:center;justify-content:center}
+  .body-img img{width:100%;height:100%;object-fit:cover;display:block}
   .kicker{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
   h4{margin:2px 0 8px;font-size:16px}
-  table{width:100%;border-collapse:collapse;font-size:10.5pt}
-  th,td{border:1px solid var(--line);padding:8px 9px;vertical-align:top;text-align:left}
+  table{width:100%;border-collapse:collapse;font-size:10.5pt;table-layout:fixed}
+  th,td{border:1px solid var(--line);padding:8px 9px;vertical-align:top;text-align:left;word-break:break-word;overflow-wrap:anywhere}
   th{background:#f8fafc;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#334155}
   .f-label{width:18%;font-weight:600}.f-value{width:28%}.f-corr{width:16%}.f-desc{width:38%;color:#1f2937}
+  .metric-stack{display:flex;flex-direction:column;gap:4px;line-height:1.45}
+  .metric-item{display:block;white-space:normal}
   .corr{display:flex;align-items:center;gap:8px}.corr-track{flex:1;height:8px;background:#e5edf7;border-radius:999px;overflow:hidden;min-width:70px}
   .corr-fill{height:100%;border-radius:999px}.corr-fill.g{background:var(--ok)}.corr-fill.b{background:var(--mid)}.corr-fill.a{background:var(--warn)}.corr-fill.r{background:var(--bad)}
   .muted{color:var(--muted)} code.formula{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em;background:#eef4ff;border:1px solid #d9e6ff;border-radius:4px;padding:1px 4px}
@@ -639,14 +747,25 @@ function exportResultsPdf(): void {
         iframe.setAttribute("aria-hidden", "true");
         document.body.appendChild(iframe);
         const doc = iframe.contentWindow?.document;
-        if (!doc) { document.body.removeChild(iframe); searchStatus.textContent = "No se pudo generar el PDF en este navegador."; return; }
+        if (!doc) {
+            document.body.removeChild(iframe);
+            searchStatus.textContent = "No se pudo generar el PDF en este navegador.";
+            return;
+        }
         doc.open();
         doc.write(html);
         doc.close();
         const win = iframe.contentWindow;
         setTimeout(() => {
-            try { win?.focus(); win?.print(); } catch { /* ignore */ }
-            setTimeout(() => { iframe.remove(); }, 1500);
+            try {
+                win?.focus();
+                win?.print();
+            } catch {
+                /* ignore */
+            }
+            setTimeout(() => {
+                iframe.remove();
+            }, 1500);
         }, 350);
     };
 
@@ -654,8 +773,14 @@ function exportResultsPdf(): void {
         printInFrame();
     } catch {
         const w = window.open("", "_blank");
-        if (w) { w.document.open(); w.document.write(html); w.document.close(); }
-        else { searchStatus.textContent = "Permite ventanas emergentes o usa la opción de imprimir del navegador para exportar el PDF."; }
+        if (w) {
+            w.document.open();
+            w.document.write(html);
+            w.document.close();
+        } else {
+            searchStatus.textContent =
+                "Permite ventanas emergentes o usa la opción de imprimir del navegador para exportar el PDF.";
+        }
     }
 }
 
@@ -693,9 +818,10 @@ useMyLocationBtn.addEventListener("click", () => {
             useMyLocationBtn.disabled = false;
         },
         err => {
-            const msg = err && err.code === 1
-                ? "Permiso de ubicación denegado."
-                : "No se pudo obtener tu ubicación (requiere HTTPS o localhost y permiso).";
+            const msg =
+                err && err.code === 1
+                    ? "Permiso de ubicación denegado."
+                    : "No se pudo obtener tu ubicación (requiere HTTPS o localhost y permiso).";
             userLocStatus.textContent = msg;
             useMyLocationBtn.disabled = false;
         },
@@ -738,7 +864,8 @@ searchPanel.addEventListener("submit", async event => {
 
     try {
         matches = await searchAnalogs(query);
-        clearTimeout(t1); clearTimeout(t2);
+        clearTimeout(t1);
+        clearTimeout(t2);
         if (searchLoadingMsg) searchLoadingMsg.textContent = "Listo";
         if (searchLoadingBar) (searchLoadingBar as HTMLElement).style.width = "100%";
         if (searchLoadingPct) searchLoadingPct.textContent = "Completado";
@@ -757,12 +884,15 @@ searchPanel.addEventListener("submit", async event => {
         renderResults();
         setState("results");
     } catch {
-        clearTimeout(t1); clearTimeout(t2);
+        clearTimeout(t1);
+        clearTimeout(t2);
         if (searchLoadingMsg) searchLoadingMsg.textContent = "No se pudo conectar";
         searchStatus.textContent = "No se pudo completar la búsqueda. Inténtalo de nuevo.";
     } finally {
         confirmBtn.disabled = false;
-        setTimeout(() => { searchLoading.hidden = true; }, 350);
+        setTimeout(() => {
+            searchLoading.hidden = true;
+        }, 350);
     }
 });
 
@@ -777,10 +907,11 @@ if (reopenResults) {
 
 if (exportCsvBtn) exportCsvBtn.addEventListener("click", exportResultsCsv);
 if (exportPdfBtn) exportPdfBtn.addEventListener("click", exportResultsPdf);
-if (dataViewSelect) dataViewSelect.addEventListener("change", () => {
-    dataView = (dataViewSelect.value as "both" | "earth" | "zone") || "both";
-    if (matches.length) renderResults();
-});
+if (dataViewSelect)
+    dataViewSelect.addEventListener("change", () => {
+        dataView = (dataViewSelect.value as "both" | "earth" | "zone") || "both";
+        if (matches.length) renderResults();
+    });
 
 if (matchPrev) {
     matchPrev.addEventListener("click", () => {

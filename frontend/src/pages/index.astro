@@ -36,8 +36,6 @@ const tech = [
           </p>
           <div class="hero-actions">
             <button type="button" class="btn-primary" data-show-view="explore" data-focus-picker="true">Explorar Itzamná</button>
-            <button type="button" class="btn-secondary" data-show-view="content">Ver contenido</button>
-            <a href="/nosotros" class="btn-secondary">Conocer el proyecto</a>
           </div>
         </div>
       </section>
@@ -47,9 +45,7 @@ const tech = [
     <section id="view-content" class="app-view" data-app-view="content" hidden aria-label="Contenido del proyecto">
       <div class="content-shell">
         <div class="content-topbar">
-          <button type="button" class="btn-secondary btn-compact" data-show-view="home">Inicio</button>
           <div class="content-progress" aria-live="polite"><span id="content-step-label">1 / 6</span></div>
-          <button type="button" class="btn-primary btn-compact" data-show-view="explore" data-focus-picker="true">Ir a explorar</button>
         </div>
 
         <!-- Hero dentro de contenido -->
@@ -89,7 +85,7 @@ const tech = [
     <section class="zigzag zigzag-alt" id="proposito" data-content-step="2" hidden>
       <div class="zigzag-inner reverse">
         <div class="zigzag-media reveal is-visible">
-          <img src="https://images-assets.nasa.gov/image/PIA00407/PIA00407~orig.jpg" alt="Superficie de Marte con relieve y tonalidades rojizas" loading="lazy" decoding="async" />
+          <img src="https://images-assets.nasa.gov/image/PIA17944/PIA17944~orig.jpg" alt="Superficie de Marte en el cráter Gale, vista por el rover Curiosity" loading="lazy" decoding="async" />
         </div>
         <div class="zigzag-copy reveal is-visible">
           <p class="zigzag-kicker">Propósito</p>
@@ -175,10 +171,6 @@ const tech = [
 
     <!-- VIEW: EXPLORE (herramienta, funcionalidad preservada) -->
     <section id="view-explore" class="app-view" data-app-view="explore" hidden aria-label="Explorador de análogos">
-      <div class="explore-topbar">
-        <button type="button" class="btn-secondary btn-compact" data-show-view="home">Inicio</button>
-        <button type="button" class="btn-secondary btn-compact" data-show-view="content">Contenido</button>
-      </div>
 
       <section id="explorador" class="relative" aria-label="Explorador de análogos">
         <div class="mx-auto max-w-7xl px-4 pt-4 pb-4 md:px-8">
@@ -200,11 +192,11 @@ const tech = [
     >
       <div id="earth-visual" class="flex flex-col items-center gap-3">
         <Planet body="tierra" />
-        <div id="earth-compare-wrap" class="relative hidden">
-          <img id="earth-compare" alt="" hidden referrerpolicy="no-referrer" class="aspect-video w-[min(34vmin,26rem)] rounded-lg border border-line object-cover shadow-2xl" />
+        <div id="earth-compare-wrap" class="relative hidden w-full max-w-[min(38vmin,28rem)]">
+          <img id="earth-compare" alt="" hidden referrerpolicy="no-referrer" class="aspect-video w-full rounded-xl border border-line/60 object-cover shadow-2xl" />
           <span aria-hidden="true" class="pointer-events-none absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-full"><span class="block h-4 w-4 -rotate-45 rounded-full rounded-bl-none border-2 border-white bg-ochre shadow-lg"></span><span class="mx-auto -mt-0.5 block h-2 w-2 rounded-full bg-white/90 shadow"></span></span>
         </div>
-        <p id="earth-compare-caption" hidden class="max-w-xs text-center text-sm text-mist"></p>
+        <p id="earth-compare-caption" hidden class="max-w-[min(38vmin,28rem)] text-center text-sm leading-relaxed text-mist"></p>
       </div>
       <h2 id="earth-title" class={paneTitle}>Tierra</h2>
     </section>
@@ -214,10 +206,20 @@ const tech = [
       <div id="planet-picker" class="z-20 flex flex-col items-center gap-3 transition-all duration-500">
         <p id="planet-picker-label" class="font-display text-xl text-mist md:text-2xl">Selecciona un planeta</p>
         <label for="planet-select" class="sr-only">Planeta</label>
-        <select id="planet-select" class="field-select planet-select-ui !w-auto min-w-[14rem] px-5 py-3 text-lg md:min-w-[18rem] md:text-xl">
+        <select id="planet-select" class="sr-only" aria-hidden="true" tabindex="-1">
           <option value="">Elegir planeta…</option>
           {PLANETS.map((p) => <option value={p.id}>{p.name}</option>)}
         </select>
+        <div class="planet-dd" id="planet-dd" data-open="false">
+          <button type="button" id="planet-dd-trigger" class="planet-dd-trigger" aria-haspopup="listbox" aria-expanded="false">
+            <span id="planet-dd-label">Elegir planeta…</span>
+            <svg aria-hidden="true" viewBox="0 0 20 20" class="planet-dd-caret"><path d="M5 7l5 6 5-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <ul id="planet-dd-menu" class="planet-dd-menu" role="listbox" aria-label="Planeta" hidden>
+            <li><button type="button" class="planet-dd-option" role="option" data-value="">Elegir planeta…</button></li>
+            {PLANETS.map((p) => <li><button type="button" class="planet-dd-option" role="option" data-value={p.id}>{p.name}</button></li>)}
+          </ul>
+        </div>
       </div>
 
       <p id="empty-prompt" class="max-w-xs text-center text-lg leading-snug text-mist">
@@ -227,10 +229,10 @@ const tech = [
       {
         PLANETS.map((p) => (
           <div data-planet-view={p.id} hidden class="flex flex-col items-center gap-5">
-            <div class="planet-visual flex flex-col items-center gap-3">
+            <div class="planet-visual flex w-full flex-col items-center gap-3">
               <Planet body={p.id} />
-              <img data-zone-compare={p.id} alt="" hidden referrerpolicy="no-referrer" class="aspect-video w-[min(34vmin,26rem)] rounded-lg border border-line object-cover shadow-2xl" />
-              <p data-zone-caption={p.id} hidden class="max-w-xs text-center text-sm text-mist"></p>
+              <img data-zone-compare={p.id} alt="" hidden referrerpolicy="no-referrer" class="aspect-video w-full max-w-[min(38vmin,28rem)] rounded-xl border border-line/60 object-cover shadow-2xl" />
+              <p data-zone-caption={p.id} hidden class="max-w-[min(38vmin,28rem)] text-center text-sm leading-relaxed text-mist"></p>
             </div>
             <h2 class={paneTitle}>{p.name}</h2>
           </div>
@@ -515,7 +517,7 @@ const tech = [
           if (opts?.focusPicker) {
             setTimeout(() => {
               document.getElementById('planet-picker')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              (document.getElementById('planet-select') as HTMLElement | null)?.focus?.();
+              (document.getElementById('planet-dd-trigger') as HTMLElement | null)?.focus?.();
             }, 50);
           }
         }
@@ -546,6 +548,42 @@ const tech = [
       // default
       showView('home');
       updateSteps();
+    })();
+
+    // Custom planet dropdown (syncs with hidden #planet-select for compatibility)
+    (() => {
+      const selectEl = document.getElementById('planet-select') as HTMLSelectElement | null;
+      const ddEl = document.getElementById('planet-dd') as HTMLElement | null;
+      const triggerEl = document.getElementById('planet-dd-trigger') as HTMLButtonElement | null;
+      const labelEl = document.getElementById('planet-dd-label') as HTMLElement | null;
+      const menuEl = document.getElementById('planet-dd-menu') as HTMLElement | null;
+      if (!selectEl || !ddEl || !triggerEl || !labelEl || !menuEl) return;
+      const select = selectEl, dd = ddEl, trigger = triggerEl, label = labelEl, menu = menuEl;
+
+      const options = Array.from(menu.querySelectorAll<HTMLButtonElement>('.planet-dd-option'));
+      function syncFromSelect() {
+        const opt = select.options[select.selectedIndex] || select.options[0];
+        label.textContent = opt ? (opt.textContent || 'Elegir planeta…') : 'Elegir planeta…';
+        options.forEach(b => b.setAttribute('aria-selected', b.dataset.value === select.value ? 'true' : 'false'));
+      }
+      function setOpen(open: boolean) {
+        dd.dataset.open = open ? 'true' : 'false';
+        trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+        if (open) menu.removeAttribute('hidden'); else menu.setAttribute('hidden', '');
+      }
+      trigger.addEventListener('click', (e) => { e.preventDefault(); setOpen(dd.dataset.open !== 'true'); });
+      options.forEach(btn => btn.addEventListener('click', () => {
+        const val = btn.dataset.value || '';
+        select.value = val;
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+        syncFromSelect();
+        setOpen(false);
+        trigger.focus();
+      }));
+      select.addEventListener('change', syncFromSelect);
+      document.addEventListener('click', (e) => { if (!dd.contains(e.target as Node)) setOpen(false); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
+      syncFromSelect();
     })();
   </script>
 </Base>
