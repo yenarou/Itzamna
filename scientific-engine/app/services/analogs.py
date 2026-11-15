@@ -460,7 +460,7 @@ def build_earth_body(lat, lon, idx, place_name, place_ok, from_user_km, route_km
         fields.append(InfoField(label="Accesibilidad (OpenStreetMap/OSRM)", value=f"{from_user_km:.1f} km geodésicos · {ruta}", detail=rd, correlation=int(comps.get("accesibilidad", 60))))
 
     iso_txt = "aislada (baja huella antrópica local)" if isolated else "no plenamente aislada"
-    inf_val = f"{interference.capitalize()} · {iso_txt} · n≈{interference_count} elementos en 1.2 km"
+    inf_val = f"{interference.capitalize()} · {iso_txt} · n≈{interference_count} elementos mapeados (conteo OSM, radio 1.2 km)"
     inf_detail = f"Proxy de antropización desde infraestructura mapeada en OpenStreetMap vía Overpass API. {src_note(over_ok, 'https://overpass-api.de')}"
     fields.append(InfoField(label="Interferencia humana (OpenStreetMap/Overpass)", value=inf_val, detail=inf_detail, correlation=int(comps.get("interferencia_osm", 60))))
 
@@ -472,41 +472,41 @@ def build_earth_body(lat, lon, idx, place_name, place_ok, from_user_km, route_km
     if t2m is not None: parts.append(f"T2M {t2m:.2f} °C")
     if tmin is not None and tmax is not None: parts.append(f"rango {tmin:.2f} a {tmax:.2f} °C")
     if p_year is not None: parts.append(f"precip. {p_year:.1f} mm/año ({prec:.3f} mm/día)")
-    if rh is not None: parts.append(f"HR2M {rh:.1f}%")
-    if ws is not None: parts.append(f"viento 2 m {ws:.2f} m/s")
-    if rad is not None: parts.append(f"radiación {rad:.2f} kWh/m²/día")
-    if ai is not None: parts.append(f"índice aridez P/(T+10) {ai:.2f}")
-    p_detail = f"Climatología puntual (promedios anuales) de NASA POWER (MERRA-2/GEWEX). Parámetros: T2M,T2M_MIN,T2M_MAX,PRECTOTCORR,RH2M,WS2M,ALLSKY_SFC_SW_DWN. {src_note(power_ok, 'https://power.larc.nasa.gov/')}"
+    if rh is not None: parts.append(f"HR2M {rh:.1f} %")
+    if ws is not None: parts.append(f"viento a 2 m {ws:.2f} m/s")
+    if rad is not None: parts.append(f"radiación solar {rad:.2f} kWh/m²/día")
+    if ai is not None: parts.append(f"índice de aridez (adimensional, aprox. De Martonne) P/(T+10) = {ai:.2f}")
+    p_detail = f"Climatología puntual (promedios anuales, NASA POWER MERRA-2/GEWEX). Unidades: °C, mm/año, mm/día, %, m/s, kWh/m²/día. Parámetros: T2M, T2M_MIN, T2M_MAX, PRECTOTCORR, RH2M, WS2M, ALLSKY_SFC_SW_DWN. {src_note(power_ok, 'https://power.larc.nasa.gov/')}"
     fields.append(InfoField(label="Clima (NASA POWER)", value=("; ".join(parts) if parts else "sin datos"), detail=p_detail, correlation=int(comps.get("clima", 60))))
 
     # DEM
-    e_val = f"{elev:.1f} m s.n.m." if elev is not None else "sin datos"
-    e_detail = f"Elevación del terreno desde Modelo Digital de Elevación (OpenTopData, SRTM 90 m / ASTER 30 m). {src_note(elev_ok, 'https://www.opentopodata.org (SRTM/ASTER)')}"
+    e_val = f"{elev:.1f} m s. n. m." if elev is not None else "sin datos"
+    e_detail = f"Elevación del terreno (m s. n. m.) desde Modelo Digital de Elevación (OpenTopData, SRTM 90 m / ASTER 30 m). {src_note(elev_ok, 'https://www.opentopodata.org (SRTM/ASTER)')}"
     fields.append(InfoField(label="Elevación (DEM)", value=e_val, detail=e_detail, correlation=int(comps.get("altitud_dem", 60))))
 
     # Sustrato y humedad cuantitativos
     sub_parts = []
     if soil:
-        if soil.get("clay") is not None: sub_parts.append(f"arcilla {soil['clay']:.1f}%")
-        if soil.get("sand") is not None: sub_parts.append(f"arena {soil['sand']:.1f}%")
-        if soil.get("silt") is not None: sub_parts.append(f"limo {soil['silt']:.1f}%")
+        if soil.get("clay") is not None: sub_parts.append(f"arcilla {soil['clay']:.1f} %")
+        if soil.get("sand") is not None: sub_parts.append(f"arena {soil['sand']:.1f} %")
+        if soil.get("silt") is not None: sub_parts.append(f"limo {soil['silt']:.1f} %")
         if soil.get("soc") is not None: sub_parts.append(f"C orgánico {soil['soc']:.1f} g/kg")
-        if soil.get("bdod") is not None: sub_parts.append(f"densidad {soil['bdod']:.2f} kg/dm³")
-        if soil.get("phh2o") is not None: sub_parts.append(f"pH(H2O) {soil['phh2o']:.2f}")
+        if soil.get("bdod") is not None: sub_parts.append(f"densidad aparente {soil['bdod']:.2f} kg/dm³")
+        if soil.get("phh2o") is not None: sub_parts.append(f"pH(H₂O) {soil['phh2o']:.2f}")
         if soil.get("_tipo"): sub_parts.append(f"tipo {soil['_tipo']}")
     sub_val = "; ".join(sub_parts) if sub_parts else "sin datos"
-    sub_detail = f"Propiedades medias 0–15 cm (ISRIC SoilGrids v2.0) en unidades físicas. {src_note(soil_ok, 'https://rest.isric.org/soilgrids/v2.0/')}"
+    sub_detail = f"Propiedades medias 0–15 cm (ISRIC SoilGrids v2.0) en unidades físicas (%, g/kg, kg/dm³, pH). {src_note(soil_ok, 'https://rest.isric.org/soilgrids/v2.0/')}"
     fields.append(InfoField(label="Sustrato edáfico (SoilGrids, cuantitativo)", value=sub_val, detail=sub_detail, correlation=int(comps.get("sustrato_humedad", 50))))
 
     hum_parts = []
-    if rh is not None: hum_parts.append(f"HR media anual {rh:.1f}% (NASA POWER)")
+    if rh is not None: hum_parts.append(f"HR media anual {rh:.1f} % (NASA POWER)")
     if p_year is not None: hum_parts.append(f"precipitación {p_year:.1f} mm/año")
-    if ai is not None: hum_parts.append(f"índice aridez P/(T+10) {ai:.2f}")
-    hum_detail = f"Humedad relativa, precipitación e índice de aridez cuantitativo. {src_note(power_ok, 'https://power.larc.nasa.gov/')} (índice/aridez calculado localmente a partir de esos datos)."
+    if ai is not None: hum_parts.append(f"índice de aridez (adimensional, aprox. De Martonne) P/(T+10) = {ai:.2f}")
+    hum_detail = f"Humedad relativa (%), precipitación (mm/año) e índice de aridez (adimensional, fórmula P/(T+10)). {src_note(power_ok, 'https://power.larc.nasa.gov/')} (índice calculado localmente a partir de esos datos)."
     fields.append(InfoField(label="Humedad y disponibilidad hídrica (cuantitativa)", value=("; ".join(hum_parts) if hum_parts else "sin datos"), detail=hum_detail, correlation=int(comps.get("sustrato_humedad", 50))))
 
     comp_str = ", ".join(f"{k}={v}%" for k, v in comps.items())
-    fields.append(InfoField(label="Metodología de similitud (por componentes)", value=f"Componentes: {comp_str}", detail="Similitud como promedio ponderado de componentes medidos/consultados o calculados localmente cuando una API no responde (zona objetivo, clima, elevación DEM, sustrato/humedad, espacial, accesibilidad, interferencia OSM). Resultado directo sin normalización a un índice acotado.", correlation=None))
+    fields.append(InfoField(label="Metodología de similitud (por componentes)", value=f"Componentes (%): {comp_str}", detail="Similitud como promedio ponderado de componentes medidos/consultados o calculados localmente cuando una API no responde (zona objetivo, clima, elevación DEM, sustrato/humedad, espacial, accesibilidad, interferencia OSM). Resultado directo sin normalización a un índice acotado. Fórmulas/variables relevantes: P/(T+10), T2M, PRECTOTCORR, RH2M.", correlation=None))
 
     d = 0.08
     minLon, minLat, maxLon, maxLat = lon-d, lat-d/1.6, lon+d, lat+d/1.6
@@ -520,10 +520,12 @@ def build_zone_body(profile: dict, zone_filters: dict[str, str] | None = None) -
     vals = []
     for k in keys:
         if k in zone_filters:
-            vals.append(100 if profile["tags"].get(k) == zone_filters[k] else 45)
+            vals.append(92 if profile["tags"].get(k) == zone_filters[k] else 35)
         else:
-            vals.append(78)
-    corrs = [vals[0], vals[1], int(round((vals[2]+vals[3])/2)), 72]
+            # sin filtro explícito: afinidad estimada, no absoluta
+            base = 80 if k == "temperatura" else 78
+            vals.append(base)
+    corrs = [vals[0], vals[1], int(round((vals[2]+vals[3])/2)), 74]
     fields = [InfoField(label=l, value=v, detail=d, correlation=corrs[i] if i < len(corrs) else None) for i,(l,v,d) in enumerate(profile["fields"])]
     return BodyInfo(kicker=profile["kicker"], title=profile["title"], tone=TONE[profile["tone"]], imageUrl=profile["imageUrl"], fields=fields)
 

@@ -786,66 +786,66 @@ function earthBody(
     }
     fields.push({
         label: "Interferencia humana (OpenStreetMap/Overpass)",
-        value: `${interf[0].toUpperCase() + interf.slice(1)} · ${isolated ? "aislada" : "no plenamente aislada"} · n≈${interfCount} en 1.2 km`,
+        value: `${interf[0].toUpperCase() + interf.slice(1)} · ${isolated ? "aislada" : "no plenamente aislada"} · n≈${interfCount} elementos mapeados (conteo OSM, radio 1.2 km)`,
         detail: `Proxy de antropización desde infraestructura mapeada en OpenStreetMap vía Overpass. ${srcNote(overOk, "https://overpass-api.de")}`,
         correlation: Math.round(comps.interferencia_osm ?? 60),
     });
     const ai = aridity(power?.PRECTOTCORR, power?.T2M);
     const pYear = power?.PRECTOTCORR != null ? power.PRECTOTCORR * 365 : null;
     const pParts: string[] = [];
-    if (power?.T2M != null) pParts.push(`T2M ${power.T2M.toFixed(2)} °C`);
+    if (power?.T2M != null) pParts.push(`T2M ${Number(power.T2M).toFixed(2)} °C`);
     if (power?.T2M_MIN != null && power?.T2M_MAX != null)
-        pParts.push(`rango ${power.T2M_MIN.toFixed(2)} a ${power.T2M_MAX.toFixed(2)} °C`);
-    if (pYear != null) pParts.push(`precip. ${pYear.toFixed(1)} mm/año`);
-    if (power?.RH2M != null) pParts.push(`HR2M ${power.RH2M.toFixed(1)}%`);
-    if (power?.WS2M != null) pParts.push(`viento ${power.WS2M.toFixed(2)} m/s`);
-    if (power?.ALLSKY_SFC_SW_DWN != null) pParts.push(`radiación ${power.ALLSKY_SFC_SW_DWN.toFixed(2)} kWh/m²/día`);
-    if (ai != null) pParts.push(`aridez P/(T+10) ${ai.toFixed(2)}`);
+        pParts.push(`rango ${Number(power.T2M_MIN).toFixed(2)} a ${Number(power.T2M_MAX).toFixed(2)} °C`);
+    if (pYear != null) pParts.push(`precip. ${pYear.toFixed(1)} mm/año (${Number(power.PRECTOTCORR).toFixed(3)} mm/día)`);
+    if (power?.RH2M != null) pParts.push(`HR2M ${Number(power.RH2M).toFixed(1)} %`);
+    if (power?.WS2M != null) pParts.push(`viento a 2 m ${Number(power.WS2M).toFixed(2)} m/s`);
+    if (power?.ALLSKY_SFC_SW_DWN != null) pParts.push(`radiación solar ${Number(power.ALLSKY_SFC_SW_DWN).toFixed(2)} kWh/m²/día`);
+    if (ai != null) pParts.push(`índice de aridez (adimensional, aprox. De Martonne) P/(T+10) = ${ai.toFixed(2)}`);
     fields.push({
         label: "Clima (NASA POWER)",
         value: pParts.join("; ") || "sin datos",
-        detail: `Climatología puntual (NASA POWER, MERRA-2/GEWEX). ${srcNote(powerOk, "https://power.larc.nasa.gov/")}`,
+        detail: `Climatología puntual (NASA POWER, MERRA-2/GEWEX). Unidades: °C, mm/año, mm/día, %, m/s, kWh/m²/día. Parámetros: T2M, T2M_MIN, T2M_MAX, PRECTOTCORR, RH2M, WS2M, ALLSKY_SFC_SW_DWN. ${srcNote(powerOk, "https://power.larc.nasa.gov/")}`,
         correlation: Math.round(comps.clima ?? 60),
     });
     fields.push({
         label: "Elevación (DEM)",
-        value: elev != null ? `${elev.toFixed(1)} m s.n.m.` : "sin datos",
-        detail: `Elevación desde DEM (OpenTopData, SRTM 90 m / ASTER 30 m). ${srcNote(elevOk, "https://www.opentopodata.org")}`,
+        value: elev != null ? `${Number(elev).toFixed(1)} m s. n. m.` : "sin datos",
+        detail: `Elevación del terreno (m s. n. m.) desde DEM (OpenTopData, SRTM 90 m / ASTER 30 m). ${srcNote(elevOk, "https://www.opentopodata.org")}`,
         correlation: Math.round(comps.altitud_dem ?? 60),
     });
     const sub: string[] = [];
     if (soil) {
-        if (soil.clay != null) sub.push(`arcilla ${soil.clay.toFixed(1)}%`);
-        if (soil.sand != null) sub.push(`arena ${soil.sand.toFixed(1)}%`);
-        if (soil.silt != null) sub.push(`limo ${soil.silt.toFixed(1)}%`);
-        if (soil.soc != null) sub.push(`C org ${soil.soc.toFixed(1)} g/kg`);
-        if (soil.bdod != null) sub.push(`densidad ${soil.bdod.toFixed(2)} kg/dm³`);
-        if (soil.phh2o != null) sub.push(`pH ${soil.phh2o.toFixed(2)}`);
+        if (soil.clay != null) sub.push(`arcilla ${Number(soil.clay).toFixed(1)} %`);
+        if (soil.sand != null) sub.push(`arena ${Number(soil.sand).toFixed(1)} %`);
+        if (soil.silt != null) sub.push(`limo ${Number(soil.silt).toFixed(1)} %`);
+        if (soil.soc != null) sub.push(`C orgánico ${Number(soil.soc).toFixed(1)} g/kg`);
+        if (soil.bdod != null) sub.push(`densidad aparente ${Number(soil.bdod).toFixed(2)} kg/dm³`);
+        if (soil.phh2o != null) sub.push(`pH(H₂O) ${Number(soil.phh2o).toFixed(2)}`);
         if (soil._tipo) sub.push(String(soil._tipo));
     }
     fields.push({
         label: "Sustrato edáfico (SoilGrids, cuantitativo)",
         value: sub.join("; ") || "sin datos",
-        detail: `Propiedades medias 0–15 cm (ISRIC SoilGrids v2.0). ${srcNote(soilOk, "https://rest.isric.org/soilgrids/v2.0/")}`,
+        detail: `Propiedades medias 0–15 cm (ISRIC SoilGrids v2.0) en unidades físicas (%, g/kg, kg/dm³, pH). ${srcNote(soilOk, "https://rest.isric.org/soilgrids/v2.0/")}`,
         correlation: Math.round(comps.sustrato_humedad ?? 50),
     });
     const hum: string[] = [];
-    if (power?.RH2M != null) hum.push(`HR ${power.RH2M.toFixed(1)}%`);
-    if (pYear != null) hum.push(`precip. ${pYear.toFixed(1)} mm/año`);
-    if (ai != null) hum.push(`aridez P/(T+10) ${ai.toFixed(2)}`);
+    if (power?.RH2M != null) hum.push(`HR media anual ${Number(power.RH2M).toFixed(1)} %`);
+    if (pYear != null) hum.push(`precipitación ${pYear.toFixed(1)} mm/año`);
+    if (ai != null) hum.push(`índice de aridez (adimensional, aprox. De Martonne) P/(T+10) = ${ai.toFixed(2)}`);
     fields.push({
         label: "Humedad y disponibilidad hídrica (cuantitativa)",
         value: hum.join("; ") || "sin datos",
-        detail: `HR/precipitación e índice de aridez cuantitativo. ${srcNote(powerOk, "https://power.larc.nasa.gov/")}`,
+        detail: `Humedad relativa (%), precipitación (mm/año) e índice de aridez (adimensional, fórmula P/(T+10)). ${srcNote(powerOk, "https://power.larc.nasa.gov/")} (índice calculado localmente a partir de esos datos).`,
         correlation: Math.round(comps.sustrato_humedad ?? 50),
     });
     const compStr = Object.entries(comps)
-        .map(([k, v]) => `${k}=${Math.round(Number(v))}%`)
+        .map(([k, v]) => `${k}=${Math.round(Number(v))} %`)
         .join(", ");
     fields.push({
         label: "Metodología de similitud (por componentes)",
-        value: `Componentes: ${compStr}`,
-        detail: "Promedio ponderado de componentes medidos/consultados o calculados localmente cuando una API no responde. Resultado directo sin normalización a un índice acotado.",
+        value: `Componentes (%): ${compStr}`,
+        detail: "Promedio ponderado de componentes medidos/consultados o calculados localmente cuando una API no responde. Resultado directo sin normalización a un índice acotado. Fórmulas/variables relevantes: P/(T+10), T2M, PRECTOTCORR, RH2M.",
         correlation: undefined as any,
     });
     return {
@@ -858,14 +858,13 @@ function earthBody(
 }
 function zoneBody(profile: ZoneProfile, zone: Record<string, string>): BodyInfo {
     const keys = ["composicion", "temperatura", "relieve", "zona"];
-    const vals = keys.map(k => (zone[k] ? (profile.tags[k] === zone[k] ? 100 : 45) : 78));
-    const corrs = [vals[0], vals[1], Math.round((vals[2] + vals[3]) / 2), 72];
-    const isMarsPlanet = /^Marte\b/i.test(profile.kicker);
+    const vals = keys.map(k => (zone[k] ? (profile.tags[k] === zone[k] ? 92 : 35) : (k === "temperatura" ? 80 : 78)));
+    const corrs = [vals[0], vals[1], Math.round((vals[2] + vals[3]) / 2), 74];
     return {
         kicker: profile.kicker,
         title: profile.title,
         tone: TONE[profile.tone],
-        imageUrl: isMarsPlanet ? PLANET_IMAGES.marte : profile.imageUrl,
+        imageUrl: profile.imageUrl,
         fields: profile.fields.map((f, i) => ({ label: f[0], value: f[1], detail: f[2], correlation: corrs[i] })),
     } as BodyInfo;
 }

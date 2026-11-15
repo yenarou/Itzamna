@@ -29,11 +29,12 @@ const paneTitle = 'font-display text-3xl font-medium';
     </section>
 
     <!-- Planeta elegido -->
-    <section class="relative flex flex-col items-center justify-center gap-5 bg-deep p-4">
-      <div class="absolute right-4 top-4 z-10">
+    <section id="planet-pane" class="relative flex flex-col items-center justify-center gap-5 bg-deep p-4">
+      <div id="planet-picker" class="z-20 flex flex-col items-center gap-3 transition-all duration-500">
+        <p id="planet-picker-label" class="font-display text-xl text-mist md:text-2xl">Selecciona un planeta</p>
         <label for="planet-select" class="sr-only">Planeta</label>
-        <select id="planet-select" class="field-select !w-auto min-w-36">
-          <option value="">Planeta</option>
+        <select id="planet-select" class="field-select planet-select-ui !w-auto min-w-[14rem] px-5 py-3 text-lg md:min-w-[18rem] md:text-xl">
+          <option value="">Elegir planeta…</option>
           {PLANETS.map((p) => <option value={p.id}>{p.name}</option>)}
         </select>
       </div>
@@ -91,6 +92,7 @@ const paneTitle = 'font-display text-3xl font-medium';
           <path d="m5 17 6-6 6 6"></path>
         </svg>
       </button>
+      <button id="reopen-results" type="button" hidden class="rounded-md border border-line bg-panel px-3 py-1.5 text-sm hover:border-ochre">Ver resultados</button>
     </div>
 
     <!-- Búsqueda por campos -->
@@ -120,7 +122,7 @@ const paneTitle = 'font-display text-3xl font-medium';
               <button id="use-my-location" type="button" class="rounded-md border border-line px-3 py-1.5 text-sm hover:border-ochre">📍 Usar mi ubicación</button>
               <span id="user-loc-status" class="text-xs text-mist"></span>
             </div>
-            <div id="loc-map" class="mb-3 h-56 w-full overflow-hidden rounded-md border border-line" aria-label="Mapa para seleccionar punto en la Tierra"></div>
+            <div id="loc-map" class="mb-3 h-72 w-full overflow-hidden rounded-md border border-line md:h-[26rem]" aria-label="Mapa para seleccionar punto en la Tierra"></div>
             <div class="grid gap-3 sm:grid-cols-3">
               <div>
                 <label for="loc-lat" class="mb-1.5 block text-sm text-mist">Latitud</label>
@@ -164,7 +166,7 @@ const paneTitle = 'font-display text-3xl font-medium';
           ))
         }
       </div>
-      <div class="mx-auto mt-8 flex max-w-4xl flex-col items-end gap-2">
+      <div class="mx-auto mt-8 flex max-w-4xl flex-col items-end gap-3">
         <button
           id="confirm"
           type="submit"
@@ -172,6 +174,20 @@ const paneTitle = 'font-display text-3xl font-medium';
         >
           Confirmar
         </button>
+        <div id="search-loading" hidden class="w-full max-w-md self-end rounded-md border border-line bg-panel/80 p-3" aria-live="polite">
+          <div class="mb-2 flex items-center justify-between text-sm text-mist">
+            <span class="flex items-center gap-2"><span class="inline-block size-4 animate-spin rounded-full border-2 border-ochre border-t-transparent" aria-hidden="true"></span>Buscando zonas similares…</span>
+            <span id="search-loading-pct" class="font-medium text-ochre">Calculando</span>
+          </div>
+          <div class="h-2.5 w-full overflow-hidden rounded-full bg-line/60">
+            <div id="search-loading-bar" class="loading-bar h-full rounded-full bg-ochre" style="width:35%"></div>
+          </div>
+          <div class="mt-3 grid gap-2">
+            <div class="skeleton h-3 w-11/12 rounded"></div>
+            <div class="skeleton h-3 w-9/12 rounded"></div>
+            <div class="skeleton h-3 w-10/12 rounded"></div>
+          </div>
+        </div>
         <p id="search-status" role="status" class="min-h-5 text-sm text-mist"></p>
       </div>
     </form>
@@ -184,7 +200,7 @@ const paneTitle = 'font-display text-3xl font-medium';
       class="absolute inset-0 z-30 overflow-y-auto bg-deep"
     >
       <div class="sticky top-0 z-10 border-b border-line bg-panel/95 px-4 py-3 backdrop-blur md:px-8">
-        <div class="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-3">
+        <div class="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-3">
           <button
             id="results-close"
             type="button"
@@ -193,15 +209,39 @@ const paneTitle = 'font-display text-3xl font-medium';
             Volver
           </button>
           <h2 id="results-title" class="font-display text-2xl font-medium">Zonas similares</h2>
+          <div class="flex items-center gap-2">
+            <button id="match-prev" type="button" aria-label="Zona anterior" class="grid size-9 place-items-center rounded-md border border-line text-lg hover:border-ochre disabled:opacity-40">‹</button>
+            <button id="match-next" type="button" aria-label="Zona siguiente" class="grid size-9 place-items-center rounded-md border border-line text-lg hover:border-ochre disabled:opacity-40">›</button>
+          </div>
           <div id="match-tabs" role="tablist" aria-label="Zonas encontradas" class="flex flex-wrap gap-2"></div>
+          <div class="ml-auto flex flex-wrap gap-2">
+            <button id="export-csv" type="button" class="rounded-md border border-line px-3 py-1.5 text-sm hover:border-ochre">Exportar CSV</button>
+            <button id="export-pdf" type="button" class="rounded-md border border-line px-3 py-1.5 text-sm hover:border-ochre">Exportar PDF</button>
+          </div>
         </div>
       </div>
 
-      <div class="mx-auto max-w-6xl px-4 py-8 md:px-8">
+      <div id="results-print-root" class="mx-auto max-w-6xl px-4 py-8 md:px-8">
         <p class="mb-6 flex items-baseline gap-3">
           <span class="text-sm text-mist">Similitud</span>
           <strong id="result-percent" class="font-display text-5xl font-semibold text-ochre"></strong>
         </p>
+        <div id="results-skeleton" hidden class="grid gap-8 md:grid-cols-2" aria-hidden="true">
+          <div class="space-y-3">
+            <div class="skeleton h-8 w-2/3 rounded"></div>
+            <div class="skeleton aspect-video w-full rounded-lg"></div>
+            <div class="skeleton h-20 w-full rounded"></div>
+            <div class="skeleton h-20 w-full rounded"></div>
+            <div class="skeleton h-20 w-11/12 rounded"></div>
+          </div>
+          <div class="space-y-3">
+            <div class="skeleton h-8 w-2/3 rounded"></div>
+            <div class="skeleton aspect-video w-full rounded-lg"></div>
+            <div class="skeleton h-20 w-full rounded"></div>
+            <div class="skeleton h-20 w-full rounded"></div>
+            <div class="skeleton h-20 w-11/12 rounded"></div>
+          </div>
+        </div>
         <div id="general" class="grid gap-8 md:grid-cols-2"></div>
 
         <div class="mt-10 border-t border-line pt-6">

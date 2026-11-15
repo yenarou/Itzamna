@@ -14,6 +14,7 @@ function el<T extends Element>(selector: string): T {
 
 const root = el<HTMLElement>("#explorer");
 const planetSelect = el<HTMLSelectElement>("#planet-select");
+const planetPicker = el<HTMLElement>("#planet-picker");
 const emptyPrompt = el<HTMLElement>("#empty-prompt");
 const control = el<HTMLElement>("#control");
 const toggleSearch = el<HTMLButtonElement>("#toggle-search");
@@ -22,9 +23,13 @@ const percentValue = el<HTMLElement>("#percent-value");
 const searchPanel = el<HTMLFormElement>("#search-panel");
 const confirmBtn = el<HTMLButtonElement>("#confirm");
 const searchStatus = el<HTMLElement>("#search-status");
+const searchLoading = el<HTMLElement>("#search-loading");
 const results = el<HTMLElement>("#results");
+const resultsSkeleton = document.querySelector<HTMLElement>("#results-skeleton");
 const resultsClose = el<HTMLButtonElement>("#results-close");
 const matchTabs = el<HTMLElement>("#match-tabs");
+const matchPrev = el<HTMLButtonElement>("#match-prev");
+const matchNext = el<HTMLButtonElement>("#match-next");
 const resultPercent = el<HTMLElement>("#result-percent");
 const general = el<HTMLElement>("#general");
 const advancedToggle = el<HTMLButtonElement>("#advanced-toggle");
@@ -37,6 +42,9 @@ const userLocStatus = el<HTMLElement>("#user-loc-status");
 const earthCompare = el<HTMLImageElement>("#earth-compare");
 const earthCompareWrap = el<HTMLElement>("#earth-compare-wrap");
 const earthCompareCaption = el<HTMLElement>("#earth-compare-caption");
+const reopenResults = document.querySelector<HTMLButtonElement>("#reopen-results");
+const exportCsvBtn = document.querySelector<HTMLButtonElement>("#export-csv");
+const exportPdfBtn = document.querySelector<HTMLButtonElement>("#export-pdf");
 
 let planet: PlanetId | "" = "";
 let matches: Match[] = [];
@@ -239,6 +247,11 @@ function setState(next: State): void {
     toggleSearch.setAttribute("aria-expanded", String(next === "searching"));
     chevron.style.transform = next === "searching" ? "rotate(180deg)" : "";
     emptyPrompt.hidden = next !== "idle";
+    if (planetPicker) {
+        planetPicker.classList.toggle("picker-centered", next === "idle");
+        planetPicker.classList.toggle("picker-corner", next !== "idle");
+    }
+    if (reopenResults) reopenResults.hidden = !(next === "selected" && matches.length > 0);
     if (next === "searching") {
         ensureMap();
         setTimeout(() => {
@@ -289,32 +302,47 @@ function readLocation(): LocationQuery | undefined {
     return { lat: latN, lng: lngN, radiusKm: radiusN };
 }
 
+function fmtFormulas(text: string): string {
+    // aplica formato a expresiones/fórmulas comunes sin romper HTML ya escapado
+    let out = text;
+    const wrap = (re: RegExp) => { out = out.replace(re, (m) => `<code class="formula">${m}</code>`); };
+    wrap(/P\/\(T\+10\)/g);
+    wrap(/\bALLSKY_SFC_SW_DWN\b/g);
+    wrap(/\bPRECTOTCORR\b/g);
+    wrap(/\bT2M_(?:MIN|MAX)\b/g);
+    wrap(/\bT2M\b/g);
+    wrap(/\bRH2M\b/g);
+    wrap(/\bWS2M\b/g);
+    wrap(/\bFeO\/TiO₂\b/g);
+    wrap(/\bCO₂\b/g);
+    wrap(/\b~?\d+(?:\.\d+)?\s*mbar\b/g);
+    wrap(/\bg\s*≈\s*0\.165\s*g\b/g);
+    return out;
+}
+
 function bodyColumn(b: BodyInfo, withImage: boolean, longText: boolean, extra?: string): string {
-    const fields = b.fields
+    void longText;
+    const rows = b.fields
         .map(f => {
-            if (longText) {
-                return `<div class="border-t border-line py-4">
-             <dt class="text-sm text-mist">${esc(f.label)}</dt>
-             <dd class="mt-1 font-medium">${esc(f.value)}</dd>
-             <dd class="mt-2 max-w-[60ch] leading-relaxed text-mist">${esc(f.detail)}</dd>
-           </div>`;
-            }
+            const isGeo = f.label === "Georreferenciación";
+            const geoCoords = isGeo ? (f.value.match(/-?\d+(?:\.\d+)?/g) || []) : [];
+            const geoLink = isGeo && geoCoords.length >= 2 ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(geoCoords[0] + "," + geoCoords[1])}` : null;
+            const rawVal = fmtFormulas(esc(f.value));
+            const valueHtml = isGeo && geoLink
+                ? `<a class="text-base font-semibold text-sky-300 underline decoration-sky-400/40 underline-offset-2 hover:text-sky-200 md:text-lg" href="${esc(geoLink)}" target="_blank" rel="noopener noreferrer">${rawVal} ↗</a>`
+                : `<span class="${isGeo ? "text-base md:text-lg" : ""}">${rawVal}</span>`;
             const corr = typeof f.correlation === "number" ? Math.max(0, Math.min(100, Math.round(f.correlation))) : null;
-            const bar = corr !== null
-                ? `<div class="mt-2">
-                     <div class="mb-1 flex items-center justify-between text-xs text-mist"><span>Correlación</span><span class="font-medium text-ochre">${corr}%</span></div>
-                     <div class="h-2 w-full overflow-hidden rounded bg-line/60" role="img" aria-label="Correlación ${corr}%"><div class="h-full rounded bg-ochre" style="width:${corr}%"></div></div>
-                   </div>`
-                : "";
-            const detail = f.detail
-                ? `<dd class="mt-2 text-sm leading-relaxed text-mist">${esc(f.detail)}</dd>`
-                : "";
-            return `<div class="rounded-md border border-line bg-panel px-4 py-3">
-             <dt class="text-sm text-mist">${esc(f.label)}</dt>
-             <dd class="mt-0.5 font-medium">${esc(f.value)}</dd>
-             ${bar}
-             ${detail}
-           </div>`;
+            const barColor = corr === null ? "bg-ochre" : corr >= 75 ? "bg-emerald-500" : corr >= 50 ? "bg-sky-500" : corr >= 25 ? "bg-amber-500" : "bg-rose-500";
+            const corrHtml = corr !== null
+                ? `<div class="min-w-[9rem]"><div class="mb-1 flex items-center justify-between text-xs text-mist"><span>Correlación</span><span class="font-medium text-chalk">${corr} %</span></div><div class="h-2.5 w-full overflow-hidden rounded-full bg-line/60" role="img" aria-label="Correlación ${corr} por ciento"><div class="h-full rounded-full ${barColor}" style="width:${corr}%"></div></div></div>`
+                : `<span class="text-mist">—</span>`;
+            const detailHtml = f.detail ? fmtFormulas(esc(f.detail)) : `<span class="text-mist">—</span>`;
+            return `<tr>
+              <th scope="row" class="cell-label">${esc(f.label)}</th>
+              <td class="cell-value">${valueHtml}</td>
+              <td>${corrHtml}</td>
+              <td class="cell-detail">${detailHtml}</td>
+            </tr>`;
         })
         .join("");
     const isEarthCoordImage = withImage && !!b.imageUrl && /Tierra|calculad/i.test(b.kicker + " " + b.title);
@@ -336,7 +364,12 @@ function bodyColumn(b: BodyInfo, withImage: boolean, longText: boolean, extra?: 
         ${extra ?? ""}
       </header>
       ${image}
-      <dl class="${longText ? "" : "space-y-3"}">${fields}</dl>
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Campo</th><th>Valor</th><th>Correlación</th><th>Descripción</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
     </article>`;
 }
 
@@ -364,6 +397,8 @@ function googleMapsRouteUrl(dest: { lat: number; lon: number }): string {
 function renderResults(): void {
     const m = matches[active];
     if (!m) return;
+    if (resultsSkeleton) resultsSkeleton.hidden = true;
+    general.hidden = false;
 
     matchTabs.innerHTML = matches
         .map((x, i) => {
@@ -376,20 +411,49 @@ function renderResults(): void {
         .join("");
 
     resultPercent.textContent = `${m.percentage}%`;
+    const pct = m.percentage;
+    const pctClass = pct >= 75 ? "text-emerald-400" : pct >= 55 ? "text-sky-400" : pct >= 35 ? "text-amber-400" : "text-rose-400";
+    resultPercent.className = `font-display text-5xl font-semibold ${pctClass}`;
     const parts: string[] = [];
     if (typeof m.distanceKm === "number") parts.push(`A ~${m.distanceKm.toFixed(1)} km del punto de búsqueda`);
     if (typeof m.fromUserKm === "number") parts.push(`a ${m.fromUserKm.toFixed(1)} km de ti`);
-    if (typeof m.routeKm === "number" && typeof m.routeMin === "number") parts.push(`ruta ~${m.routeKm.toFixed(1)} km (${Math.round(m.routeMin)} min)`);
+    if (typeof m.routeKm === "number" && typeof m.routeMin === "number") parts.push(`ruta ~${m.routeKm.toFixed(1)} km (${Math.round(m.routeMin)} min en vehículo)`);
     if (m.humanInterference) parts.push(`interferencia humana ${m.humanInterference}${m.isolated ? " (aislada)" : ""}`);
     const coords = candidateCoords(m);
     const mapsUrl = coords ? googleMapsRouteUrl(coords) : null;
     const mapsLink = mapsUrl
-        ? `<a class="mt-2 inline-flex items-center gap-1 text-sm font-medium text-ochre underline decoration-ochre/40 underline-offset-2 hover:decoration-ochre" href="${esc(mapsUrl)}" target="_blank" rel="noopener noreferrer">Abrir ruta en Google Maps ↗</a>`
+        ? `<a class="mt-2 inline-flex items-center gap-1 text-sm font-medium text-sky-300 underline decoration-sky-400/40 underline-offset-2 hover:text-sky-200" href="${esc(mapsUrl)}" target="_blank" rel="noopener noreferrer">Abrir ruta en Google Maps ↗</a>`
         : "";
     const dist = parts.length || mapsLink ? `<div class="mt-1">${parts.length ? `<p class="text-sm text-mist">${esc(parts.join(" · "))}</p>` : ""}${mapsLink}</div>` : "";
+    // tabla en ambas vistas para mejor visualización de datos
     general.innerHTML = bodyColumn(m.earth, true, false, dist) + bodyColumn(m.zone, true, false);
     advanced.innerHTML = bodyColumn(m.earth, false, true, dist) + bodyColumn(m.zone, false, true);
     setCompareImages(m);
+}
+
+function exportResultsCsv(): void {
+    if (!matches.length) return;
+    const rows: string[][] = [["candidato","similitud_%","seccion","campo","valor","correlacion_%","descripcion"]];
+    matches.forEach((m, i) => {
+        const label = m.placeName || m.earth.title || `Candidato ${i+1}`;
+        const pushBody = (section: string, b: BodyInfo) => {
+            b.fields.forEach(f => rows.push([label, String(m.percentage), section, f.label, f.value, f.correlation != null ? String(f.correlation) : "", f.detail]));
+        };
+        pushBody("Tierra", m.earth);
+        pushBody("Zona", m.zone);
+    });
+    const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");
+    const blob = new Blob(["\ufeff"+csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = "itzamna_resultados.csv"; a.click();
+    URL.revokeObjectURL(url);
+}
+
+function exportResultsPdf(): void {
+    if (!matches.length) return;
+    // asegurar vista avanzada visible para incluir todos los datos en la impresión/PDF
+    advanced.hidden = false;
+    window.print();
 }
 
 /* ----- Eventos ----- */
@@ -450,7 +514,8 @@ searchPanel.addEventListener("submit", async event => {
         ...(uLoc ? { userLocation: uLoc, preferIsolated: true, preferAccessible: true } : {}),
     };
     confirmBtn.disabled = true;
-    searchStatus.textContent = "Buscando zonas similares…";
+    searchLoading.hidden = false;
+    searchStatus.textContent = "";
 
     try {
         matches = await searchAnalogs(query);
@@ -471,8 +536,36 @@ searchPanel.addEventListener("submit", async event => {
         searchStatus.textContent = "No se pudo completar la búsqueda. Inténtalo de nuevo.";
     } finally {
         confirmBtn.disabled = false;
+        searchLoading.hidden = true;
     }
 });
+
+if (reopenResults) {
+    reopenResults.addEventListener("click", () => {
+        if (matches.length > 0) {
+            renderResults();
+            setState("results");
+        }
+    });
+}
+
+if (exportCsvBtn) exportCsvBtn.addEventListener("click", exportResultsCsv);
+if (exportPdfBtn) exportPdfBtn.addEventListener("click", exportResultsPdf);
+
+if (matchPrev) {
+    matchPrev.addEventListener("click", () => {
+        if (!matches.length) return;
+        active = (active - 1 + matches.length) % matches.length;
+        renderResults();
+    });
+}
+if (matchNext) {
+    matchNext.addEventListener("click", () => {
+        if (!matches.length) return;
+        active = (active + 1) % matches.length;
+        renderResults();
+    });
+}
 
 matchTabs.addEventListener("click", event => {
     const tab = (event.target as HTMLElement).closest<HTMLElement>("[data-i]");
