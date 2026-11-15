@@ -6,30 +6,35 @@ interface Props {
   title: string;
   /** true: la página ocupa exactamente el alto de la ventana (explorador). */
   fullscreen?: boolean;
+  /** header transparente sobre hero (scroll aplica vidrio) */
+  transparentHeader?: boolean;
 }
-const { title, fullscreen = false } = Astro.props;
+const { title, fullscreen = false, transparentHeader = false } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang="es" data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Itzamná identifica zonas de la Tierra con características comparables a zonas de la Luna y Marte."
+      content="Itzamná identifica zonas de la Tierra con características comparables a zonas de la Luna y Marte mediante análisis geoespacial y criterios científicos."
     />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <title>{title} · Itzamná</title>
   </head>
-  <body class={fullscreen ? 'flex h-dvh flex-col overflow-hidden' : 'flex min-h-dvh flex-col'}>
-    <Header />
+  <body class:list={[
+    'min-h-dvh flex flex-col',
+    fullscreen ? 'h-dvh overflow-hidden' : '',
+  ]}>
+    <Header transparent={transparentHeader} />
     <slot />
   </body>
 </html>

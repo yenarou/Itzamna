@@ -4,13 +4,153 @@ import Planet from '../components/Planet.astro';
 import { EARTH_FIELDS, PLANETS } from '../lib/data';
 
 const paneTitle = 'font-display text-3xl font-medium';
+const tech = [
+  { name: 'Astro', desc: 'Framework del frontend para páginas rápidas y contenido estático optimizado.' },
+  { name: 'TypeScript', desc: 'Tipado en el frontend y scripts para mayor claridad y mantenimiento.' },
+  { name: 'Tailwind CSS', desc: 'Sistema de estilos utilitario para la interfaz y el diseño responsive.' },
+  { name: 'ASP.NET Core', desc: 'Backend que expone y orquesta la API de búsqueda de análogos.' },
+  { name: 'Python', desc: 'Lenguaje del motor científico para cálculo e integración de datos.' },
+  { name: 'FastAPI', desc: 'Servicio científico que procesa consultas y devuelve candidatos/análisis.' },
+];
 ---
 
-<Base title="Explorar" fullscreen>
-  <main
+<Base title="Explorar" transparentHeader>
+  <main class="page-wrap">
+    <!-- HERO -->
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-stars" aria-hidden="true"></div>
+      <div class="hero-orbits" aria-hidden="true">
+        <span class="hero-orbit o1"></span>
+        <span class="hero-orbit o2"></span>
+        <span class="hero-orbit o3"></span>
+        <span class="hero-planet mars"></span>
+        <span class="hero-planet moon"></span>
+      </div>
+      <div class="hero-glow" aria-hidden="true"></div>
+      <div class="hero-content reveal is-visible">
+        <p class="hero-kicker">Exploración científica · Análogos terrestres</p>
+        <h1 id="hero-title">Explorando la Tierra para comprender otros mundos.</h1>
+        <p>
+          Itzamná identifica regiones terrestres con características comparables a entornos de la Luna y Marte mediante análisis geoespacial y criterios científicos.
+        </p>
+        <div class="hero-actions">
+          <a href="#explorador" class="btn-primary">Explorar Itzamná</a>
+          <a href="/nosotros" class="btn-secondary">Conocer el proyecto</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ZIGZAG 1: ¿Qué es Itzamná? (imagen izq, texto der) -->
+    <section class="zigzag" id="que-es">
+      <div class="zigzag-inner">
+        <div class="zigzag-media reveal">
+          <img src="https://images-assets.nasa.gov/image/PIA18033/PIA18033~orig.jpg" alt="La Tierra vista desde el espacio, con océanos y continentes iluminados" loading="lazy" decoding="async" />
+        </div>
+        <div class="zigzag-copy reveal">
+          <p class="zigzag-kicker">Plataforma</p>
+          <h2>¿Qué es Itzamná?</h2>
+          <p>
+            <strong>Itzamná (Integrated Terrestrial-Zonal Analog &amp; Multi-factor Nearest Atlas)</strong> es una plataforma que ayuda a localizar y comparar regiones de la Tierra con rasgos similares a zonas de la Luna y Marte.
+          </p>
+          <p>
+            A partir de un punto geográfico, un radio y características seleccionadas, calcula candidatos análogos y presenta información georreferenciada, similitud por criterios y datos de apoyo para la exploración y el análisis.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ZIGZAG 2: Nuestro propósito (texto izq, imagen der) -->
+    <section class="zigzag zigzag-alt" id="proposito">
+      <div class="zigzag-inner reverse">
+        <div class="zigzag-media reveal">
+          <img src="https://images-assets.nasa.gov/image/PIA00407/PIA00407~orig.jpg" alt="Superficie de Marte con relieve y tonalidades rojizas" loading="lazy" decoding="async" />
+        </div>
+        <div class="zigzag-copy reveal">
+          <p class="zigzag-kicker">Propósito</p>
+          <h2>Nuestro propósito</h2>
+          <p>
+            Encontrar análogos terrestres permite estudiar, en nuestro propio planeta, condiciones y paisajes comparables a entornos extraterrestres. Esto facilita preparar observaciones, entrenamientos y análisis en lugares accesibles antes de pensar en escenarios lunares o marcianos.
+          </p>
+          <p>
+            Itzamná busca hacer esa comparación más clara: reunir ubicación, contexto ambiental y criterios de similitud en una sola vista para apoyar la toma de decisiones y el aprendizaje.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ZIGZAG 3: Exploración y análisis (imagen izq, texto der) -->
+    <section class="zigzag" id="analisis">
+      <div class="zigzag-inner">
+        <div class="zigzag-media reveal">
+          <img src="https://images-assets.nasa.gov/image/PIA00256/PIA00256~orig.jpg" alt="Superficie lunar con cráteres y mares basálticos" loading="lazy" decoding="async" />
+        </div>
+        <div class="zigzag-copy reveal">
+          <p class="zigzag-kicker">Análisis geoespacial</p>
+          <h2>Exploración y análisis</h2>
+          <p>
+            La plataforma permite seleccionar un planeta y una zona de interés, elegir un punto en el mapa y definir un radio de búsqueda. Con esos parámetros genera candidatos calculados en el área y muestra su similitud, distancia y correlación por campo.
+          </p>
+          <p>
+            Los resultados combinan datos de consulta (cuando las fuentes responden) con estimaciones locales marcadas como tales, ofreciendo una lectura transparente entre datos obtenidos y valores calculados.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ZIGZAG 4: Tecnología (texto izq, imagen der) -->
+    <section class="zigzag zigzag-alt" id="tecnologia">
+      <div class="zigzag-inner reverse">
+        <div class="zigzag-media reveal">
+          <img src="https://images-assets.nasa.gov/image/PIA12235/PIA12235~orig.jpg" alt="Mapa topográfico y relieve representando análisis de superficie" loading="lazy" decoding="async" />
+        </div>
+        <div class="zigzag-copy reveal">
+          <p class="zigzag-kicker">Arquitectura</p>
+          <h2>Tecnología</h2>
+          <p>Itzamná integra componentes web y de cálculo científico, cada uno con una responsabilidad definida:</p>
+          <ul>
+            {tech.map((t) => (
+              <li><strong>{t.name}:</strong> {t.desc}</li>
+            ))}
+          </ul>
+          <div class="chip-row" aria-label="Tecnologías del proyecto">
+            {tech.map((t) => <span class="chip">{t.name}</span>)}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ZIGZAG 5: Visión a futuro (imagen izq, texto der) -->
+    <section class="zigzag" id="vision-futuro">
+      <div class="zigzag-inner">
+        <div class="zigzag-media reveal">
+          <img src="https://images-assets.nasa.gov/image/PIA03654/PIA03654~orig.jpg" alt="Concepto de exploración planetaria y terreno rocoso" loading="lazy" decoding="async" />
+        </div>
+        <div class="zigzag-copy reveal">
+          <p class="zigzag-kicker">Evolución</p>
+          <h2>Visión a futuro</h2>
+          <p>
+            La visión del proyecto es fortalecer la precisión y utilidad de las comparaciones, incorporando de forma progresiva mejores fuentes de datos y criterios de análisis documentados, para que la herramienta sea cada vez más útil en contextos educativos y de planificación exploratoria.
+          </p>
+          <p>
+            Cualquier nueva capacidad se incorporará de manera gradual y verificable, manteniendo clara la distinción entre resultados calculados, estimaciones y datos provenientes de fuentes externas.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXPLORADOR (funcionalidad existente preservada) -->
+    <section id="explorador" class="relative border-t border-line" aria-label="Explorador de análogos">
+      <div class="mx-auto max-w-7xl px-4 pt-14 pb-4 md:px-8">
+        <p class="zigzag-kicker">Herramienta</p>
+        <h2 class="font-display text-3xl font-semibold tracking-tight md:text-4xl">Explorar análogos terrestres</h2>
+        <p class="mt-3 max-w-2xl text-mist">Selecciona un planeta, define características y un punto en la Tierra para buscar zonas comparables.</p>
+      </div>
+
+      <div class="mx-auto max-w-[110rem] px-2 pb-6 md:px-4">
+  <div
     id="explorer"
     data-state="idle"
-    class="relative grid min-h-0 flex-1 grid-rows-2 md:grid-cols-2 md:grid-rows-1"
+    class="relative grid min-h-[88svh] grid-rows-2 overflow-hidden rounded-2xl md:grid-cols-2 md:grid-rows-1"
   >
     <!-- Tierra -->
     <section
@@ -288,11 +428,26 @@ const paneTitle = 'font-display text-3xl font-medium';
         </section>
       </div>
     </section>
+  </div>
+      </div>
+    </section>
   </main>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
   <script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script>
     import '../scripts/explorer';
+  </script>
+  <script>
+    // reveal on scroll
+    const els = document.querySelectorAll('.reveal');
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); } });
+      }, { threshold: 0.12 });
+      els.forEach((el) => { if (!el.classList.contains('is-visible')) io.observe(el); });
+    } else {
+      els.forEach((el) => el.classList.add('is-visible'));
+    }
   </script>
 </Base>

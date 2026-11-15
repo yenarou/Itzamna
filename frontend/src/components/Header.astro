@@ -1,4 +1,6 @@
 ---
+interface Props { transparent?: boolean }
+const { transparent = false } = Astro.props;
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 const links = [
   { href: '/', label: 'Explorar' },
@@ -7,54 +9,56 @@ const links = [
 ];
 ---
 
-<header class="flex h-16 shrink-0 items-center justify-between border-b border-line bg-panel/90 px-4 md:px-8">
-  <div class="flex items-center gap-3">
-    <a href="/" class="flex items-center gap-3 font-display text-[1.8rem] font-semibold tracking-[-0.06em] text-chalk">
-      <span class="inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-[0.7rem] border border-[var(--logo-ring)] bg-[rgba(255,255,255,0.08)] shadow-[inset_1px_1px_0_rgba(255,255,255,0.24)]">
-        <img src="/logo-itzamna.svg" alt="Itzamná" class="h-8 w-8 object-contain" />
+<header id="site-header" data-transparent={transparent ? 'true' : 'false'} class="site-header">
+  <div class="site-header-inner">
+    <a href="/" class="brand" aria-label="Itzamná, inicio">
+      <span class="brand-mark">
+        <img src="/logo-itzamna.svg" alt="" class="h-7 w-7 object-contain" />
       </span>
-      <span>Itzamná</span>
+      <span class="brand-name">Itzamná</span>
     </a>
-  </div>
 
-  <div class="flex items-center gap-2">
-    <button
-      id="theme-toggle"
-      type="button"
-      aria-label="Cambiar tema"
-      class="inline-flex h-9 w-9 items-center justify-center rounded-[0.55rem] border border-line bg-[rgba(255,255,255,0.04)] text-base text-chalk transition-colors hover:bg-[rgba(255,255,255,0.08)]"
-    >
-      <span aria-hidden="true">☀️</span>
-    </button>
-
-    <nav aria-label="Principal">
-      <ul class="flex gap-1.5">
-        {
-          links.map((l) => (
-            <li>
-              <a
-                href={l.href}
-                aria-current={path === l.href ? 'page' : undefined}
-                class:list={[
-                  'px-3 py-1.5 text-sm font-medium transition-colors',
-                  path === l.href
-                    ? 'rounded-[0.5rem] border border-line bg-[rgba(255,255,255,0.08)] text-chalk shadow-[var(--shadow-inset)]'
-                    : 'rounded-[0.5rem] text-mist hover:text-chalk',
-                ]}
-              >
-                {l.label}
-              </a>
-            </li>
-          ))
-        }
+    <nav aria-label="Principal" class="nav-desktop">
+      <ul class="nav-list">
+        {links.map((l) => (
+          <li>
+            <a href={l.href} aria-current={path === l.href ? 'page' : undefined} class:list={['nav-link', path === l.href && 'is-active']}>
+              {l.label}
+            </a>
+          </li>
+        ))}
       </ul>
     </nav>
+
+    <div class="header-actions">
+      <button id="theme-toggle" type="button" aria-label="Cambiar tema" class="icon-btn">
+        <span aria-hidden="true">☀️</span>
+      </button>
+      <button id="menu-toggle" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobile-nav" class="icon-btn menu-btn">
+        <span class="menu-bars" aria-hidden="true"><span></span><span></span><span></span></span>
+      </button>
+    </div>
   </div>
+
+  <nav id="mobile-nav" aria-label="Navegación móvil" class="nav-mobile" hidden>
+    <ul>
+      {links.map((l) => (
+        <li>
+          <a href={l.href} aria-current={path === l.href ? 'page' : undefined} class:list={['nav-link-mobile', path === l.href && 'is-active']}>
+            {l.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
 </header>
 
 <script>
   const root = document.documentElement;
+  const header = document.getElementById('site-header');
   const btn = document.getElementById('theme-toggle');
+  const menuBtn = document.getElementById('menu-toggle');
+  const mobileNav = document.getElementById('mobile-nav');
   const savedTheme = localStorage.getItem('itzamna-theme');
 
   const applyTheme = (theme: 'light' | 'dark') => {
@@ -66,11 +70,10 @@ const links = [
     }
   };
 
+  // default dark para identidad espacial, respeta preferencia guardada o sistema claro explícito
   const preferred: 'light' | 'dark' = (savedTheme === 'light' || savedTheme === 'dark')
     ? savedTheme
-    : window.matchMedia('(prefers-color-scheme: light)').matches
-      ? 'light'
-      : 'dark';
+    : 'dark';
   applyTheme(preferred);
 
   btn?.addEventListener('click', () => {
@@ -78,4 +81,19 @@ const links = [
     localStorage.setItem('itzamna-theme', current);
     applyTheme(current);
   });
+
+  menuBtn?.addEventListener('click', () => {
+    const open = menuBtn.getAttribute('aria-expanded') === 'true';
+    menuBtn.setAttribute('aria-expanded', String(!open));
+    menuBtn.setAttribute('aria-label', open ? 'Abrir menú' : 'Cerrar menú');
+    if (mobileNav) mobileNav.hidden = open;
+    header?.classList.toggle('menu-open', !open);
+  });
+
+  const onScroll = () => {
+    if (!header) return;
+    header.classList.toggle('is-scrolled', window.scrollY > 12);
+  };
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
 </script>
