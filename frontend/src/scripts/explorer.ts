@@ -197,8 +197,7 @@ function initPlanetGlobe(id: string): void {
         const texUrls = id === "luna"
             ? ["https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/moon_1024.jpg"]
             : [
-                "https://raw.githubusercontent.com/jeromeetienne/threex.planets/master/images/marsmap1k.jpg",
-                "https://upload.wikimedia.org/wikipedia/commons/0/02/OSIRIS_Mars_true_color.jpg" // loads, but not equirectangular; used only as last visual fallback if others fail
+                "https://raw.githubusercontent.com/jeromeetienne/threex.planets/master/images/marsmap1k.jpg"
               ];
         const g = new Globe(node)
             .backgroundColor("rgba(0,0,0,0)")
