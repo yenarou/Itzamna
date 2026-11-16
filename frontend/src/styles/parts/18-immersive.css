@@ -18,3 +18,16 @@
   .hero .hero-kicker, .hero h1, .hero p, .hero .hero-actions, [data-content-step].is-visible .zigzag-copy > *, .app-view { animation: none !important; }
   .story-card:hover, .zigzag-media img:hover, .btn-primary:hover, .btn-secondary:hover { transform: none !important; }
 }
+
+/* Earth globe sizing (Globe.GL canvas) */
+.earth-globe {
+  width: min(38vmin, 22rem);
+  height: min(38vmin, 22rem);
+  position: relative;
+}
+.earth-globe canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+  border-radius: 9999px;
+}
