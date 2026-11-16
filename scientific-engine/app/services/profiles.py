@@ -60,7 +60,7 @@ ZONE_PROFILES = {
             "title": "Planicies marcianas",
             "kicker": "Marte · Planicies",
             "tone": "rust",
-            "imageUrl": "https://images-assets.nasa.gov/image/PIA05112/PIA05112~orig.jpg",
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLqDp8W7HeRo3dYfCC1BAsoxdARAlZhk4NN7B5VVuJ43tmDuGVPf-sNgpK&s=10",
             "tags": {"zona": "planicies", "temperatura": "fria", "composicion": "sulfatos", "relieve": "plano"},
             "fields": [
                 ("Litología/mineralogía", "Sulfatos, óxidos férricos y basaltos alterados", "Señales de interacción agua-roca; análogos: desiertos, evaporitas y terrenos volcánicos áridos."),

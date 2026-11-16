@@ -1,4 +1,3 @@
-import Globe from "globe.gl";
 import { searchAnalogs } from "../lib/api";
 import { NASA_EARTH_FALLBACK, NASA_MARS_FALLBACK, NASA_MOON_FALLBACK } from "../lib/data";
 import type { BodyInfo, LocationQuery, Match, PlanetId, SearchQuery, UserLocation } from "../lib/types";
@@ -47,7 +46,6 @@ const accessFilter = el<HTMLSelectElement>("#access-filter");
 const earthCompare = el<HTMLImageElement>("#earth-compare");
 const earthCompareWrap = el<HTMLElement>("#earth-compare-wrap");
 const earthCompareCaption = el<HTMLElement>("#earth-compare-caption");
-const earthGlobe = el<HTMLElement>("#earth-globe");
 const reopenResults = document.querySelector<HTMLButtonElement>("#reopen-results");
 const exportCsvBtn = document.querySelector<HTMLButtonElement>("#export-csv");
 const exportPdfBtn = document.querySelector<HTMLButtonElement>("#export-pdf");
@@ -62,85 +60,7 @@ let marker: any;
 let circle: any;
 let userMarker: any;
 let userLocation: UserLocation | undefined;
-let globeEarth: any = null;
-
-function fallbackGlobeTexture(): string {
-    try {
-        const c = document.createElement("canvas");
-        c.width = 512;
-        c.height = 256;
-        const ctx = c.getContext("2d");
-        if (!ctx) return "";
-        const g = ctx.createLinearGradient(0, 0, 0, c.height);
-        g.addColorStop(0, "#1e4fa3");
-        g.addColorStop(0.5, "#1b7f6b");
-        g.addColorStop(1, "#17408a");
-        ctx.fillStyle = g;
-        ctx.fillRect(0, 0, c.width, c.height);
-        ctx.fillStyle = "rgba(255,255,255,0.08)";
-        for (let i = 0; i < 180; i++) {
-            ctx.beginPath();
-            ctx.arc(Math.random() * c.width, Math.random() * c.height, Math.random() * 18 + 2, 0, Math.PI * 2);
-            ctx.fill();
-        }
-        return c.toDataURL("image/jpeg", 0.85);
-    } catch {
-        return "";
-    }
-}
-
-function resizeEarthGlobe(): void {
-    if (!globeEarth || !earthGlobe) return;
-    const w = earthGlobe.clientWidth || 300;
-    const h = earthGlobe.clientHeight || w;
-    try {
-        globeEarth.width(w);
-        globeEarth.height(h);
-    } catch {}
-}
-
-function initEarthGlobe(): void {
-    if (!earthGlobe || globeEarth) return;
-    if (earthGlobe.clientWidth === 0) {
-        requestAnimationFrame(initEarthGlobe);
-        return;
-    }
-    try {
-        const fallback = fallbackGlobeTexture();
-        globeEarth = new Globe(earthGlobe);
-        globeEarth
-            .backgroundColor("rgba(0,0,0,0)")
-            .showAtmosphere(true)
-            .atmosphereColor("#8ec8ff")
-            .atmosphereAltitude(0.16)
-            .showGraticules(true)
-            .graticuleColor("rgba(156, 204, 255, 0.45)");
-        if (fallback) globeEarth.globeImageUrl(fallback);
-        resizeEarthGlobe();
-        // Try to load detailed Earth texture (may fail offline); fallback remains visible meanwhile
-        const tex = new Image();
-        tex.crossOrigin = "anonymous";
-        tex.onload = () => {
-            try {
-                globeEarth && globeEarth.globeImageUrl(tex.src);
-            } catch {}
-        };
-        tex.src = "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg";
-        globeEarth.controls().autoRotate = true;
-        globeEarth.controls().autoRotateSpeed = 0.65;
-        globeEarth.controls().enablePan = false;
-        globeEarth.controls().enableZoom = false;
-        globeEarth.pointOfView({ lat: 18, lng: -18, altitude: 1.6 }, 0);
-        try {
-            if (typeof ResizeObserver !== "undefined") {
-                new ResizeObserver(() => resizeEarthGlobe()).observe(earthGlobe);
-            }
-        } catch {}
-        window.addEventListener("resize", resizeEarthGlobe);
-    } catch (error) {
-        console.error("No se pudo inicializar Globe.GL", error);
-    }
-}
+let candidateMaps: { map: any; lat: number; lon: number }[] = [];
 
 
 function zoneFallback(p: PlanetId | "" = planet): string {
@@ -295,7 +215,6 @@ function clearCompareImages(): void {
     earthCompare.removeAttribute("src");
     earthCompareCaption.hidden = true;
     earthCompareCaption.textContent = "";
-    if (earthGlobe) earthGlobe.style.display = "";
     document.querySelectorAll<HTMLImageElement>("[data-zone-compare]").forEach(img => {
         img.hidden = true;
         img.removeAttribute("src");
@@ -313,12 +232,16 @@ function clearCompareImages(): void {
 function setCompareImages(m: Match | undefined): void {
     clearCompareImages();
     if (!m) return;
+    const earthPlanet = document.querySelector("#earth-visual .planet") as HTMLElement | null;
     if (m.earth.imageUrl) {
         earthCompare.referrerPolicy = "no-referrer";
         earthCompare.onerror = () => {
             earthCompare.onerror = null;
-            earthCompare.src = NASA_EARTH_FALLBACK;
-            earthCompare.alt = `Satellite image: ${m.earth.title}`;
+            earthCompare.hidden = true;
+            earthCompare.removeAttribute("src");
+            earthCompareWrap.classList.add("hidden");
+            earthCompareCaption.hidden = true;
+            if (earthPlanet) earthPlanet.style.display = "";
         };
         earthCompare.src = m.earth.imageUrl;
         earthCompare.alt = `Satellite image: ${m.earth.title}`;
@@ -326,7 +249,7 @@ function setCompareImages(m: Match | undefined): void {
         earthCompareWrap.classList.remove("hidden");
         earthCompareCaption.textContent = m.earth.title;
         earthCompareCaption.hidden = false;
-        if (earthGlobe) earthGlobe.style.display = "none";
+        if (earthPlanet) earthPlanet.style.display = "none";
     }
     if (planet) {
         const zImg = document.querySelector<HTMLImageElement>(`[data-zone-compare="${planet}"]`);
@@ -504,8 +427,11 @@ function bodyColumn(
         ? `<span aria-hidden="true" class="pointer-events-none absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-full"><span class="block h-4 w-4 -rotate-45 rounded-full rounded-bl-none border-2 border-white bg-ochre shadow-lg"></span><span class="mx-auto -mt-0.5 block h-2 w-2 rounded-full bg-white/90 shadow"></span></span>`
         : "";
     const imgAlt = isEarthCoordImage ? `Satellite image: ${b.title}` : `Image: ${b.title}`;
+    const mapCoords = isEarthCoordImage ? coordsFromBody(b) : null;
     const image = withImage
-        ? b.imageUrl
+        ? mapCoords
+            ? `<div class="candidate-map-wrap"><div class="candidate-map" data-lat="${mapCoords.lat}" data-lon="${mapCoords.lon}" role="img" aria-label="Map preview: ${esc(b.title)}"></div></div>`
+            : b.imageUrl
             ? `<div class="${isEarthCoordImage ? "relative " : ""}img-frame mb-0 overflow-hidden rounded-xl border border-line/50" style="aspect-ratio:16/9">${pin}<img class="img-slot block h-full w-full object-cover" src="${esc(b.imageUrl)}" alt="${esc(imgAlt)}" loading="lazy" referrerpolicy="no-referrer" style="background:${b.tone}" onerror="this.onerror=null;this.src='${fallback}';this.alt='Reference image: ${esc(b.title)}';" /></div>`
             : `<div class="img-slot img-slot-empty mb-0" style="background:${b.tone};aspect-ratio:16/9" role="img" aria-label="Reference image: ${esc(b.title)}"></div>`
         : "";
@@ -556,6 +482,63 @@ function googleMapsRouteUrl(dest: { lat: number; lon: number }): string {
     return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d)}`;
 }
 
+function coordsFromBody(b: BodyInfo): { lat: number; lon: number } | null {
+    const f = b.fields.find(x => x.label === "Georeferencing");
+    if (!f) return null;
+    const nums = f.value.match(/-?\d+(?:\.\d+)?/g);
+    if (!nums || nums.length < 2) return null;
+    const lat = Number(nums[0]);
+    const lon = Number(nums[1]);
+    return Number.isFinite(lat) && Number.isFinite(lon) ? { lat, lon } : null;
+}
+
+function destroyCandidateMaps(): void {
+    candidateMaps.forEach(({ map }) => {
+        try {
+            map.remove();
+        } catch {
+            /* ignore */
+        }
+    });
+    candidateMaps = [];
+}
+
+/** Previsualización de mapa (Leaflet + Esri) centrada exactamente en el candidato. */
+function mountCandidateMaps(): void {
+    if (typeof L === "undefined") return;
+    document.querySelectorAll<HTMLElement>(".candidate-map[data-lat]").forEach(node => {
+        const lat = Number(node.dataset.lat);
+        const lon = Number(node.dataset.lon);
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+        const m = L.map(node, {
+            preferCanvas: true,
+            fadeAnimation: false,
+            zoomAnimation: false,
+            markerZoomAnimation: false,
+            scrollWheelZoom: false,
+        }).setView([lat, lon], 11);
+        L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+            maxZoom: 18,
+            attribution: "Tiles &copy; Esri",
+        }).addTo(m);
+        L.tileLayer(
+            "https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
+            { maxZoom: 18, attribution: "" },
+        ).addTo(m);
+        L.marker([lat, lon]).addTo(m);
+        candidateMaps.push({ map: m, lat, lon });
+        setTimeout(() => m.invalidateSize(), 60);
+    });
+}
+
+/** Los mapas montados dentro de un contenedor oculto (vista avanzada) se recalculan al mostrarse. */
+function refreshCandidateMaps(): void {
+    candidateMaps.forEach(({ map, lat, lon }) => {
+        map.invalidateSize();
+        map.setView([lat, lon], map.getZoom(), { animate: false });
+    });
+}
+
 function renderResults(): void {
     const m = matches[active];
     if (!m) return;
@@ -603,12 +586,14 @@ function renderResults(): void {
     // Basic view: select between Earth and Moon/Mars
     const earthBody = bodyColumn(m.earth, true, true, dist, { showDescription: true, compact: false });
     const zoneBody = bodyColumn(m.zone, true, true, "", { showDescription: true, compact: false });
+    destroyCandidateMaps();
     general.className = "grid gap-8 items-start";
     general.innerHTML = `${showEarth ? earthBody : zoneBody}${geoCard}`;
 
     // Advanced information: both (Earth and Moon/Mars)
     advanced.className = "mt-6 grid gap-8 xl:grid-cols-2 items-start";
     advanced.innerHTML = `${earthBody}${zoneBody}${geoCard}`;
+    mountCandidateMaps();
     setCompareImages(m);
 }
 
@@ -1021,6 +1006,7 @@ advancedToggle.addEventListener("click", () => {
     else advancedToggle.textContent = open ? "Hide advanced information" : "Show advanced information";
     const panel = el<HTMLElement>("#advanced-panel");
     panel.classList.toggle("is-open", open);
+    if (open) setTimeout(refreshCandidateMaps, 60);
 });
 
 resultsClose.addEventListener("click", () => setState("selected"));
@@ -1031,5 +1017,4 @@ document.addEventListener("keydown", event => {
     if (state === "searching" || state === "results") setState("selected");
 });
 
-initEarthGlobe();
 setState("idle");
