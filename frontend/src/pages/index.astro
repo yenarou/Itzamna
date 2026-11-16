@@ -16,9 +16,16 @@ import ExplorerView from '../components/explorer/ExplorerView.astro';
     import '../scripts/appViews';
   </script>
   <script>
-    import '../scripts/reveal';
-    import '../scripts/customDropdowns';
-    import '../scripts/planetDropdown';
+    const loadUi = () => Promise.all([
+      import('../scripts/reveal'),
+      import('../scripts/customDropdowns'),
+      import('../scripts/planetDropdown'),
+    ]);
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(() => { void loadUi(); }, { timeout: 2000 });
+    } else {
+      setTimeout(() => { void loadUi(); }, 0);
+    }
   </script>
   <script>
     // Lazy-load heavy explorer (globe.gl, map logic) and Leaflet only when needed.
