@@ -221,15 +221,18 @@ function initPlanetGlobe(id: string): void {
         controls.maxDistance = 450;
         g.pointOfView({ lat: id === "luna" ? 10 : 15, lng: id === "luna" ? 0 : -20, altitude: 1.8 }, 0);
         // Try remote equirectangular textures; keep full procedural fallback if none load.
-        const tryTex = (i: number) => {
-            if (i >= texUrls.length) return;
-            const img = new Image();
-            img.crossOrigin = "anonymous";
-            img.onload = () => { try { g.globeImageUrl(texUrls[i]); } catch {} };
-            img.onerror = () => tryTex(i + 1);
-            img.src = texUrls[i];
-        };
-        setTimeout(() => tryTex(0), 0);
+        // For Mars we keep the complete procedural texture by default to guarantee full 360° coverage (no black faces).
+        if (id !== "marte") {
+            const tryTex = (i: number) => {
+                if (i >= texUrls.length) return;
+                const img = new Image();
+                img.crossOrigin = "anonymous";
+                img.onload = () => { try { g.globeImageUrl(texUrls[i]); } catch {} };
+                img.onerror = () => tryTex(i + 1);
+                img.src = texUrls[i];
+            };
+            setTimeout(() => tryTex(0), 0);
+        }
         const stopAuto = () => { try { controls.autoRotate = false; } catch {} };
         node.addEventListener("pointerdown", stopAuto);
         node.addEventListener("wheel", stopAuto, { passive: true });
