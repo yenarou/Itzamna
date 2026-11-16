@@ -1,3 +1,4 @@
+import Globe from "globe.gl";
 import { searchAnalogs } from "../lib/api";
 import { NASA_EARTH_FALLBACK, NASA_MARS_FALLBACK, NASA_MOON_FALLBACK } from "../lib/data";
 import type { BodyInfo, LocationQuery, Match, PlanetId, SearchQuery, UserLocation } from "../lib/types";
@@ -46,6 +47,7 @@ const accessFilter = el<HTMLSelectElement>("#access-filter");
 const earthCompare = el<HTMLImageElement>("#earth-compare");
 const earthCompareWrap = el<HTMLElement>("#earth-compare-wrap");
 const earthCompareCaption = el<HTMLElement>("#earth-compare-caption");
+const earthGlobe = document.getElementById("earth-globe") as HTMLElement | null;
 const reopenResults = document.querySelector<HTMLButtonElement>("#reopen-results");
 const exportCsvBtn = document.querySelector<HTMLButtonElement>("#export-csv");
 const exportPdfBtn = document.querySelector<HTMLButtonElement>("#export-pdf");
@@ -55,6 +57,44 @@ let planet: PlanetId | "" = "";
 let matches: Match[] = [];
 let active = 0;
 let dataView: "earth" | "zone" = "zone";
+let globeEarth: any = null;
+
+function resizeEarthGlobe(): void {
+    if (!globeEarth || !earthGlobe) return;
+    const w = earthGlobe.clientWidth || 300;
+    const h = earthGlobe.clientHeight || w;
+    try { globeEarth.width(w); globeEarth.height(h); } catch {}
+}
+
+function initEarthGlobe(): void {
+    if (!earthGlobe || globeEarth || typeof Globe === "undefined") return;
+    if (earthGlobe.clientWidth === 0) { requestAnimationFrame(initEarthGlobe); return; }
+    try {
+        globeEarth = new Globe(earthGlobe)
+            .backgroundColor("rgba(0,0,0,0)")
+            .showAtmosphere(true)
+            .atmosphereColor("#7fdcff")
+            .atmosphereAltitude(0.18)
+            .globeImageUrl("https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg")
+            .bumpImageUrl("https://unpkg.com/three-globe/example/img/earth-topology.png");
+        resizeEarthGlobe();
+        const controls = globeEarth.controls();
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 0.35;
+        controls.enableRotate = true;
+        controls.enablePan = false;
+        controls.enableZoom = true;
+        controls.minDistance = 120;
+        controls.maxDistance = 450;
+        globeEarth.pointOfView({ lat: 20, lng: 0, altitude: 1.8 }, 0);
+        const stopAuto = () => { try { controls.autoRotate = false; } catch {} };
+        earthGlobe.addEventListener("pointerdown", stopAuto);
+        earthGlobe.addEventListener("wheel", stopAuto, { passive: true });
+        window.addEventListener("resize", resizeEarthGlobe);
+        if (typeof ResizeObserver !== "undefined") new ResizeObserver(resizeEarthGlobe).observe(earthGlobe);
+    } catch (e) { console.error("Globe init failed", e); }
+}
+
 let map: any;
 let marker: any;
 let circle: any;
@@ -202,6 +242,7 @@ function clearCompareImages(): void {
     earthCompare.removeAttribute("src");
     earthCompareCaption.hidden = true;
     earthCompareCaption.textContent = "";
+    if (earthGlobe) earthGlobe.style.display = "";
     document.querySelectorAll<HTMLImageElement>("[data-zone-compare]").forEach(img => {
         img.hidden = true;
         img.removeAttribute("src");
@@ -236,6 +277,7 @@ function setCompareImages(m: Match | undefined): void {
         earthCompareWrap.classList.remove("hidden");
         earthCompareCaption.textContent = m.earth.title;
         earthCompareCaption.hidden = false;
+        if (earthGlobe) earthGlobe.style.display = "none";
         if (earthPlanet) earthPlanet.style.display = "none";
     }
     if (planet) {
@@ -578,7 +620,7 @@ function renderResults(): void {
     general.innerHTML = `${showEarth ? earthBody : zoneBody}${geoCard}`;
 
     // Advanced information: both (Earth and Moon/Mars)
-    advanced.className = "mt-6 grid gap-8 xl:grid-cols-2 items-start";
+    advanced.className = "mt-6 grid gap-8 xl:grid-cols-2 items-start content-start pb-8";
     advanced.innerHTML = `${earthBody}${zoneBody}${geoCard}`;
     mountCandidateMaps();
     setCompareImages(m);
@@ -1004,4 +1046,5 @@ document.addEventListener("keydown", event => {
     if (state === "searching" || state === "results") setState("selected");
 });
 
+initEarthGlobe();
 setState("idle");

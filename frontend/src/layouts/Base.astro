@@ -30,14 +30,12 @@ const { title, fullscreen = false, transparentHeader = false } = Astro.props;
     />
     <title>{title} · Itzamná</title>
 
-    <!-- Aviso de seguridad: se decide ANTES de pintar para que no parpadee ni reaparezca en cada página -->
+    <!-- Safety notice: show once per page load/session entry, not on SPA view/tab switches -->
     <script is:inline>
       (function () {
-        var KEY = 'itzamna-safety-accepted';
+        var KEY = 'itzamna-safety-accepted-session';
         var ok = false;
-        try { ok = localStorage.getItem(KEY) === '1'; } catch (e) {}
-        if (!ok) { try { ok = sessionStorage.getItem(KEY) === '1'; } catch (e) {} }
-        if (!ok) ok = document.cookie.indexOf('itzamna_safety=1') > -1;
+        try { ok = sessionStorage.getItem(KEY) === '1'; } catch (e) {}
         if (ok) document.documentElement.setAttribute('data-safety', 'accepted');
       })();
     </script>
@@ -61,7 +59,7 @@ const { title, fullscreen = false, transparentHeader = false } = Astro.props;
     </div>
     <script is:inline>
       (() => {
-        const KEY = 'itzamna-safety-accepted';
+        const KEY = 'itzamna-safety-accepted-session';
         const root = document.documentElement;
         const gate = document.getElementById('safety-gate');
         const btn = document.getElementById('safety-gate-accept');
@@ -72,10 +70,10 @@ const { title, fullscreen = false, transparentHeader = false } = Astro.props;
           return;
         }
         document.body.style.overflow = 'hidden';
+        gate.hidden = false;
+        gate.setAttribute('aria-hidden', 'false');
         btn.addEventListener('click', () => {
-          try { localStorage.setItem(KEY, '1'); } catch {}
           try { sessionStorage.setItem(KEY, '1'); } catch {}
-          document.cookie = 'itzamna_safety=1; max-age=31536000; path=/; SameSite=Lax';
           root.setAttribute('data-safety', 'accepted');
           gate.hidden = true;
           gate.setAttribute('aria-hidden', 'true');

@@ -117,6 +117,8 @@ html[data-theme="light"] .site-header[data-transparent="true"] {
 
 /* Acciones */
 .theme-mode-pill {
+    backdrop-filter: blur(4px);
+    transition: all 0.3s cubic-bezier(.4,0,.2,1);
     box-shadow:
         inset 3px 3px 8px rgba(2, 6, 18, 0.6),
         inset -2px -2px 6px rgba(120, 190, 255, 0.08);
@@ -205,6 +207,8 @@ html[data-theme="light"] .icon-btn {
         -3px -3px 8px rgba(255, 255, 255, 0.95);
 }
 html[data-theme="light"] .theme-mode-pill {
+    backdrop-filter: blur(4px);
+    transition: all 0.3s cubic-bezier(.4,0,.2,1);
     box-shadow:
         inset 3px 3px 8px rgba(18, 58, 112, 0.18),
         inset -2px -2px 6px rgba(255, 255, 255, 0.8);
