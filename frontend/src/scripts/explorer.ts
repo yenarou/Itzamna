@@ -117,22 +117,22 @@ function initPlanetGlobe(id: string): void {
         const texUrls = id === 'luna'
             ? [
                 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/FullMoon2010.jpg/1024px-FullMoon2010.jpg',
-                'https://threejs.org/examples/textures/planets/moon_1024.jpg'
+                'https://raw.githubusercontent.com/mrdoob/three.js/r160/examples/textures/planets/moon_1024.jpg'
               ]
             : [
                 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/OSIRIS_Mars_true_color.jpg/1024px-OSIRIS_Mars_true_color.jpg',
-                'https://www.solarsystemscope.com/textures/download/2k_mars.jpg',
-                'https://threejs.org/examples/textures/planets/mars_1k_color.jpg'
+                'https://upload.wikimedia.org/wikipedia/commons/0/02/OSIRIS_Mars_true_color.jpg',
+                'https://raw.githubusercontent.com/mrdoob/three.js/r160/examples/textures/planets/mars_1k_color.jpg'
               ];
-        const bumpUrl = id === 'luna' ? texUrls[texUrls.length - 1] : '';
+        const bumpUrl = id === 'luna' ? 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/FullMoon2010.jpg/1024px-FullMoon2010.jpg' : '';
         const g = new Globe(node)
             .backgroundColor('rgba(0,0,0,0)')
             .showAtmosphere(id === 'marte')
             .atmosphereColor(id === 'marte' ? '#ffb08a' : '#cfd8e3')
             .atmosphereAltitude(id === 'marte' ? 0.14 : 0.02)
-            .globeImageUrl(texFallback || texUrl);
-        if (bumpUrl) {
-            try { g.bumpImageUrl(bumpUrl).bumpScale(id === 'luna' ? 2 : 1.2); } catch {}
+            .globeImageUrl(texFallback || texUrls[0] || '');
+        if (id === 'luna' && bumpUrl) {
+            try { g.bumpImageUrl(bumpUrl).bumpScale(2); } catch {}
         }
         g.width(node.clientWidth || 300);
         g.height(node.clientHeight || node.clientWidth || 300);
