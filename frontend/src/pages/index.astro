@@ -16,19 +16,15 @@ import ExplorerView from '../components/explorer/ExplorerView.astro';
     import '../scripts/appViews';
   </script>
   <script>
-    const loadUi = () => Promise.all([
-      import('../scripts/reveal'),
-      import('../scripts/customDropdowns'),
-      import('../scripts/planetDropdown'),
-    ]);
+    const loadReveal = () => import('../scripts/reveal');
     if ('requestIdleCallback' in window) {
-      (window as any).requestIdleCallback(() => { void loadUi(); }, { timeout: 2000 });
+      (window as any).requestIdleCallback(() => { void loadReveal(); }, { timeout: 2500 });
     } else {
-      setTimeout(() => { void loadUi(); }, 0);
+      setTimeout(() => { void loadReveal(); }, 200);
     }
   </script>
   <script>
-    // Lazy-load heavy explorer (globe.gl, map logic) and Leaflet only when needed.
+    // Lazy-load heavy explorer (globe.gl, map logic), Leaflet and explorer UI helpers only when needed.
     let explorerReady: Promise<void> | null = null;
     function loadLeaflet(): Promise<void> {
       if ((window as any).L) return Promise.resolve();
@@ -55,7 +51,11 @@ import ExplorerView from '../components/explorer/ExplorerView.astro';
       if (!explorerReady) {
         explorerReady = (async () => {
           await loadLeaflet();
-          await import('../scripts/explorer');
+          await Promise.all([
+            import('../scripts/customDropdowns'),
+            import('../scripts/planetDropdown'),
+            import('../scripts/explorer'),
+          ]);
         })();
       }
       return explorerReady;
