@@ -7,7 +7,7 @@ import urllib.request
 
 
 OSM_HEADERS = {"User-Agent": "ItzamnaHackathon/1.0 (analog search; contact: local-demo)", "Accept": "application/json"}
-API_SAT = "API saturada o sin respuesta; se usó valor calculado/local"
+API_SAT = "API saturated or unavailable; a calculated/local value was used"
 
 
 def _http_json(url: str, timeout: float = 4.0, headers: dict | None = None):

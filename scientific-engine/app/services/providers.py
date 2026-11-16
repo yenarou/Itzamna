@@ -6,7 +6,7 @@ import urllib.parse
 import urllib.request
 
 OSM_HEADERS = {"User-Agent": "ItzamnaHackathon/1.0 (analog search; contact: local-demo)", "Accept": "application/json"}
-API_SAT = "API saturada o sin respuesta; se usó valor calculado/local"
+API_SAT = "API saturated or unavailable; a calculated/local value was used"
 
 
 def _http_json(url: str, timeout: float = 4.0, headers: dict | None = None):
@@ -201,4 +201,4 @@ def local_soil(lat: float, lon: float, power: dict, earth_filters: dict[str, str
 
 
 def src_note(ok: bool, src: str) -> str:
-    return f"Fuente: {src}." if ok else f"{API_SAT} (fuente prevista: {src})."
+    return f"Source: {src}." if ok else f"{API_SAT} (expected source: {src})."
