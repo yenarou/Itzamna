@@ -102,23 +102,39 @@ function initPlanetGlobe(id: string): void {
     if (!node) return;
     if (node.clientWidth === 0) { requestAnimationFrame(() => initPlanetGlobe(id)); return; }
     try {
+        const texFallback = planetTexture(id);
+        const texUrl = id === 'luna'
+            ? 'https://threejs.org/examples/textures/planets/moon_1024.jpg'
+            : 'https://threejs.org/examples/textures/planets/mars_1k_color.jpg';
+        const bumpUrl = id === 'luna'
+            ? 'https://threejs.org/examples/textures/planets/moon_1024.jpg'
+            : '';
         const g = new Globe(node)
             .backgroundColor('rgba(0,0,0,0)')
             .showAtmosphere(id === 'marte')
-            .atmosphereColor(id === 'marte' ? '#ffb08a' : '#d0d0d0')
-            .atmosphereAltitude(id === 'marte' ? 0.12 : 0.03)
-            .globeImageUrl(planetTexture(id));
+            .atmosphereColor(id === 'marte' ? '#ffb08a' : '#cfd8e3')
+            .atmosphereAltitude(id === 'marte' ? 0.14 : 0.02)
+            .globeImageUrl(texFallback || texUrl);
+        if (bumpUrl) {
+            try { g.bumpImageUrl(bumpUrl).bumpScale(id === 'luna' ? 2 : 1.2); } catch {}
+        }
         g.width(node.clientWidth || 300);
         g.height(node.clientHeight || node.clientWidth || 300);
         const controls = g.controls();
         controls.autoRotate = true;
-        controls.autoRotateSpeed = id === 'marte' ? 0.3 : 0.2;
+        controls.autoRotateSpeed = id === 'marte' ? 0.28 : 0.18;
         controls.enableRotate = true;
         controls.enablePan = false;
         controls.enableZoom = true;
         controls.minDistance = 120;
         controls.maxDistance = 450;
         g.pointOfView({ lat: id === 'luna' ? 10 : 15, lng: id === 'luna' ? 0 : -20, altitude: 1.8 }, 0);
+        // try load realistic texture over fallback
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => { try { g.globeImageUrl(texUrl); } catch {} };
+        img.onerror = () => {};
+        img.src = texUrl;
         const stopAuto = () => { try { controls.autoRotate = false; } catch {} };
         node.addEventListener('pointerdown', stopAuto);
         node.addEventListener('wheel', stopAuto, { passive: true });
@@ -688,7 +704,7 @@ function renderResults(): void {
 
     // Advanced information: both (Earth and Moon/Mars)
     advanced.className = "mt-6 grid gap-8 xl:grid-cols-2 items-start content-start pb-8";
-    advanced.innerHTML = `${earthBody}${zoneBody}${geoCard}`;
+    advanced.innerHTML = `${geoCard ? `<div class=\"xl:col-span-2\">${geoCard}</div>` : ""}${earthBody}${zoneBody}`;
     mountCandidateMaps();
     setCompareImages(m);
 }
