@@ -21,7 +21,7 @@ const { title, fullscreen = false, transparentHeader = false } = Astro.props;
       name="description"
       content="Itzamná identifies regions on Earth with characteristics comparable to environments on the Moon and Mars through geospatial analysis and scientific criteria."
     />
-    <link rel="icon" type="image/svg+xml" href="/logo-itzamna.svg" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -29,6 +29,18 @@ const { title, fullscreen = false, transparentHeader = false } = Astro.props;
       rel="stylesheet"
     />
     <title>{title} · Itzamná</title>
+
+    <!-- Aviso de seguridad: se decide ANTES de pintar para que no parpadee ni reaparezca en cada página -->
+    <script is:inline>
+      (function () {
+        var KEY = 'itzamna-safety-accepted';
+        var ok = false;
+        try { ok = localStorage.getItem(KEY) === '1'; } catch (e) {}
+        if (!ok) { try { ok = sessionStorage.getItem(KEY) === '1'; } catch (e) {} }
+        if (!ok) ok = document.cookie.indexOf('itzamna_safety=1') > -1;
+        if (ok) document.documentElement.setAttribute('data-safety', 'accepted');
+      })();
+    </script>
   </head>
   <body class:list={[
     'min-h-dvh flex flex-col',
@@ -36,49 +48,39 @@ const { title, fullscreen = false, transparentHeader = false } = Astro.props;
   ]}>
     <Header transparent={transparentHeader} />
     <slot />
-    <div id="safety-gate" class="safety-gate" role="dialog" aria-modal="true" aria-labelledby="safety-gate-title" aria-describedby="safety-gate-text" style="position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;padding:1.25rem;background:rgba(4,8,22,.88);">
-      <div class="safety-gate-card" style="width:min(720px,96vw);border:1px solid rgba(120,190,255,.25);border-radius:1.1rem;background:rgba(10,20,40,.98);color:#eaf2ff;padding:1.5rem 1.6rem;box-shadow:0 30px 80px rgba(0,0,0,.55);">
-        <h2 id="safety-gate-title" class="safety-gate-title" data-i18n="safety.title" style="margin:0 0 .85rem;font-size:1.15rem;letter-spacing:.02em;">SAFETY AND PRIVATE PROPERTY NOTICE</h2>
-        <p id="safety-gate-text" class="safety-gate-text" style="margin:0 0 1.25rem;line-height:1.7;font-size:.98rem;color:#c8d8f0;">
+    <div id="safety-gate" class="safety-gate" role="dialog" aria-modal="true" aria-labelledby="safety-gate-title" aria-describedby="safety-gate-text">
+      <div class="safety-gate-card">
+        <h2 id="safety-gate-title" class="safety-gate-title" data-i18n="safety.title">SAFETY AND PRIVATE PROPERTY NOTICE</h2>
+        <p id="safety-gate-text" class="safety-gate-text">
           <span data-i18n="safety.text1">By continuing, you agree that you must respect local laws and private property boundaries.</span>
           <br /><br />
           <span data-i18n="safety.text2">Entering land, homes, or enclosed spaces to interact with game elements is strictly prohibited. The developer is not responsible for legal penalties, accidents, or damages resulting from unauthorized access to any property.</span>
         </p>
-        <button id="safety-gate-accept" type="button" class="btn-primary safety-gate-btn" data-i18n="safety.accept" style="width:100%;padding:.9rem 1rem;border-radius:.8rem;border:1px solid rgba(120,190,255,.35);background:#2563eb;color:#fff;font-weight:600;cursor:pointer;">I accept and understand</button>
+        <button id="safety-gate-accept" type="button" class="btn-primary safety-gate-btn" data-i18n="safety.accept">I accept and understand</button>
       </div>
     </div>
     <script is:inline>
-      (function () {
-        var gate = document.getElementById('safety-gate');
-        var btn = document.getElementById('safety-gate-accept');
+      (() => {
+        const KEY = 'itzamna-safety-accepted';
+        const root = document.documentElement;
+        const gate = document.getElementById('safety-gate');
+        const btn = document.getElementById('safety-gate-accept');
         if (!gate || !btn) return;
-        var key = 'itzamna-safety-accepted';
-        var accepted = false;
-        try {
-          accepted = sessionStorage.getItem(key) === '1' || localStorage.getItem(key) === '1';
-        } catch (e) {}
-        function show() {
-          document.body.style.overflow = 'hidden';
-          gate.hidden = false;
-          gate.setAttribute('aria-hidden', 'false');
-          gate.style.display = 'flex';
-        }
-        function hide() {
+        if (root.getAttribute('data-safety') === 'accepted') {
           gate.hidden = true;
           gate.setAttribute('aria-hidden', 'true');
-          gate.style.display = 'none';
-          document.body.style.overflow = '';
-          try {
-            sessionStorage.setItem(key, '1');
-            localStorage.setItem(key, '1');
-          } catch (e) {}
-        }
-        if (accepted) {
-          hide();
           return;
         }
-        show();
-        btn.addEventListener('click', hide);
+        document.body.style.overflow = 'hidden';
+        btn.addEventListener('click', () => {
+          try { localStorage.setItem(KEY, '1'); } catch {}
+          try { sessionStorage.setItem(KEY, '1'); } catch {}
+          document.cookie = 'itzamna_safety=1; max-age=31536000; path=/; SameSite=Lax';
+          root.setAttribute('data-safety', 'accepted');
+          gate.hidden = true;
+          gate.setAttribute('aria-hidden', 'true');
+          document.body.style.overflow = '';
+        });
       })();
     </script>
     <script>

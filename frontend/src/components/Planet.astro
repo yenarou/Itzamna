@@ -6,23 +6,32 @@ interface Props {
 }
 
 const { body } = Astro.props;
-
 const src = PLANET_IMAGES[body];
+const isEarth = body === 'tierra';
 ---
 
-<div class={`planet planet-${body}`} aria-hidden="true">
-  <img src={src} alt="" loading="eager" />
-</div>
+{
+  isEarth ? (
+    <div class="planet planet-tierra planet-globe" aria-hidden="true">
+      <div id="earth-globe"></div>
+    </div>
+  ) : (
+    <div class={`planet planet-${body}`} aria-hidden="true">
+      <img src={src} alt="" loading="eager" />
+    </div>
+  )
+}
 
 <style>
   .planet {
     position: relative;
-    width: min(34vmin, 26rem);
+    width: var(--planet-size, min(54vmin, 32rem));
     aspect-ratio: 1;
     border-radius: 50%;
     overflow: hidden;
     box-shadow: 0 0 0 1px rgb(255 255 255 / 0.06), 0 30px 80px rgb(0 0 0 / 0.45);
     background: #111827;
+    flex: none;
   }
 
   .planet img {
@@ -34,7 +43,6 @@ const src = PLANET_IMAGES[body];
     animation: planet-spin 90s linear infinite;
     transform-origin: 50% 50%;
   }
-  .planet-tierra img { animation-duration: 120s; }
   .planet-luna img { animation-duration: 140s; }
   .planet-marte img { animation-duration: 110s; }
 
@@ -43,7 +51,7 @@ const src = PLANET_IMAGES[body];
     to { transform: rotate(360deg) scale(1.08); }
   }
 
-  .planet::after {
+  .planet:not(.planet-globe)::after {
     content: '';
     position: absolute;
     inset: 0;
@@ -53,7 +61,66 @@ const src = PLANET_IMAGES[body];
     pointer-events: none;
   }
 
+  /* El globo 3D dibuja su propia esfera y atmósfera: sin recorte circular */
+  .planet-globe {
+    overflow: visible;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+  }
+  .planet-globe :global(#earth-globe),
+  .planet-globe :global(#earth-globe > div),
+  .planet-globe :global(#earth-globe canvas) {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+  }
+  .planet-globe :global(#earth-globe) {
+    position: absolute;
+    inset: 0;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .planet img { animation: none; transform: none; }
   }
 </style>
+
+<script>
+  import Globe from 'globe.gl';
+
+  const host = document.getElementById('earth-globe') as (HTMLElement & { _globe?: unknown }) | null;
+  if (host && !host._globe) {
+    const wrap = host.parentElement as HTMLElement;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Texturas locales (public/textures): sin depender de CDN ni de CORS
+    const globe = new (Globe as any)(host, { animateIn: false })
+      .globeImageUrl('/textures/earth-blue-marble.jpg')
+      .bumpImageUrl('/textures/earth-topology.png')
+      .backgroundColor('rgba(0,0,0,0)')
+      .showAtmosphere(true)
+      .atmosphereColor('#36d6f5')
+      .atmosphereAltitude(0.16)
+      .pointOfView({ lat: 20, lng: -100, altitude: 1.55 }, 0);
+    host._globe = globe;
+
+    const controls = globe.controls();
+    controls.autoRotate = !reduceMotion;
+    controls.autoRotateSpeed = 0.5;
+    controls.enableZoom = false;
+    controls.enablePan = false;
+
+    // El lienzo siempre es cuadrado y del tamaño del contenedor (--planet-size) → centrado y igual a la Luna/Marte
+    const fit = () => {
+      const size = Math.round(wrap.clientWidth);
+      if (size < 10) {
+        globe.pauseAnimation();
+        return;
+      }
+      globe.resumeAnimation();
+      globe.width(size).height(size);
+    };
+    new ResizeObserver(fit).observe(wrap);
+    fit();
+  }
+</script>
