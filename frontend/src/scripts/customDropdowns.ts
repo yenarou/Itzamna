@@ -108,3 +108,5 @@ document.querySelectorAll<HTMLElement>('.custom-dd[data-dd-for]').forEach((dd) =
     window.addEventListener('scroll', () => { if (dd.dataset.open === 'true') placeMenu(); }, true);
     syncFromSelect();
 });
+
+export {};

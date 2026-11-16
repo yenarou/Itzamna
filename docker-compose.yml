@@ -34,6 +34,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        PUBLIC_API_URL: http://localhost:5000
     container_name: itzamna-frontend
     ports:
       - "4321:4321"

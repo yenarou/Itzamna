@@ -47,3 +47,5 @@ const closeCustom = () => {
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
     syncFromSelect();
 })();
+
+export {};

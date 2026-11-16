@@ -12,3 +12,5 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && 'Intersect
 } else {
     els.forEach((el) => el.classList.add('is-visible'));
 }
+
+export {};
