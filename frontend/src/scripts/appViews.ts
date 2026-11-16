@@ -10,6 +10,7 @@ if (root) {
 
     function showView(name: string, opts?: { focusPicker?: boolean }) {
         root!.dataset.view = name;
+        window.dispatchEvent(new CustomEvent('itzamna:view', { detail: { view: name } }));
         views.forEach((v) => {
             v.hidden = v.dataset.appView !== name;
         });

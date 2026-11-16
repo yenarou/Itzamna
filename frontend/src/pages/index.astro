@@ -12,32 +12,6 @@ import ExplorerView from '../components/explorer/ExplorerView.astro';
     <ExplorerView />
   </main>
 
-  <link rel="preconnect" href="https://unpkg.com" crossorigin />
-  <link
-    rel="preload"
-    as="style"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-    crossorigin=""
-    onload="this.onload=null;this.rel='stylesheet'"
-  />
-  <noscript>
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-      crossorigin=""
-    />
-  </noscript>
-
-  <script
-    is:inline
-    defer
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-    crossorigin=""
-  ></script>
-
   <script>
     import '../scripts/appViews';
   </script>
@@ -47,6 +21,54 @@ import ExplorerView from '../components/explorer/ExplorerView.astro';
     import '../scripts/planetDropdown';
   </script>
   <script>
-    import '../scripts/explorer';
+    // Lazy-load heavy explorer (globe.gl, map logic) and Leaflet only when needed.
+    let explorerReady: Promise<void> | null = null;
+    function loadLeaflet(): Promise<void> {
+      if ((window as any).L) return Promise.resolve();
+      if ((window as any).__leafletLoading) return (window as any).__leafletLoading;
+      (window as any).__leafletLoading = new Promise<void>((resolve, reject) => {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+        link.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
+        link.crossOrigin = '';
+        document.head.appendChild(link);
+        const s = document.createElement('script');
+        s.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+        s.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
+        s.crossOrigin = '';
+        s.defer = true;
+        s.onload = () => resolve();
+        s.onerror = () => reject(new Error('Failed to load Leaflet'));
+        document.head.appendChild(s);
+      });
+      return (window as any).__leafletLoading;
+    }
+    async function ensureExplorer() {
+      if (!explorerReady) {
+        explorerReady = (async () => {
+          await loadLeaflet();
+          await import('../scripts/explorer');
+        })();
+      }
+      return explorerReady;
+    }
+    // Preload when user intends to explore
+    document.addEventListener('click', (e) => {
+      const t = e.target as HTMLElement;
+      if (t.closest('[data-show-view="explore"]')) void ensureExplorer();
+    }, { capture: true });
+    // Also load if app switches to explore by other means
+    window.addEventListener('itzamna:view', (e: Event) => {
+      const name = (e as CustomEvent).detail?.view;
+      if (name === 'explore') void ensureExplorer();
+    });
+    // Fallback: if explore view becomes visible
+    const root = document.getElementById('app-views');
+    if (root) {
+      new MutationObserver(() => {
+        if (root.dataset.view === 'explore') void ensureExplorer();
+      }).observe(root, { attributes: true, attributeFilter: ['data-view'] });
+    }
   </script>
 </Base>
