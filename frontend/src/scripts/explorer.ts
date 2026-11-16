@@ -71,97 +71,172 @@ const planetGlobes: Record<string, any> = {};
 
 function planetTexture(id: string): string {
     try {
-        const c = document.createElement('canvas');
-        c.width = 1024; c.height = 512;
-        const ctx = c.getContext('2d');
-        if (!ctx) return '';
-        const rand = (a:number,b:number)=>a+Math.random()*(b-a);
-        if (id === 'luna') {
-            const g = ctx.createLinearGradient(0,0,0,c.height);
-            g.addColorStop(0,'#d8d8d8'); g.addColorStop(0.5,'#a8a8a8'); g.addColorStop(1,'#8a8a8a');
-            ctx.fillStyle = g; ctx.fillRect(0,0,c.width,c.height);
-            for(let i=0;i<420;i++){const r=rand(2,22); ctx.fillStyle=`rgba(70,70,70,${rand(0.08,0.22)})`; ctx.beginPath(); ctx.arc(rand(0,c.width),rand(0,c.height),r,0,Math.PI*2); ctx.fill();}
-            for(let i=0;i<160;i++){const r=rand(1,10); ctx.fillStyle=`rgba(235,235,235,${rand(0.05,0.14)})`; ctx.beginPath(); ctx.arc(rand(0,c.width),rand(0,c.height),r,0,Math.PI*2); ctx.fill();}
+        const c = document.createElement("canvas");
+        c.width = 2048;
+        c.height = 1024;
+        const ctx = c.getContext("2d");
+        if (!ctx) return "";
+        // Seeded PRNG for stable, complete coverage (no black gaps)
+        let s = id === "luna" ? 424242 : 13371337;
+        const rnd = () => {
+            s = (s * 1664525 + 1013904223) >>> 0;
+            return s / 4294967296;
+        };
+        const rand = (a: number, b: number) => a + rnd() * (b - a);
+        const drawWrappedEllipse = (x: number, y: number, rx: number, ry: number, rot: number, fill: string) => {
+            for (const ox of [-c.width, 0, c.width]) {
+                ctx.save();
+                ctx.translate(ox, 0);
+                ctx.fillStyle = fill;
+                ctx.beginPath();
+                ctx.ellipse(x, y, rx, ry, rot, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        };
+        if (id === "luna") {
+            const g = ctx.createLinearGradient(0, 0, 0, c.height);
+            g.addColorStop(0, "#d9d9d9");
+            g.addColorStop(0.5, "#a7a7a7");
+            g.addColorStop(1, "#8c8c8c");
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, c.width, c.height);
+            for (let i = 0; i < 120; i++) {
+                drawWrappedEllipse(rand(0, c.width), rand(60, c.height - 60), rand(30, 180), rand(18, 100), rand(0, Math.PI), `rgba(75,75,75,${rand(0.08, 0.22)})`);
+            }
+            for (let i = 0; i < 120; i++) {
+                drawWrappedEllipse(rand(0, c.width), rand(40, c.height - 40), rand(20, 120), rand(12, 70), rand(0, Math.PI), `rgba(230,230,230,${rand(0.04, 0.12)})`);
+            }
+            for (let i = 0; i < 900; i++) {
+                const x = rand(0, c.width), y = rand(8, c.height - 8), r = rand(1, 14);
+                ctx.strokeStyle = `rgba(55,55,55,${rand(0.08, 0.28)})`;
+                ctx.lineWidth = rand(0.5, 2);
+                ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke();
+                if (r > 5) {
+                    ctx.fillStyle = `rgba(245,245,245,${rand(0.02, 0.08)})`;
+                    ctx.beginPath(); ctx.arc(x - r * 0.2, y - r * 0.2, r * 0.45, 0, Math.PI * 2); ctx.fill();
+                }
+            }
         } else {
-            const g = ctx.createLinearGradient(0,0,0,c.height);
-            g.addColorStop(0,'#e3b07a'); g.addColorStop(0.18,'#c7773e'); g.addColorStop(0.5,'#9e3d1f'); g.addColorStop(0.82,'#7a2f18'); g.addColorStop(1,'#d7a56f');
-            ctx.fillStyle = g; ctx.fillRect(0,0,c.width,c.height);
-            // dark basalt plains
-            for(let i=0;i<260;i++){const r=rand(12,70); ctx.fillStyle=`rgba(55,20,10,${rand(0.08,0.22)})`; ctx.beginPath(); ctx.ellipse(rand(0,c.width),rand(40,c.height-40),r,rand(r*0.4,r*0.9),rand(0,Math.PI),0,Math.PI*2); ctx.fill();}
-            // bright dusty highlands
-            for(let i=0;i<220;i++){const r=rand(8,50); ctx.fillStyle=`rgba(230,170,120,${rand(0.06,0.18)})`; ctx.beginPath(); ctx.ellipse(rand(0,c.width),rand(30,c.height-30),r,rand(r*0.5,r),rand(0,Math.PI),0,Math.PI*2); ctx.fill();}
-            // canyons/rifts streaks
-            ctx.lineCap='round';
-            for(let i=0;i<70;i++){ctx.strokeStyle=`rgba(35,12,6,${rand(0.08,0.18)})`; ctx.lineWidth=rand(1,5); ctx.beginPath(); const x=rand(0,c.width), y=rand(60,c.height-60); ctx.moveTo(x,y); ctx.bezierCurveTo(x+rand(-120,120),y+rand(-40,40),x+rand(-60,180),y+rand(-50,50),x+rand(40,220),y+rand(-30,30)); ctx.stroke();}
-            // polar caps
-            const north = ctx.createRadialGradient(c.width*0.5, 0, 10, c.width*0.5, 0, c.height*0.14);
-            north.addColorStop(0,'rgba(245,235,225,0.95)'); north.addColorStop(1,'rgba(245,235,225,0)');
-            ctx.fillStyle=north; ctx.fillRect(0,0,c.width,c.height*0.22);
-            const south = ctx.createRadialGradient(c.width*0.52, c.height, 10, c.width*0.52, c.height, c.height*0.13);
-            south.addColorStop(0,'rgba(240,230,220,0.9)'); south.addColorStop(1,'rgba(240,230,220,0)');
-            ctx.fillStyle=south; ctx.fillRect(0,c.height*0.78,c.width,c.height*0.22);
-            // subtle craters
-            for(let i=0;i<140;i++){const x=rand(0,c.width), y=rand(20,c.height-20), r=rand(2,10); ctx.strokeStyle=`rgba(70,25,12,${rand(0.08,0.2)})`; ctx.lineWidth=rand(1,2); ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.stroke();}
+            // Full-coverage Mars equirectangular base (no black regions)
+            const g = ctx.createLinearGradient(0, 0, 0, c.height);
+            g.addColorStop(0, "#e6b77a");
+            g.addColorStop(0.12, "#d57a3f");
+            g.addColorStop(0.35, "#b55327");
+            g.addColorStop(0.55, "#8f3416");
+            g.addColorStop(0.78, "#a84321");
+            g.addColorStop(1, "#dca46a");
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, c.width, c.height);
+
+            for (let i = 0; i < 420; i++) {
+                drawWrappedEllipse(rand(0, c.width), rand(40, c.height - 40), rand(40, 220), rand(18, 110), rand(-0.6, 0.6), `rgba(70,24,10,${rand(0.05, 0.18)})`);
+            }
+            for (let i = 0; i < 360; i++) {
+                drawWrappedEllipse(rand(0, c.width), rand(30, c.height - 30), rand(30, 180), rand(14, 90), rand(-0.7, 0.7), `rgba(236,176,120,${rand(0.04, 0.14)})`);
+            }
+            drawWrappedEllipse(c.width * 0.22, c.height * 0.48, 220, 120, -0.2, "rgba(242,188,132,0.16)");
+            drawWrappedEllipse(c.width * 0.62, c.height * 0.42, 260, 130, 0.15, "rgba(60,20,10,0.14)");
+            drawWrappedEllipse(c.width * 0.82, c.height * 0.58, 210, 110, -0.1, "rgba(85,28,12,0.12)");
+
+            ctx.lineCap = "round";
+            for (let j = 0; j < 3; j++) {
+                ctx.strokeStyle = `rgba(40,12,6,${0.14 + j * 0.04})`;
+                ctx.lineWidth = 7 - j * 1.5;
+                ctx.beginPath();
+                const y0 = c.height * 0.52 + j * 3;
+                for (let x = -50; x <= c.width + 50; x += 20) {
+                    const nx = x / c.width;
+                    const y = y0 + Math.sin(nx * Math.PI * 2.2) * 10 + Math.sin(nx * Math.PI * 5.1) * 4;
+                    ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+            for (let i = 0; i < 140; i++) {
+                ctx.strokeStyle = `rgba(45,14,7,${rand(0.06, 0.16)})`;
+                ctx.lineWidth = rand(0.8, 3.5);
+                ctx.beginPath();
+                let x = rand(0, c.width), y = rand(50, c.height - 50);
+                ctx.moveTo(x, y);
+                for (let k = 0; k < 4; k++) { x += rand(20, 80); y += rand(-18, 18); ctx.lineTo(x, y); }
+                ctx.stroke();
+            }
+            for (let i = 0; i < 520; i++) {
+                const x = rand(0, c.width), y = rand(14, c.height - 14), r = rand(1.5, 16);
+                ctx.strokeStyle = `rgba(70,24,12,${rand(0.08, 0.22)})`;
+                ctx.lineWidth = rand(0.5, 2.2);
+                ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke();
+                ctx.fillStyle = `rgba(30,10,6,${rand(0.02, 0.08)})`;
+                ctx.beginPath(); ctx.arc(x + r * 0.15, y + r * 0.15, r * 0.7, 0, Math.PI * 2); ctx.fill();
+            }
+            const north = ctx.createLinearGradient(0, 0, 0, c.height * 0.16);
+            north.addColorStop(0, "rgba(248,240,232,0.98)");
+            north.addColorStop(0.7, "rgba(244,232,220,0.55)");
+            north.addColorStop(1, "rgba(244,232,220,0)");
+            ctx.fillStyle = north; ctx.fillRect(0, 0, c.width, c.height * 0.18);
+            const south = ctx.createLinearGradient(0, c.height, 0, c.height * 0.84);
+            south.addColorStop(0, "rgba(245,236,226,0.96)");
+            south.addColorStop(0.7, "rgba(240,228,216,0.5)");
+            south.addColorStop(1, "rgba(240,228,216,0)");
+            ctx.fillStyle = south; ctx.fillRect(0, c.height * 0.82, c.width, c.height * 0.18);
         }
-        return c.toDataURL('image/jpeg', 0.92);
-    } catch { return ''; }
+        return c.toDataURL("image/jpeg", 0.94);
+    } catch {
+        return "";
+    }
 }
 
 function initPlanetGlobe(id: string): void {
-    if (planetGlobes[id] || typeof Globe === 'undefined') return;
+    if (planetGlobes[id] || typeof Globe === "undefined") return;
     const node = document.querySelector(`[data-planet-globe="${id}"]`) as HTMLElement | null;
     if (!node) return;
     if (node.clientWidth === 0) { requestAnimationFrame(() => initPlanetGlobe(id)); return; }
     try {
         const texFallback = planetTexture(id);
-        const texUrls = id === 'luna'
-            ? [
-                'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/FullMoon2010.jpg/1024px-FullMoon2010.jpg',
-                'https://raw.githubusercontent.com/mrdoob/three.js/r160/examples/textures/planets/moon_1024.jpg'
-              ]
+        // Equirectangular (2:1) Mars textures only — disc photos caused black/broken faces on rotation.
+        const texUrls = id === "luna"
+            ? ["https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/moon_1024.jpg"]
             : [
-                'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/OSIRIS_Mars_true_color.jpg/1024px-OSIRIS_Mars_true_color.jpg',
-                'https://upload.wikimedia.org/wikipedia/commons/0/02/OSIRIS_Mars_true_color.jpg',
-                'https://raw.githubusercontent.com/mrdoob/three.js/r160/examples/textures/planets/mars_1k_color.jpg'
+                "https://upload.wikimedia.org/wikipedia/commons/5/56/Mars_Viking_MDIM21_ClrMosaic_global_1024.jpg",
+                "https://www.solarsystemscope.com/textures/download/2k_mars.jpg"
               ];
-        const bumpUrl = id === 'luna' ? 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/FullMoon2010.jpg/1024px-FullMoon2010.jpg' : '';
         const g = new Globe(node)
-            .backgroundColor('rgba(0,0,0,0)')
-            .showAtmosphere(id === 'marte')
-            .atmosphereColor(id === 'marte' ? '#ffb08a' : '#cfd8e3')
-            .atmosphereAltitude(id === 'marte' ? 0.14 : 0.02)
-            .globeImageUrl(texFallback || texUrls[0] || '');
-        if (id === 'luna' && bumpUrl) {
-            try { g.bumpImageUrl(bumpUrl).bumpScale(2); } catch {}
+            .backgroundColor("rgba(0,0,0,0)")
+            .showAtmosphere(id === "marte")
+            .atmosphereColor(id === "marte" ? "#ffb08a" : "#cfd8e3")
+            .atmosphereAltitude(id === "marte" ? 0.14 : 0.02)
+            .globeImageUrl(texFallback);
+        if (id === "luna") {
+            try { g.bumpImageUrl(texFallback).bumpScale(1.2); } catch {}
         }
         g.width(node.clientWidth || 300);
         g.height(node.clientHeight || node.clientWidth || 300);
         const controls = g.controls();
         controls.autoRotate = true;
-        controls.autoRotateSpeed = id === 'marte' ? 0.28 : 0.18;
+        controls.autoRotateSpeed = id === "marte" ? 0.28 : 0.18;
         controls.enableRotate = true;
         controls.enablePan = false;
         controls.enableZoom = true;
         controls.minDistance = 120;
         controls.maxDistance = 450;
-        g.pointOfView({ lat: id === 'luna' ? 10 : 15, lng: id === 'luna' ? 0 : -20, altitude: 1.8 }, 0);
-        // try load realistic texture over fallback
-        const tryTex = (i:number) => {
+        g.pointOfView({ lat: id === "luna" ? 10 : 15, lng: id === "luna" ? 0 : -20, altitude: 1.8 }, 0);
+        // Try remote equirectangular textures; keep full procedural fallback if none load.
+        const tryTex = (i: number) => {
             if (i >= texUrls.length) return;
             const img = new Image();
-            img.crossOrigin = 'anonymous';
+            img.crossOrigin = "anonymous";
             img.onload = () => { try { g.globeImageUrl(texUrls[i]); } catch {} };
-            img.onerror = () => tryTex(i+1);
+            img.onerror = () => tryTex(i + 1);
             img.src = texUrls[i];
         };
-        tryTex(0);
+        setTimeout(() => tryTex(0), 0);
         const stopAuto = () => { try { controls.autoRotate = false; } catch {} };
-        node.addEventListener('pointerdown', stopAuto);
-        node.addEventListener('wheel', stopAuto, { passive: true });
-        window.addEventListener('resize', () => { try { g.width(node.clientWidth); g.height(node.clientHeight || node.clientWidth); } catch {} });
-        if (typeof ResizeObserver !== 'undefined') new ResizeObserver(() => { try { g.width(node.clientWidth); g.height(node.clientHeight || node.clientWidth); } catch {} }).observe(node);
+        node.addEventListener("pointerdown", stopAuto);
+        node.addEventListener("wheel", stopAuto, { passive: true });
+        window.addEventListener("resize", () => { try { g.width(node.clientWidth); g.height(node.clientHeight || node.clientWidth); } catch {} });
+        if (typeof ResizeObserver !== "undefined") new ResizeObserver(() => { try { g.width(node.clientWidth); g.height(node.clientHeight || node.clientWidth); } catch {} }).observe(node);
         planetGlobes[id] = g;
-    } catch (e) { console.error('Planet globe init failed', id, e); }
+    } catch (e) { console.error("Planet globe init failed", id, e); }
 }
 
 function initEarthGlobe(): void {
