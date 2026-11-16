@@ -1,3 +1,5 @@
+export {};
+
 const closeCustom = () => {
     document.querySelectorAll<HTMLElement>('.custom-dd[data-open="true"]').forEach((d) => {
         d.dataset.open = 'false';

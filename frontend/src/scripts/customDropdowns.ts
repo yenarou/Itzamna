@@ -1,3 +1,5 @@
+export {};
+
 const closeAll = (except?: HTMLElement) => {
     document.querySelectorAll<HTMLElement>('.custom-dd[data-open="true"], .planet-dd[data-open="true"]').forEach((d) => {
         if (d !== except) {
