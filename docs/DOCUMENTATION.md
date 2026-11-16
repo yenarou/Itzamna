@@ -89,9 +89,9 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 **Search request (representative shape):**
 ```json
 {
-  "planet": "luna | marte",
-  "earth": { "...": "..." },
-  "zone": { "...": "..." },
+  "planet": "moon",
+  "earth": { "climate": "arid", "elevation": "medium", "soil": "sandy", "humidity": "low" },
+  "zone": { "zone": "canyons", "temperature": "cold", "composition": "oxides", "terrain": "rugged" },
   "tags": { "...": "..." },
   "location": { "lat": 0.0, "lng": 0.0, "radiusKm": 500 },
   "userLocation": { "lat": 0.0, "lng": 0.0 },
@@ -99,7 +99,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
   "preferAccessible": true
 }
 ```
-(Exact filter keys/options are defined by frontend/explorer inputs and engine schema handling.)
+(Filter keys and options use English identifiers and are defined by the frontend explorer and scientific-engine profiles.)
 
 ### Scientific engine
 - `GET /health` — engine health.

@@ -26,7 +26,7 @@ def score_components(profile_tags: dict, zone_filters: dict, earth_filters: dict
     hv = int(hashlib.sha1(f"sc:{lat:.5f},{lon:.5f}".encode()).hexdigest()[:8], 16)
     jitter = ((hv % 13) - 6) * 0.35
 
-    zkeys = [k for k in ("zona", "temperatura", "composicion", "relieve") if k in zone_filters]
+    zkeys = [k for k in ("zone", "temperature", "composition", "terrain") if k in zone_filters]
     if zkeys:
         comps["target_zone"] = 100.0 * sum(1 for k in zkeys if profile_tags.get(k) == zone_filters[k]) / len(zkeys)
     else:
@@ -34,11 +34,11 @@ def score_components(profile_tags: dict, zone_filters: dict, earth_filters: dict
 
     if power and power.get("T2M") is not None:
         t = float(power.get("T2M", 15.0)); p = float(power.get("PRECTOTCORR") or 0) * 365.0; rh = float(power.get("RH2M") or 50.0)
-        if "clima" in earth_filters:
-            want = earth_filters["clima"]
-            ok = (want == "arido" and p < 400) or (want == "polar" and t < 2) or (want == "templado" and 2 <= t <= 22 and p >= 300)
+        if "climate" in earth_filters:
+            want = earth_filters["climate"]
+            ok = (want == "arid" and p < 400) or (want == "polar" and t < 2) or (want == "temperate" and 2 <= t <= 22 and p >= 300)
             base = 92.0 if ok else 38.0
-            if want == "arido": base += max(-10.0, min(6.0, (400 - p) / 80.0))
+            if want == "arid": base += max(-10.0, min(6.0, (400 - p) / 80.0))
             elif want == "polar": base += max(-10.0, min(6.0, (2 - t) / 3.0))
             else: base += max(-10.0, min(6.0, 6.0 - abs(t - 12.0) / 3.0))
             comps["climate"] = clamp(base, 20.0, 98.0)
@@ -52,9 +52,9 @@ def score_components(profile_tags: dict, zone_filters: dict, earth_filters: dict
 
     if elev is not None:
         e = float(elev)
-        if "altitud" in earth_filters:
-            want = earth_filters["altitud"]
-            ok = (want == "baja" and e < 500) or (want == "media" and 500 <= e < 2000) or (want == "alta" and e >= 2000)
+        if "elevation" in earth_filters:
+            want = earth_filters["elevation"]
+            ok = (want == "low" and e < 500) or (want == "medium" and 500 <= e < 2000) or (want == "high" and e >= 2000)
             comps["elevation_dem"] = clamp((95.0 if ok else 32.0) + max(-8.0, min(4.0, (1000 - abs(e % 1000 - 500)) / 120.0)), 20.0, 99.0)
         else:
             comps["elevation_dem"] = clamp(55.0 + min(e, 3500.0) / 80.0, 30.0, 98.0)
@@ -62,9 +62,9 @@ def score_components(profile_tags: dict, zone_filters: dict, earth_filters: dict
         comps["elevation_dem"] = 35.0
 
     if soil or (power and power.get("RH2M") is not None):
-        if soil and "suelo" in earth_filters:
-            sand = float(soil.get("sand", 40.0)); want = earth_filters["suelo"]
-            ok = (want == "arenoso" and sand >= 50) or (want == "salino" and (power and (float(power.get("PRECTOTCORR") or 0) * 365) < 350)) or (want == "hielo" and (power and float(power.get("T2M", 10)) < 0)) or (want == "basaltico" and 30 <= sand <= 55)
+        if soil and "soil" in earth_filters:
+            sand = float(soil.get("sand", 40.0)); want = earth_filters["soil"]
+            ok = (want == "sandy" and sand >= 50) or (want == "saline" and (power and (float(power.get("PRECTOTCORR") or 0) * 365) < 350)) or (want == "ice" and (power and float(power.get("T2M", 10)) < 0)) or (want == "basaltic" and 30 <= sand <= 55)
             comps["substrate_moisture"] = clamp((90.0 if ok else 45.0) + (sand - 45.0) / 10.0, 20.0, 98.0)
         else:
             sand = float(soil.get("sand", 40.0)) if soil else 40.0
@@ -91,9 +91,9 @@ def score_components(profile_tags: dict, zone_filters: dict, earth_filters: dict
     comps["accessibility"] = acc
 
     intr = 70.0
-    if interference == "baja": intr = 95.0
-    elif interference == "media": intr = 60.0
-    elif interference == "alta": intr = 25.0
+    if interference == "low": intr = 95.0
+    elif interference == "medium": intr = 60.0
+    elif interference == "high": intr = 25.0
     comps["osm_interference"] = intr
 
     weights = {"target_zone": 0.25, "climate": 0.2, "elevation_dem": 0.15, "substrate_moisture": 0.15, "spatial": 0.1, "accessibility": 0.08, "osm_interference": 0.07}
@@ -117,12 +117,12 @@ def build_earth_body(lat, lon, idx, place_name, place_ok, from_user_km, route_km
 
     if from_user_km is not None:
         if route_km is not None and route_min is not None:
-            ruta = f"{route_km:.1f} km, ~{route_min:.0f} min by car (OSRM/OpenStreetMap)"
-            rd = f"Estimated route via OSRM (OpenStreetMap road network). {src_note(route_ok, 'https://router.project-osrm.org')}"
+            route_text = f"{route_km:.1f} km, ~{route_min:.0f} min by car (OSRM/OpenStreetMap)"
+            route_detail = f"Estimated route via OSRM (OpenStreetMap road network). {src_note(route_ok, 'https://router.project-osrm.org')}"
         else:
-            ruta = "no vehicle route (geodesic distance used)"
-            rd = f"No OSRM route obtained ({API_SAT.lower()}); geodesic distance calculated locally is reported."
-        fields.append(InfoField(label="Accessibility (OpenStreetMap/OSRM)", value=f"{from_user_km:.1f} km geodesic · {ruta}", detail=rd, correlation=int(comps.get("accessibility", 60))))
+            route_text = "no vehicle route (geodesic distance used)"
+            route_detail = f"No OSRM route obtained ({API_SAT.lower()}); geodesic distance calculated locally is reported."
+        fields.append(InfoField(label="Accessibility (OpenStreetMap/OSRM)", value=f"{from_user_km:.1f} km geodesic · {route_text}", detail=route_detail, correlation=int(comps.get("accessibility", 60))))
 
     iso_txt = "isolated (low local human footprint)" if isolated else "not fully isolated"
     inf_val = f"{interference.capitalize()} · {iso_txt} · n≈{interference_count} mapped elements (OSM count, 1.2 km radius)"
@@ -149,13 +149,13 @@ def build_earth_body(lat, lon, idx, place_name, place_ok, from_user_km, route_km
 
     sub_parts = []
     if soil:
-        if soil.get("clay") is not None: sub_parts.append(f"arcilla {soil['clay']:.1f} %")
-        if soil.get("sand") is not None: sub_parts.append(f"arena {soil['sand']:.1f} %")
-        if soil.get("silt") is not None: sub_parts.append(f"limo {soil['silt']:.1f} %")
-        if soil.get("soc") is not None: sub_parts.append(f"C orgánico {soil['soc']:.1f} g/kg")
-        if soil.get("bdod") is not None: sub_parts.append(f"densidad aparente {soil['bdod']:.2f} kg/dm³")
+        if soil.get("clay") is not None: sub_parts.append(f"clay {soil['clay']:.1f} %")
+        if soil.get("sand") is not None: sub_parts.append(f"sand {soil['sand']:.1f} %")
+        if soil.get("silt") is not None: sub_parts.append(f"silt {soil['silt']:.1f} %")
+        if soil.get("soc") is not None: sub_parts.append(f"organic carbon {soil['soc']:.1f} g/kg")
+        if soil.get("bdod") is not None: sub_parts.append(f"bulk density {soil['bdod']:.2f} kg/dm³")
         if soil.get("phh2o") is not None: sub_parts.append(f"pH(H₂O) {soil['phh2o']:.2f}")
-        if soil.get("_tipo"): sub_parts.append(f"tipo {soil['_tipo']}")
+        if soil.get("_type"): sub_parts.append(f"type {soil['_type']}")
     sub_val = "; ".join(sub_parts) if sub_parts else "no data"
     sub_detail = f"Mean 0–15 cm properties (ISRIC SoilGrids v2.0) in physical units (%, g/kg, kg/dm³, pH). {src_note(soil_ok, 'https://rest.isric.org/soilgrids/v2.0/')}"
     fields.append(InfoField(label="Edaphic substrate (SoilGrids, quantitative)", value=sub_val, detail=sub_detail, correlation=int(comps.get("substrate_moisture", 50))))
@@ -217,7 +217,7 @@ def build_match(planet, idx, lat, lon, dist, radius_km, query_loc, user_loc, pre
 
 
 def search_analogs(query: SearchQuery) -> list[Match]:
-    planet = query.planet if query.planet in ZONE_PROFILES else "marte"
+    planet = query.planet if query.planet in ZONE_PROFILES else "mars"
     zone_filters = dict(query.zone or {})
     earth_filters = dict(query.earth or {})
     profile = pick_zone_profile(planet, zone_filters)

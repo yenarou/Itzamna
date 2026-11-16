@@ -39,7 +39,7 @@
 }
 
 /* ============ Dropdowns ============ */
-/* Lista nativa de <select>: fondo oscuro y texto claro (antes salía blanca con texto casi invisible) */
+/* Native <select> list: use a dark background and light text. */
 .field-select,
 #loc-radius {
     color-scheme: dark;
@@ -68,7 +68,7 @@ html[data-theme="light"] .field-select option:checked {
     background-color: #dbe8ff;
     color: #0a1428;
 }
-/* Menú de planeta: ancho fijo cuando el selector está en la esquina (antes se encogía y partía el texto) */
+/* Keep the planet menu at a fixed width in the corner so its text does not wrap. */
 #explorer:not([data-state="idle"]) .planet-dd {
     width: 11.5rem;
 }
@@ -83,7 +83,7 @@ html[data-theme="light"] .field-select option:checked {
     padding: 0.7rem 0.9rem;
 }
 
-/* Custom dropdowns para búsqueda por características (formato visual del selector de planeta) */
+/* Custom dropdowns for characteristic searches, styled like the planet selector. */
 .custom-dd {
     position: relative;
     width: 100%;

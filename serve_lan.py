@@ -46,7 +46,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         sys.stdout.write("%s - %s\n" % (self.address_string(), fmt % args))
 
     def end_headers(self):
-        # CORS por si el front llama directo
+        # CORS in case the frontend calls this endpoint directly.
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")

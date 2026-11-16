@@ -50,7 +50,7 @@ def build_match(planet, idx, lat, lon, dist, radius_km, query_loc, user_loc, pre
 
 
 def search_analogs(query) -> list[Match]:
-    planet = query.planet if query.planet in ZONE_PROFILES else "marte"
+    planet = query.planet if query.planet in ZONE_PROFILES else "mars"
     zone_filters = dict(query.zone or {})
     earth_filters = dict(query.earth or {})
     tag_filters = dict(getattr(query, "tags", {}) or {})

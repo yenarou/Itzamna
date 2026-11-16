@@ -1,5 +1,5 @@
-# Documentación
+# Documentation
 
-Esta carpeta se utilizará para documentar la evolución del proyecto, decisiones técnicas y referencias de arquitectura.
+This folder documents the project's evolution, technical decisions, and architecture references.
 
-Por ahora contiene la estructura inicial del monorepo y la base para la documentación futura.
+It currently contains the initial monorepo structure and a foundation for future documentation.

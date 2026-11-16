@@ -1,4 +1,4 @@
-export type Lang = 'en' | 'es';
+export type Lang = 'en';
 
 // Site is English-only. Keep structure simple and avoid swapped ES/EN toggle confusion.
 export const translations: Record<Lang, Record<string, string>> = {
@@ -156,9 +156,6 @@ export const translations: Record<Lang, Record<string, string>> = {
     'about.goals.kicker': 'Goals and evolution',
     'about.goals.h2': 'Continuous and verifiable improvement',
     'about.goals.p': 'The project seeks to gradually improve data quality, comparison criteria, and the exploration experience, prioritizing transparency about the origin of information (external sources, calculations, or estimates) and maintaining existing capabilities while incorporating documented improvements.',
-  },
-  es: {
-    // Kept for type compatibility; site runs in English-only mode.
   }
 };
 

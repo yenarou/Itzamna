@@ -2,12 +2,12 @@
 import Base from '../layouts/Base.astro';
 
 const tech = [
-  { name: 'Astro', roleEn: 'Frontend and fast page generation.', roleEs: 'Frontend and fast page generation.', key: 'about.tech.astro' },
-  { name: 'TypeScript', roleEn: 'Typing and client-side logic.', roleEs: 'Typing and client-side logic.', key: 'about.tech.ts' },
-  { name: 'Tailwind CSS', roleEn: 'Styling and responsive design.', roleEs: 'Styling and responsive design.', key: 'about.tech.tw' },
-  { name: 'ASP.NET Core', roleEn: 'API/backend that orchestrates queries.', roleEs: 'API/backend that orchestrates queries.', key: 'about.tech.dotnet' },
-  { name: 'Python', roleEn: 'Processing and computation in the scientific engine.', roleEs: 'Processing and computation in the scientific engine.', key: 'about.tech.py' },
-  { name: 'FastAPI', roleEn: 'Scientific service for analog search and analysis.', roleEs: 'Scientific service for analog search and analysis.', key: 'about.tech.fastapi' },
+  { name: 'Astro', roleEn: 'Frontend and fast page generation.', key: 'about.tech.astro' },
+  { name: 'TypeScript', roleEn: 'Typing and client-side logic.', key: 'about.tech.ts' },
+  { name: 'Tailwind CSS', roleEn: 'Styling and responsive design.', key: 'about.tech.tw' },
+  { name: 'ASP.NET Core', roleEn: 'API/backend that orchestrates queries.', key: 'about.tech.dotnet' },
+  { name: 'Python', roleEn: 'Processing and computation in the scientific engine.', key: 'about.tech.py' },
+  { name: 'FastAPI', roleEn: 'Scientific service for analog search and analysis.', key: 'about.tech.fastapi' },
 ];
 ---
 
@@ -19,18 +19,18 @@ const tech = [
         <h1 data-i18n="about.h1">About Itzamná</h1>
         <p data-i18n="about.lead">Itzamná (Integrated Terrestrial-Zonal Analog &amp; Multi-factor Nearest Atlas) is a platform to identify and compare regions on Earth with characteristics comparable to environments on the Moon and Mars, supported by geospatial analysis and scientific criteria.</p>
         <nav class="section-nav" aria-label="Page sections">
-          <a href="#introduccion" data-i18n="about.nav.intro">Introduction</a>
-          <a href="#problema" data-i18n="about.nav.problem">Problem</a>
-          <a href="#mision" data-i18n="about.nav.mission">Mission</a>
+          <a href="#introduction" data-i18n="about.nav.intro">Introduction</a>
+          <a href="#problem" data-i18n="about.nav.problem">Problem</a>
+          <a href="#mission" data-i18n="about.nav.mission">Mission</a>
           <a href="#vision" data-i18n="about.nav.vision">Vision</a>
-          <a href="#valores" data-i18n="about.nav.values">Values</a>
-          <a href="#tecnologias" data-i18n="about.nav.tech">Technologies</a>
-          <a href="#objetivos" data-i18n="about.nav.goals">Goals</a>
+          <a href="#values" data-i18n="about.nav.values">Values</a>
+          <a href="#technologies" data-i18n="about.nav.tech">Technologies</a>
+          <a href="#goals" data-i18n="about.nav.goals">Goals</a>
         </nav>
       </div>
     </section>
 
-    <section id="introduccion" class="zigzag">
+    <section id="introduction" class="zigzag">
       <div class="zigzag-inner">
         <div class="zigzag-media reveal">
           <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2xJssqJoadkUVP41eHEsk-YdDo-SKDQaCo573dEI1e2dhvCjXG-lGi8g&s=10" alt="Earth from space" data-i18n-aria="content.img1.alt" loading="lazy" decoding="async" />
@@ -44,7 +44,7 @@ const tech = [
       </div>
     </section>
 
-    <section id="problema" class="zigzag zigzag-alt">
+    <section id="problem" class="zigzag zigzag-alt">
       <div class="zigzag-inner reverse">
         <div class="zigzag-media reveal">
           <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS462KLzatNx-vvUQAuTD_LeQ0ScKxHf9jnIonb99i3WQ&s=10" alt="Martian terrain from orbit" data-i18n-aria="about.img2.alt" loading="lazy" decoding="async" />
@@ -58,7 +58,7 @@ const tech = [
       </div>
     </section>
 
-    <section id="mision" class="story-section">
+    <section id="mission" class="story-section">
       <div class="story-section-inner story-grid two">
         <div class="reveal">
           <p class="zigzag-kicker" data-i18n="about.mission.kicker">Mission</p>
@@ -89,7 +89,7 @@ const tech = [
       </div>
     </section>
 
-    <section id="valores" class="story-section">
+    <section id="values" class="story-section">
       <div class="story-section-inner">
         <p class="zigzag-kicker" data-i18n="about.values.kicker">Values</p>
         <h2 class="font-display text-3xl font-semibold tracking-tight md:text-4xl mb-6" data-i18n="about.values.h2">Project principles</h2>
@@ -103,7 +103,7 @@ const tech = [
     </section>
 
 
-    <section id="tecnologias" class="zigzag">
+    <section id="technologies" class="zigzag">
       <div class="zigzag-inner reverse">
         <div class="zigzag-media reveal">
           <img src="https://c.files.bbci.co.uk/170CC/production/_117021449_diana6.jpg" alt="Topographic visualization and geospatial data" data-i18n-aria="content.img4.alt" loading="lazy" decoding="async" />
@@ -124,7 +124,7 @@ const tech = [
       </div>
     </section>
 
-    <section id="objetivos" class="story-section">
+    <section id="goals" class="story-section">
       <div class="story-section-inner">
         <div class="story-card reveal" style="padding:1.75rem;">
           <p class="zigzag-kicker" data-i18n="about.goals.kicker">Goals and evolution</p>

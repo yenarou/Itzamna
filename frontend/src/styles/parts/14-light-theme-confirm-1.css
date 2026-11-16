@@ -65,7 +65,7 @@
     flex-shrink: 0;
 }
 
-/* ============ Light theme fixes (espacial claro) ============ */
+/* ============ Light theme fixes (light space theme) ============ */
 html[data-theme="light"] body::before {
     background:
         radial-gradient(60% 50% at 15% 20%, rgba(80, 170, 255, 0.18), transparent 60%),

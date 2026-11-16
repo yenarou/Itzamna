@@ -6,7 +6,7 @@ from app.services.data import human_interference
 
 def test_search_schema_module_supports_tag_filters() -> None:
     query = SearchQuery(
-        planet="marte",
+        planet="mars",
         tags={"amenity": "parking"},
         location=LocationQuery(lat=18.5, lng=-70.5, radiusKm=30.0),
         userLocation=UserLocation(lat=19.2, lng=-70.9),
@@ -30,19 +30,19 @@ def test_human_interference_filters_by_tag_and_access(monkeypatch) -> None:
 
     result = human_interference(18.5, -70.5, tag_filters={"amenity": "parking"}, prefer_accessible=True)
 
-    assert result[0] == "baja"
+    assert result[0] == "low"
     assert result[2] == 1
     assert result[3] is True
 
 
 def test_search_schema_modules_are_available() -> None:
     query = SearchQuery(
-        planet="marte",
+        planet="mars",
         location=LocationQuery(lat=18.5, lng=-70.5, radiusKm=30.0),
         userLocation=UserLocation(lat=19.2, lng=-70.9),
     )
 
-    assert query.planet == "marte"
+    assert query.planet == "mars"
     assert query.location is not None
     assert query.location.radiusKm == 30.0
 
@@ -50,16 +50,16 @@ def test_search_schema_modules_are_available() -> None:
         id="candidate-1",
         percentage=76,
         earth=BodyInfo(
-            kicker="Tierra",
-            title="Candidato de prueba",
+            kicker="Earth",
+            title="Test candidate",
             tone="neutral",
-            fields=[InfoField(label="Clima", value="templado", detail="Detalle", correlation=80)],
+            fields=[InfoField(label="Climate", value="temperate", detail="Details", correlation=80)],
         ),
         zone=BodyInfo(
-            kicker="Zona",
-            title="Zona de prueba",
+            kicker="Zone",
+            title="Test zone",
             tone="neutral",
-            fields=[InfoField(label="Tipo", value="canones", detail="Detalle", correlation=75)],
+            fields=[InfoField(label="Type", value="canyons", detail="Details", correlation=75)],
         ),
     )
 

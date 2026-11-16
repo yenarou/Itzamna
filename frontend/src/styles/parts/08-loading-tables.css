@@ -23,7 +23,7 @@
     }
 }
 
-/* Tablas de datos */
+/* Data tables */
 .data-table-wrap {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -33,7 +33,7 @@
 }
 .data-table {
     width: 100%;
-    min-width: 44rem; /* si el contenedor es más angosto, hay scroll horizontal en lugar de encimarse */
+    min-width: 44rem; /* Narrower containers scroll horizontally instead of overlapping. */
     border-collapse: collapse;
     table-layout: fixed;
     font-size: 0.96rem;
@@ -139,7 +139,7 @@
     }
 }
 .data-table .cell-corr {
-    overflow: hidden; /* la barra nunca invade la columna de descripción */
+    overflow: hidden; /* Keep the bar from entering the description column. */
 }
 .data-table .cell-detail {
     color: var(--color-mist);

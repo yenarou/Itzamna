@@ -93,7 +93,7 @@ html[data-theme="light"] .view-toggle-btn.is-active {
 html[data-theme="light"] .app-view { background: transparent; }
 html[data-theme="light"] .btn-secondary { color: var(--color-chalk); }
 
-/* Light theme: story/vision/nosotros + picker fixes */
+/* Light theme: story, vision, about, and picker fixes */
 html[data-theme="light"] .story-card {
     background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(242,247,255,0.94));
     border-color: rgba(18,58,112,.12);
@@ -135,7 +135,7 @@ html[data-theme="light"] .chip {
     background: rgba(31,99,224,.08);
 }
 
-/* Planet picker "Selecciona el planeta" in light mode */
+/* Planet picker in light mode */
 html[data-theme="light"] #planet-picker-label {
     color: var(--color-chalk);
 }
@@ -153,7 +153,7 @@ html[data-theme="light"] #explorer:not([data-state="idle"]) #planet-picker-label
     color: var(--color-chalk);
 }
 
-/* Story/vision/nosotros page headings and surfaces inherit vars but ensure contrast */
+/* Ensure story, vision, and about page headings and surfaces have sufficient contrast. */
 html[data-theme="light"] .story-hero h1,
 html[data-theme="light"] .story-hero p,
 html[data-theme="light"] .zigzag-copy h2,

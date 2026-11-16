@@ -81,11 +81,11 @@ def human_interference(lat: float, lon: float, tag_filters: dict[str, str] | Non
         h = int(hashlib.sha1(f"osm:{lat:.4f},{lon:.4f}".encode()).hexdigest()[:6], 16)
         bucket = h % 10
         if bucket <= 5:
-            level, isolated, count = "baja", True, h % 4
+            level, isolated, count = "low", True, h % 4
         elif bucket <= 8:
-            level, isolated, count = "media", False, 6 + (h % 30)
+            level, isolated, count = "medium", False, 6 + (h % 30)
         else:
-            level, isolated, count = "alta", False, 45 + (h % 60)
+            level, isolated, count = "high", False, 45 + (h % 60)
         return (level, isolated, count, False)
 
     try:
@@ -102,12 +102,12 @@ def human_interference(lat: float, lon: float, tag_filters: dict[str, str] | Non
         count = 0
 
     if count == 0:
-        return ("baja", True, 0, True)
+        return ("low", True, 0, True)
     if count <= 5:
-        return ("baja", True, count, True)
+        return ("low", True, count, True)
     if count <= 40:
-        return ("media", False, count, True)
-    return ("alta", False, count, True)
+        return ("medium", False, count, True)
+    return ("high", False, count, True)
 
 
 def fetch_nasa_power(lat: float, lon: float) -> tuple[dict | None, bool]:
@@ -188,19 +188,19 @@ def fetch_soil(lat: float, lon: float) -> tuple[dict | None, bool]:
 def local_climate(lat: float, lon: float, earth_filters: dict[str, str]) -> dict:
     al = abs(lat)
     if al >= 66:
-        clima = "polar"
+        climate = "polar"
         t2m, tmin, tmax, prec, rh = -12.0, -30.0, 5.0, 0.7, 70.0
     elif al <= 23:
-        clima = "arido"
+        climate = "arid"
         t2m, tmin, tmax, prec, rh = 24.0, 10.0, 38.0, 0.4, 35.0
     else:
-        clima = "templado"
+        climate = "temperate"
         t2m, tmin, tmax, prec, rh = 15.0, 4.0, 27.0, 2.0, 60.0
-    if "clima" in earth_filters:
-        clima = earth_filters["clima"]
-        if clima == "arido":
+    if "climate" in earth_filters:
+        climate = earth_filters["climate"]
+        if climate == "arid":
             t2m, tmin, tmax, prec, rh = 25.0, 12.0, 39.0, 0.3, 30.0
-        elif clima == "polar":
+        elif climate == "polar":
             t2m, tmin, tmax, prec, rh = -10.0, -28.0, 6.0, 0.8, 72.0
         else:
             t2m, tmin, tmax, prec, rh = 16.0, 5.0, 28.0, 2.2, 58.0
@@ -210,16 +210,16 @@ def local_climate(lat: float, lon: float, earth_filters: dict[str, str]) -> dict
     tmax += (((h >> 12) % 41) - 20) / 10.0
     prec = max(0.05, prec + (((h >> 18) % 31) - 15) / 100.0)
     rh = min(98.0, max(10.0, rh + (((h >> 23) % 21) - 10)))
-    return {"T2M": t2m, "T2M_MIN": tmin, "T2M_MAX": tmax, "PRECTOTCORR": prec, "RH2M": rh, "WS2M": 3.5, "ALLSKY_SFC_SW_DWN": 4.5, "_clima": clima}
+    return {"T2M": t2m, "T2M_MIN": tmin, "T2M_MAX": tmax, "PRECTOTCORR": prec, "RH2M": rh, "WS2M": 3.5, "ALLSKY_SFC_SW_DWN": 4.5, "_climate": climate}
 
 
 def local_elevation(lat: float, lon: float, earth_filters: dict[str, str]) -> float:
     al = abs(lat)
     base = 1400.0 if al > 15 else 300.0
-    if "altitud" in earth_filters:
-        if earth_filters["altitud"] == "baja":
+    if "elevation" in earth_filters:
+        if earth_filters["elevation"] == "low":
             base = 200.0
-        elif earth_filters["altitud"] == "media":
+        elif earth_filters["elevation"] == "medium":
             base = 1200.0
         else:
             base = 2800.0
@@ -229,29 +229,29 @@ def local_elevation(lat: float, lon: float, earth_filters: dict[str, str]) -> fl
 
 def local_soil(lat: float, lon: float, power: dict, earth_filters: dict[str, str]) -> dict:
     t = power.get("T2M", 15.0)
-    if "suelo" in earth_filters:
-        s = earth_filters["suelo"]
+    if "soil" in earth_filters:
+        s = earth_filters["soil"]
     else:
         if t < 0:
-            s = "hielo"
+            s = "ice"
         elif (power.get("PRECTOTCORR", 1.0) * 365) < 350:
-            s = "salino"
+            s = "saline"
         else:
-            s = "arenoso"
+            s = "sandy"
     h = int(hashlib.sha1(f"soil:{lat:.4f},{lon:.4f}".encode()).hexdigest()[:8], 16)
 
     def v(base, span, shift=0):
         return round(base + (((h >> shift) % (span * 2 + 1)) - span), 2)
 
-    if s == "arenoso":
-        return {"clay": v(8.0, 4, 0), "sand": v(72.0, 6, 3), "silt": v(20.0, 5, 6), "soc": v(6.0, 3, 9), "bdod": v(1.45, 0.1, 12), "phh2o": v(7.2, 0.4, 15), "_tipo": "Arenoso (estimado)"}
-    if s == "salino":
-        return {"clay": v(18.0, 5, 0), "sand": v(40.0, 6, 3), "silt": v(42.0, 6, 6), "soc": v(3.0, 2, 9), "bdod": v(1.35, 0.1, 12), "phh2o": v(8.1, 0.3, 15), "_tipo": "Salino/evaporítico (estimado)"}
-    if s == "hielo":
-        return {"clay": v(10.0, 4, 0), "sand": v(35.0, 6, 3), "silt": v(55.0, 6, 6), "soc": v(12.0, 4, 9), "bdod": v(0.9, 0.08, 12), "phh2o": v(6.2, 0.4, 15), "_tipo": "Criósuelo/permafrost (estimado)"}
-    if s == "basaltico":
-        return {"clay": v(22.0, 5, 0), "sand": v(38.0, 6, 3), "silt": v(40.0, 6, 6), "soc": v(9.0, 3, 9), "bdod": v(1.25, 0.1, 12), "phh2o": v(6.8, 0.4, 15), "_tipo": "Derivado basáltico (estimado)"}
-    return {"clay": v(20.0, 5, 0), "sand": v(45.0, 6, 3), "silt": v(35.0, 6, 6), "soc": v(8.0, 3, 9), "bdod": v(1.3, 0.1, 12), "phh2o": v(7.0, 0.4, 15), "_tipo": "Férrico/mixto (estimado)"}
+    if s == "sandy":
+        return {"clay": v(8.0, 4, 0), "sand": v(72.0, 6, 3), "silt": v(20.0, 5, 6), "soc": v(6.0, 3, 9), "bdod": v(1.45, 0.1, 12), "phh2o": v(7.2, 0.4, 15), "_type": "Estimated sandy soil"}
+    if s == "saline":
+        return {"clay": v(18.0, 5, 0), "sand": v(40.0, 6, 3), "silt": v(42.0, 6, 6), "soc": v(3.0, 2, 9), "bdod": v(1.35, 0.1, 12), "phh2o": v(8.1, 0.3, 15), "_type": "Estimated saline/evaporitic soil"}
+    if s == "ice":
+        return {"clay": v(10.0, 4, 0), "sand": v(35.0, 6, 3), "silt": v(55.0, 6, 6), "soc": v(12.0, 4, 9), "bdod": v(0.9, 0.08, 12), "phh2o": v(6.2, 0.4, 15), "_type": "Estimated cryosol/permafrost"}
+    if s == "basaltic":
+        return {"clay": v(22.0, 5, 0), "sand": v(38.0, 6, 3), "silt": v(40.0, 6, 6), "soc": v(9.0, 3, 9), "bdod": v(1.25, 0.1, 12), "phh2o": v(6.8, 0.4, 15), "_type": "Estimated basalt-derived soil"}
+    return {"clay": v(20.0, 5, 0), "sand": v(45.0, 6, 3), "silt": v(35.0, 6, 6), "soc": v(8.0, 3, 9), "bdod": v(1.3, 0.1, 12), "phh2o": v(7.0, 0.4, 15), "_type": "Estimated ferric/mixed soil"}
 
 
 def aridity_index(precip_mm_day: float | None, t2m_c: float | None) -> float | None:
