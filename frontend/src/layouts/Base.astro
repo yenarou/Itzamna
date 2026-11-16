@@ -38,6 +38,18 @@ const { title, fullscreen = false, transparentHeader = false } = Astro.props;
     </noscript>
     <title>{title} · Itzamná</title>
 
+    <!-- Apply saved theme early to avoid flash/reload mismatch on navigation -->
+    <script is:inline>
+      (function () {
+        try {
+          var theme = localStorage.getItem('itzamna-theme');
+          if (theme === 'light' || theme === 'dark') {
+            document.documentElement.setAttribute('data-theme', theme);
+          }
+        } catch (e) {}
+      })();
+    </script>
+
     <!-- Safety notice: show once per page load/session entry, not on SPA view/tab switches -->
     <script is:inline>
       (function () {
