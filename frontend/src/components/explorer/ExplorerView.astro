@@ -65,7 +65,7 @@ const paneTitle = 'font-display text-3xl font-medium';
         PLANETS.map((p) => (
           <div data-planet-view={p.id} hidden class="flex flex-col items-center gap-5">
             <div class="planet-visual flex w-full flex-col items-center gap-3">
-              <Planet body={p.id} />
+              <div class="planet-globe earth-globe" data-planet-globe={p.id} aria-label={`${p.name} 3D globe`}></div>
               <img data-zone-compare={p.id} alt="" hidden referrerpolicy="no-referrer" class="aspect-video w-full max-w-[min(38vmin,28rem)] rounded-xl border border-line/60 object-cover shadow-2xl" />
               <p data-zone-caption={p.id} hidden class="max-w-[min(38vmin,28rem)] text-center text-sm leading-relaxed text-mist"></p>
             </div>

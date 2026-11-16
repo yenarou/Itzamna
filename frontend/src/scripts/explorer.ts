@@ -66,6 +66,68 @@ function resizeEarthGlobe(): void {
     try { globeEarth.width(w); globeEarth.height(h); } catch {}
 }
 
+
+const planetGlobes: Record<string, any> = {};
+
+function planetTexture(id: string): string {
+    try {
+        const c = document.createElement('canvas');
+        c.width = 512; c.height = 256;
+        const ctx = c.getContext('2d');
+        if (!ctx) return '';
+        if (id === 'luna') {
+            const g = ctx.createLinearGradient(0,0,0,c.height);
+            g.addColorStop(0,'#cfcfcf'); g.addColorStop(0.5,'#9a9a9a'); g.addColorStop(1,'#7f7f7f');
+            ctx.fillStyle = g; ctx.fillRect(0,0,c.width,c.height);
+            ctx.fillStyle='rgba(60,60,60,0.18)';
+            for(let i=0;i<220;i++){ctx.beginPath();ctx.arc(Math.random()*c.width,Math.random()*c.height,Math.random()*14+1,0,Math.PI*2);ctx.fill();}
+            ctx.fillStyle='rgba(240,240,240,0.08)';
+            for(let i=0;i<80;i++){ctx.beginPath();ctx.arc(Math.random()*c.width,Math.random()*c.height,Math.random()*8+1,0,Math.PI*2);ctx.fill();}
+        } else {
+            const g = ctx.createLinearGradient(0,0,0,c.height);
+            g.addColorStop(0,'#c96b3c'); g.addColorStop(0.45,'#9f3f1f'); g.addColorStop(1,'#6e2a16');
+            ctx.fillStyle = g; ctx.fillRect(0,0,c.width,c.height);
+            ctx.fillStyle='rgba(40,10,5,0.18)';
+            for(let i=0;i<180;i++){ctx.beginPath();ctx.arc(Math.random()*c.width,Math.random()*c.height,Math.random()*16+2,0,Math.PI*2);ctx.fill();}
+            ctx.fillStyle='rgba(255,210,170,0.08)';
+            for(let i=0;i<90;i++){ctx.beginPath();ctx.arc(Math.random()*c.width,Math.random()*c.height,Math.random()*10+1,0,Math.PI*2);ctx.fill();}
+        }
+        return c.toDataURL('image/jpeg', 0.9);
+    } catch { return ''; }
+}
+
+function initPlanetGlobe(id: string): void {
+    if (planetGlobes[id] || typeof Globe === 'undefined') return;
+    const node = document.querySelector(`[data-planet-globe="${id}"]`) as HTMLElement | null;
+    if (!node) return;
+    if (node.clientWidth === 0) { requestAnimationFrame(() => initPlanetGlobe(id)); return; }
+    try {
+        const g = new Globe(node)
+            .backgroundColor('rgba(0,0,0,0)')
+            .showAtmosphere(id === 'marte')
+            .atmosphereColor(id === 'marte' ? '#ffb08a' : '#d0d0d0')
+            .atmosphereAltitude(id === 'marte' ? 0.12 : 0.03)
+            .globeImageUrl(planetTexture(id));
+        g.width(node.clientWidth || 300);
+        g.height(node.clientHeight || node.clientWidth || 300);
+        const controls = g.controls();
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = id === 'marte' ? 0.3 : 0.2;
+        controls.enableRotate = true;
+        controls.enablePan = false;
+        controls.enableZoom = true;
+        controls.minDistance = 120;
+        controls.maxDistance = 450;
+        g.pointOfView({ lat: id === 'luna' ? 10 : 15, lng: id === 'luna' ? 0 : -20, altitude: 1.8 }, 0);
+        const stopAuto = () => { try { controls.autoRotate = false; } catch {} };
+        node.addEventListener('pointerdown', stopAuto);
+        node.addEventListener('wheel', stopAuto, { passive: true });
+        window.addEventListener('resize', () => { try { g.width(node.clientWidth); g.height(node.clientHeight || node.clientWidth); } catch {} });
+        if (typeof ResizeObserver !== 'undefined') new ResizeObserver(() => { try { g.width(node.clientWidth); g.height(node.clientHeight || node.clientWidth); } catch {} }).observe(node);
+        planetGlobes[id] = g;
+    } catch (e) { console.error('Planet globe init failed', id, e); }
+}
+
 function initEarthGlobe(): void {
     if (!earthGlobe || globeEarth || typeof Globe === "undefined") return;
     if (earthGlobe.clientWidth === 0) { requestAnimationFrame(initEarthGlobe); return; }
@@ -254,6 +316,7 @@ function clearCompareImages(): void {
     document
         .querySelectorAll<HTMLElement>("[data-planet-view] .planet")
         .forEach(p => ((p as HTMLElement).style.display = ""));
+    document.querySelectorAll<HTMLElement>(".planet-globe").forEach(g => (g.style.display = ""));
     (document.querySelector("#earth-visual .planet") as HTMLElement | null)?.style.removeProperty("display");
 }
 
@@ -299,6 +362,8 @@ function setCompareImages(m: Match | undefined): void {
                 zCap.hidden = false;
             }
             if (zPlanet) zPlanet.style.display = "none";
+            const zGlobe = document.querySelector<HTMLElement>(`[data-planet-globe="${planet}"]`);
+            if (zGlobe) zGlobe.style.display = "none";
         }
     }
 }
@@ -335,6 +400,7 @@ function showPlanet(id: PlanetId | ""): void {
     document.querySelectorAll<HTMLElement>("[data-planet-view]").forEach(n => {
         n.hidden = n.dataset.planetView !== id;
     });
+    if (id) initPlanetGlobe(id);
     document.querySelectorAll<HTMLElement>("[data-planet-fields]").forEach(n => {
         n.hidden = n.dataset.planetFields !== id;
     });
@@ -449,19 +515,19 @@ function bodyColumn(
             </tr>`;
         })
         .join("");
-    const isEarthCoordImage = withImage && !!b.imageUrl && /Earth|calculat/i.test(b.kicker + " " + b.title);
+    const isEarthLike = withImage && (b.kicker.includes("Earth") || b.kicker.includes("Tierra") || /Earth|Tierra|calcul|candidat|candidate/i.test(b.kicker + " " + b.title));
     const isPlanetZone = /^Mars\b|^Moon\b/i.test(b.kicker);
     const fallback = isPlanetZone ? zoneFallback(/^Mars\b/i.test(b.kicker) ? "marte" : "luna") : NASA_EARTH_FALLBACK;
-    const pin = isEarthCoordImage
+    const mapCoords = isEarthLike ? coordsFromBody(b) : null;
+    const pin = isEarthLike && b.imageUrl && !mapCoords
         ? `<span aria-hidden="true" class="pointer-events-none absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-full"><span class="block h-4 w-4 -rotate-45 rounded-full rounded-bl-none border-2 border-white bg-ochre shadow-lg"></span><span class="mx-auto -mt-0.5 block h-2 w-2 rounded-full bg-white/90 shadow"></span></span>`
         : "";
-    const imgAlt = isEarthCoordImage ? `Satellite image: ${b.title}` : `Image: ${b.title}`;
-    const mapCoords = isEarthCoordImage ? coordsFromBody(b) : null;
+    const imgAlt = isEarthLike ? `Satellite image: ${b.title}` : `Image: ${b.title}`;
     const image = withImage
         ? mapCoords
-            ? `<div class="candidate-map-wrap"><div class="candidate-map" data-lat="${mapCoords.lat}" data-lon="${mapCoords.lon}" role="img" aria-label="Map preview: ${esc(b.title)}"></div></div>`
+            ? `<div class="candidate-map-wrap relative overflow-hidden rounded-xl border border-line/50" style="aspect-ratio:16/9"><div class="candidate-map h-full w-full" data-lat="${mapCoords.lat}" data-lon="${mapCoords.lon}" role="img" aria-label="Aerial map: ${esc(b.title)}"></div></div>`
             : b.imageUrl
-            ? `<div class="${isEarthCoordImage ? "relative " : ""}img-frame mb-0 overflow-hidden rounded-xl border border-line/50" style="aspect-ratio:16/9">${pin}<img class="img-slot block h-full w-full object-cover" src="${esc(b.imageUrl)}" alt="${esc(imgAlt)}" loading="lazy" referrerpolicy="no-referrer" style="background:${b.tone}" onerror="this.onerror=null;this.src='${fallback}';this.alt='Reference image: ${esc(b.title)}';" /></div>`
+            ? `<div class="${isEarthLike ? "relative " : ""}img-frame mb-0 overflow-hidden rounded-xl border border-line/50" style="aspect-ratio:16/9">${pin}<img class="img-slot block h-full w-full object-cover" src="${esc(b.imageUrl)}" alt="${esc(imgAlt)}" loading="lazy" referrerpolicy="no-referrer" style="background:${b.tone}" onerror="this.onerror=null;this.src='${fallback}';this.alt='Reference image: ${esc(b.title)}';" /></div>`
             : `<div class="img-slot img-slot-empty mb-0" style="background:${b.tone};aspect-ratio:16/9" role="img" aria-label="Reference image: ${esc(b.title)}"></div>`
         : "";
     const thead = showDescription
@@ -569,6 +635,7 @@ function refreshCandidateMaps(): void {
 }
 
 function renderResults(): void {
+    destroyCandidateMaps();
     const m = matches[active];
     if (!m) return;
     if (resultsSkeleton) resultsSkeleton.hidden = true;
@@ -1047,4 +1114,5 @@ document.addEventListener("keydown", event => {
 });
 
 initEarthGlobe();
+if (planet) initPlanetGlobe(planet);
 setState("idle");
