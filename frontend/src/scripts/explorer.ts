@@ -62,7 +62,6 @@ let userMarker: any;
 let userLocation: UserLocation | undefined;
 let candidateMaps: { map: any; lat: number; lon: number }[] = [];
 
-
 function zoneFallback(p: PlanetId | "" = planet): string {
     return p === "marte" ? NASA_MARS_FALLBACK : NASA_MOON_FALLBACK;
 }
@@ -120,20 +119,8 @@ function updateMapMarker(): void {
         }
     } else {
         const ll: [number, number] = [lat, lng];
-        if (!marker) {
-            marker = L.circleMarker(ll, {
-                radius: 8,
-                color: "#ffffff",
-                weight: 2,
-                fillColor: "#e0a84a",
-                fillOpacity: 1,
-            }).addTo(map);
-            marker.bindTooltip("Selected point");
-        } else {
-            marker.setLatLng(ll);
-        }
-        if (map.getZoom() < 4) map.setView(ll, 8);
-        else map.panTo(ll);
+        if (!marker) marker = L.marker(ll).addTo(map);
+        else marker.setLatLng(ll);
 
         const r = Number(locRadius.value || "100");
         if (Number.isFinite(r) && r > 0) {
@@ -420,7 +407,7 @@ function bodyColumn(
             </tr>`;
         })
         .join("");
-    const isEarthCoordImage = withImage && !!b.imageUrl && (b.kicker.includes("Tierra") || /Earth|Tierra|calcul|candidat|coord/i.test(b.kicker + " " + b.title) || b.fields.some(f => f.label === "Georeferencing" || f.label === "Georreferenciación"));
+    const isEarthCoordImage = withImage && !!b.imageUrl && /Earth|calculat/i.test(b.kicker + " " + b.title);
     const isPlanetZone = /^Mars\b|^Moon\b/i.test(b.kicker);
     const fallback = isPlanetZone ? zoneFallback(/^Mars\b/i.test(b.kicker) ? "marte" : "luna") : NASA_EARTH_FALLBACK;
     const pin = isEarthCoordImage
