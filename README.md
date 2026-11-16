@@ -88,6 +88,9 @@ docker compose up --build
 - Backend -> scientific engine: http://localhost:5000/api/health/scientific-engine
 - Scientific engine: http://localhost:8001/health
 
+## Video Explication
+-https://drive.google.com/drive/folders/1PiK6KPID32nC5XsmhfOkhlHctPeakaiA?usp=drive_link
+
 ## Note
 
 This stage establishes the project structure, environment configuration, and HTTP communication between the backend and scientific engine. It does not implement business logic or external services.
