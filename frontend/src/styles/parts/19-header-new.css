@@ -56,12 +56,12 @@ html[data-theme="light"] .site-header[data-transparent="true"] {
     pointer-events: none;
 }
 .site-header.is-scrolled .site-header-inner {
-    background: linear-gradient(145deg, rgba(20, 42, 80, 0.86), rgba(6, 14, 30, 0.9));
+    background: linear-gradient(145deg, rgba(22, 42, 70, 0.78), rgba(11, 20, 35, 0.82));
     box-shadow:
-        14px 20px 40px rgba(2, 6, 18, 0.65),
-        -6px -6px 18px rgba(120, 190, 255, 0.07),
-        inset 1px 1px 0 rgba(255, 255, 255, 0.12),
-        inset -2px -3px 8px rgba(0, 0, 0, 0.3);
+        12px 18px 30px rgba(2, 6, 18, 0.45),
+        -4px -4px 14px rgba(120, 190, 255, 0.06),
+        inset 1px 1px 0 rgba(255, 255, 255, 0.1),
+        inset -2px -3px 8px rgba(0, 0, 0, 0.22);
 }
 
 /* Marca */
