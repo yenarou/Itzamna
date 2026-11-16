@@ -206,7 +206,7 @@ function initPlanetGlobe(id: string): void {
             .atmosphereAltitude(id === "mars" ? 0.14 : 0.02)
             .globeImageUrl(texFallback);
         if (id === "moon") {
-            try { g.bumpImageUrl(texFallback).bumpScale(1.2); } catch {}
+            try { g.bumpImageUrl(texFallback); } catch {}
         }
         g.width(node.clientWidth || 300);
         g.height(node.clientHeight || node.clientWidth || 300);

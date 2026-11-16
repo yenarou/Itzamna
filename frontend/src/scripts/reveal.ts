@@ -1,3 +1,5 @@
+export {};
+
 const els = document.querySelectorAll('.reveal');
 if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
     const io = new IntersectionObserver((entries) => {
