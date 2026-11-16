@@ -1,19 +1,23 @@
+
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-  // host: true allows access from outside the container (Docker Compose).
+  // Permite acceder desde fuera del contenedor durante el desarrollo.
   server: {
     host: true,
-    port: 4321,
-    allowedHosts: [
-      'app.itzamna.earth',
-      'itzamna.earth'
-    ]
+    port: 4321
   },
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss()],
+    server: {
+      allowedHosts: [
+        'app.itzamna.earth',
+        'itzamna.earth'
+      ]
+    }
   },
-  devToolbar: { enabled: false },
-  vite: { plugins: [tailwindcss()] },
+  devToolbar: {
+    enabled: false
+  }
 });
