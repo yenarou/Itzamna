@@ -117,6 +117,39 @@
         height: 26rem;
     }
 }
+/* Compact search layout: fit panels without forcing scroll */
+.loc-card-compact {
+    display: flex;
+    flex-direction: column;
+}
+.loc-card-compact .loc-status {
+    margin-bottom: 0.35rem;
+}
+.loc-card-compact .loc-map-wrap {
+    margin-bottom: 0.6rem;
+}
+.loc-card-compact .loc-map {
+    height: 12rem;
+}
+@media (min-width: 640px) {
+    .loc-card-compact .loc-map {
+        height: 14rem;
+    }
+}
+@media (min-width: 1024px) {
+    .loc-card-compact .loc-map {
+        height: clamp(11rem, 28vh, 15rem);
+    }
+    .loc-card-compact .loc-help {
+        display: none;
+    }
+    .loc-card-compact .loc-controls {
+        gap: 0.5rem;
+    }
+    .loc-card-compact .loc-confirm {
+        margin-top: 0.5rem;
+    }
+}
 .loc-map-hint {
     position: absolute;
     left: 0.65rem;
