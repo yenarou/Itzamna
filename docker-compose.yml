@@ -40,7 +40,7 @@ services:
     environment:
       HOST: 0.0.0.0
       PORT: 4321
-      # URL que usará el navegador (desde la máquina host). Para acceso en LAN, cambiar por http://<IP_DEL_HOST>:5000
+      # Browser-accessible API URL from the host machine. For LAN access, use http://<HOST_IP>:5000.
       PUBLIC_API_URL: http://localhost:5000
     depends_on:
       - backend

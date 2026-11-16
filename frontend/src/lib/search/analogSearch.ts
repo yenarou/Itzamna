@@ -48,13 +48,13 @@ type ZoneProfile = {
     fields: [string, string, string][];
 };
 const ZONE_PROFILES: Record<string, Record<string, ZoneProfile>> = {
-    luna: {
-        mares: {
+    moon: {
+        maria: {
             title: "Lunar maria (basaltic)",
             kicker: "Moon · Maria",
             tone: "moon",
             imageUrl: "https://images-assets.nasa.gov/image/as11-40-5877/as11-40-5877~orig.jpg",
-            tags: { zona: "mares", temperatura: "extrema", composicion: "basalto", relieve: "plano" },
+            tags: { zone: "maria", temperature: "extreme", composition: "basalt", terrain: "flat" },
             fields: [
                 [
                     "Lithology/regolith",
@@ -70,12 +70,12 @@ const ZONE_PROFILES: Record<string, Record<string, ZoneProfile>> = {
                 ["Planetary environment", "Vacuum, g ≈ 0.165 g, radiation", "Geological/geomorphological analogy."],
             ],
         },
-        crateres: {
+        craters: {
             title: "Impact craters",
             kicker: "Moon · Craters",
             tone: "moon",
             imageUrl: "https://images-assets.nasa.gov/image/PIA23210/PIA23210~orig.jpg",
-            tags: { zona: "crateres", temperatura: "extrema", composicion: "regolito", relieve: "crateres" },
+            tags: { zone: "craters", temperature: "extreme", composition: "regolith", terrain: "craters" },
             fields: [
                 [
                     "Lithology/regolith",
@@ -91,12 +91,12 @@ const ZONE_PROFILES: Record<string, Record<string, ZoneProfile>> = {
                 ["Planetary environment", "Vacuum, g ≈ 0.165 g, radiation", "Space weathering."],
             ],
         },
-        polos: {
+        poles: {
             title: "Permanently shadowed polar regions",
             kicker: "Moon · Poles",
             tone: "moonPole",
             imageUrl: "https://images-assets.nasa.gov/image/PIA14021/PIA14021~orig.jpg",
-            tags: { zona: "polos", temperatura: "muy-fria", composicion: "hielo", relieve: "crateres" },
+            tags: { zone: "poles", temperature: "very-cold", composition: "ice", terrain: "craters" },
             fields: [
                 [
                     "Volatiles/composition",
@@ -109,13 +109,13 @@ const ZONE_PROFILES: Record<string, Record<string, ZoneProfile>> = {
             ],
         },
     },
-    marte: {
-        planicies: {
+    mars: {
+        plains: {
             title: "Martian plains",
             kicker: "Mars · Plains",
             tone: "rust",
             imageUrl: "https://images-assets.nasa.gov/image/PIA05112/PIA05112~orig.jpg",
-            tags: { zona: "planicies", temperatura: "fria", composicion: "sulfatos", relieve: "plano" },
+            tags: { zone: "plains", temperature: "cold", composition: "sulfates", terrain: "flat" },
             fields: [
                 [
                     "Lithology/mineralogy",
@@ -127,12 +127,12 @@ const ZONE_PROFILES: Record<string, Record<string, ZoneProfile>> = {
                 ["Planetary environment", "g ≈ 0.38 g, low pressure, radiation", "Does not replicate pressure/gravity/radiation."],
             ],
         },
-        canones: {
+        canyons: {
             title: "Canyons and valleys",
             kicker: "Mars · Canyons",
             tone: "rust",
             imageUrl: "https://images-assets.nasa.gov/image/PIA00422/PIA00422~orig.jpg",
-            tags: { zona: "canones", temperatura: "fria", composicion: "oxidos", relieve: "montanoso" },
+            tags: { zone: "canyons", temperature: "cold", composition: "oxides", terrain: "rugged" },
             fields: [
                 [
                     "Lithology/stratigraphy",
@@ -144,12 +144,12 @@ const ZONE_PROFILES: Record<string, Record<string, ZoneProfile>> = {
                 ["Planetary environment", "g ≈ 0.38 g, thin atmosphere", "Geomorphological focus."],
             ],
         },
-        polos: {
+        poles: {
             title: "Polar caps",
             kicker: "Mars · Polar caps",
             tone: "ice",
             imageUrl: "https://images-assets.nasa.gov/image/PIA13163/PIA13163~orig.jpg",
-            tags: { zona: "polos", temperatura: "muy-fria", composicion: "hielo-agua", relieve: "plano" },
+            tags: { zone: "poles", temperature: "very-cold", composition: "water-ice", terrain: "flat" },
             fields: [
                 [
                     "Volatiles/composition",
@@ -439,37 +439,37 @@ async function soilGrids(lat: number, lon: number): Promise<[Record<string, numb
 
 // ---- Quantitative definitions of Earth filters ----
 type Range = [number, number];
-const CLIMA_DEF: Record<string, { p?: Range; t?: Range }> = {
-    hiperarido: { p: [0, 100] },
-    arido: { p: [100, 250] },
-    semiarido: { p: [250, 500] },
-    templado: { t: [5, 22], p: [500, Infinity] },
+const CLIMATE_DEF: Record<string, { p?: Range; t?: Range }> = {
+    hyperarid: { p: [0, 100] },
+    arid: { p: [100, 250] },
+    semiarid: { p: [250, 500] },
+    temperate: { t: [5, 22], p: [500, Infinity] },
     tundra: { t: [-10, 2] },
-    glaciar: { t: [-Infinity, -10] },
+    glacial: { t: [-Infinity, -10] },
     polar: { t: [-Infinity, 2] }, // compatibility with legacy values
 };
-const CLIMA_SYNTH: Record<string, { t2m: number; tmin: number; tmax: number; prec: number; rh: number }> = {
-    hiperarido: { t2m: 25, tmin: 12, tmax: 40, prec: 0.1, rh: 20 },
-    arido: { t2m: 24, tmin: 11, tmax: 38, prec: 0.48, rh: 30 },
-    semiarido: { t2m: 18, tmin: 6, tmax: 31, prec: 1.0, rh: 42 },
-    templado: { t2m: 14, tmin: 4, tmax: 26, prec: 2.2, rh: 62 },
+const CLIMATE_SYNTH: Record<string, { t2m: number; tmin: number; tmax: number; prec: number; rh: number }> = {
+    hyperarid: { t2m: 25, tmin: 12, tmax: 40, prec: 0.1, rh: 20 },
+    arid: { t2m: 24, tmin: 11, tmax: 38, prec: 0.48, rh: 30 },
+    semiarid: { t2m: 18, tmin: 6, tmax: 31, prec: 1.0, rh: 42 },
+    temperate: { t2m: 14, tmin: 4, tmax: 26, prec: 2.2, rh: 62 },
     tundra: { t2m: -5, tmin: -22, tmax: 8, prec: 0.8, rh: 70 },
-    glaciar: { t2m: -18, tmin: -35, tmax: -2, prec: 0.5, rh: 72 },
+    glacial: { t2m: -18, tmin: -35, tmax: -2, prec: 0.5, rh: 72 },
     polar: { t2m: -8, tmin: -25, tmax: 6, prec: 0.8, rh: 72 },
 };
 const ALT_BANDS: Record<string, Range> = {
-    "nivel-mar": [0, 200],
-    baja: [200, 500],
-    media: [500, 1500],
-    alta: [1500, 3000],
-    "muy-alta": [3000, 6000],
+    "sea-level": [0, 200],
+    low: [200, 500],
+    medium: [500, 1500],
+    high: [1500, 3000],
+    "very-high": [3000, 6000],
 };
 const HUM_BANDS: Record<string, Range> = {
-    "muy-baja": [0, 25],
-    baja: [25, 40],
-    media: [40, 60],
-    alta: [60, 80],
-    "muy-alta": [80, 100],
+    "very-low": [0, 25],
+    low: [25, 40],
+    medium: [40, 60],
+    high: [60, 80],
+    "very-high": [80, 100],
 };
 /** Distance of x from a range (0 if inside). */
 function outside(x: number, [lo, hi]: Range): number {
@@ -486,28 +486,28 @@ function hashSeed(s: string): number {
 }
 function localClimate(lat: number, lon: number, earth: Record<string, string>) {
     const al = Math.abs(lat);
-    let clima = al >= 66 ? "polar" : al <= 23 ? "arido" : "templado";
+    let climate = al >= 66 ? "polar" : al <= 23 ? "arid" : "temperate";
     let t2m = 15,
         tmin = 4,
         tmax = 27,
         prec = 2.0,
         rh = 60;
-    if (clima === "polar") {
+    if (climate === "polar") {
         t2m = -12;
         tmin = -30;
         tmax = 5;
         prec = 0.7;
         rh = 70;
-    } else if (clima === "arido") {
+    } else if (climate === "arid") {
         t2m = 24;
         tmin = 10;
         tmax = 38;
         prec = 0.4;
         rh = 35;
     }
-    const synth = earth.clima ? CLIMA_SYNTH[earth.clima] : undefined;
-    if (earth.clima && synth) {
-        clima = earth.clima;
+    const synth = earth.climate ? CLIMATE_SYNTH[earth.climate] : undefined;
+    if (earth.climate && synth) {
+        climate = earth.climate;
         t2m = synth.t2m;
         tmin = synth.tmin;
         tmax = synth.tmax;
@@ -520,7 +520,7 @@ function localClimate(lat: number, lon: number, earth: Record<string, string>) {
     tmax += (((h >>> 12) % 41) - 20) / 10;
     prec = Math.max(0.05, prec + (((h >>> 18) % 31) - 15) / 100);
     rh = Math.min(98, Math.max(10, rh + (((h >>> 23) % 21) - 10)));
-    const hb = earth.humedad ? HUM_BANDS[earth.humedad] : undefined;
+    const hb = earth.humidity ? HUM_BANDS[earth.humidity] : undefined;
     if (hb) rh = hb[0] + (hb[1] - hb[0]) * (0.2 + 0.6 * (((h >>> 23) % 1000) / 1000));
     return {
         T2M: t2m,
@@ -530,12 +530,12 @@ function localClimate(lat: number, lon: number, earth: Record<string, string>) {
         RH2M: rh,
         WS2M: 3.5,
         ALLSKY_SFC_SW_DWN: 4.5,
-        _clima: clima,
+        _climate: climate,
     };
 }
 function localElevation(lat: number, lon: number, earth: Record<string, string>) {
     const h = hashSeed(`elev:${lat.toFixed(4)},${lon.toFixed(4)}`);
-    const band = earth.altitud ? ALT_BANDS[earth.altitud] : undefined;
+    const band = earth.elevation ? ALT_BANDS[earth.elevation] : undefined;
     if (band) {
         const span = band[1] - band[0];
         const hi = Math.min(band[1], band[0] + 3000);
@@ -545,16 +545,16 @@ function localElevation(lat: number, lon: number, earth: Record<string, string>)
     return base + (h % 500) - 250;
 }
 function localSoil(lat: number, lon: number, power: any, earth: Record<string, string>) {
-    let s = earth.suelo;
+    let s = earth.soil;
     if (!s) {
-        s = power.T2M < 0 ? "hielo" : power.PRECTOTCORR * 365 < 350 ? "salino" : "arenoso";
+        s = power.T2M < 0 ? "ice" : power.PRECTOTCORR * 365 < 350 ? "saline" : "sandy";
     }
     const h = hashSeed(`soil:${lat.toFixed(4)},${lon.toFixed(4)}`);
     const v = (base: number, span: number, sh: number) => {
         const x = ((h >>> sh) % (span * 2 + 1)) - span;
         return Math.round((base + x) * 100) / 100;
     };
-    if (s === "arenoso")
+    if (s === "sandy")
         return {
             clay: v(8, 4, 0),
             sand: v(72, 6, 3),
@@ -562,9 +562,9 @@ function localSoil(lat: number, lon: number, power: any, earth: Record<string, s
             soc: v(6, 3, 9),
             bdod: v(1.45, 0, 12),
             phh2o: v(7.2, 0, 15),
-            _tipo: "Sandy (estimated)",
+            _type: "Sandy (estimated)",
         };
-    if (s === "salino")
+    if (s === "saline")
         return {
             clay: v(18, 5, 0),
             sand: v(40, 6, 3),
@@ -572,9 +572,9 @@ function localSoil(lat: number, lon: number, power: any, earth: Record<string, s
             soc: v(3, 2, 9),
             bdod: v(1.35, 0, 12),
             phh2o: v(8.1, 0, 15),
-            _tipo: "Saline/evaporitic (estimated)",
+            _type: "Saline/evaporitic (estimated)",
         };
-    if (s === "hielo")
+    if (s === "ice")
         return {
             clay: v(10, 4, 0),
             sand: v(35, 6, 3),
@@ -582,9 +582,9 @@ function localSoil(lat: number, lon: number, power: any, earth: Record<string, s
             soc: v(12, 4, 9),
             bdod: v(0.9, 0, 12),
             phh2o: v(6.2, 0, 15),
-            _tipo: "Cryosol/permafrost (estimated)",
+            _type: "Cryosol/permafrost (estimated)",
         };
-    if (s === "basaltico")
+    if (s === "basaltic")
         return {
             clay: v(22, 5, 0),
             sand: v(38, 6, 3),
@@ -592,9 +592,9 @@ function localSoil(lat: number, lon: number, power: any, earth: Record<string, s
             soc: v(9, 3, 9),
             bdod: v(1.25, 0, 12),
             phh2o: v(6.8, 0, 15),
-            _tipo: "Basalt-derived (estimated)",
+            _type: "Basalt-derived (estimated)",
         };
-    if (s === "ceniza")
+    if (s === "ash")
         return {
             clay: v(10, 3, 0),
             sand: v(55, 6, 3),
@@ -602,9 +602,9 @@ function localSoil(lat: number, lon: number, power: any, earth: Record<string, s
             soc: v(3, 2, 9),
             bdod: v(1.0, 0, 12),
             phh2o: v(6.5, 0, 15),
-            _tipo: "Volcanic ash/tephra (estimated)",
+            _type: "Volcanic ash/tephra (estimated)",
         };
-    if (s === "grava")
+    if (s === "gravel")
         return {
             clay: v(10, 3, 0),
             sand: v(60, 6, 3),
@@ -612,9 +612,9 @@ function localSoil(lat: number, lon: number, power: any, earth: Record<string, s
             soc: v(2, 1, 9),
             bdod: v(1.55, 0, 12),
             phh2o: v(7.4, 0, 15),
-            _tipo: "Gravelly/stony (estimated)",
+            _type: "Gravelly/stony (estimated)",
         };
-    if (s === "ferroso")
+    if (s === "iron-rich")
         return {
             clay: v(32, 5, 0),
             sand: v(30, 5, 3),
@@ -622,9 +622,9 @@ function localSoil(lat: number, lon: number, power: any, earth: Record<string, s
             soc: v(4, 2, 9),
             bdod: v(1.3, 0, 12),
             phh2o: v(6.0, 0, 15),
-            _tipo: "Iron oxide-rich (estimated)",
+            _type: "Iron oxide-rich (estimated)",
         };
-    if (s === "yeso")
+    if (s === "gypsum")
         return {
             clay: v(14, 3, 0),
             sand: v(38, 5, 3),
@@ -632,7 +632,7 @@ function localSoil(lat: number, lon: number, power: any, earth: Record<string, s
             soc: v(2, 1, 9),
             bdod: v(1.3, 0, 12),
             phh2o: v(8.0, 0, 15),
-            _tipo: "Sulfate-rich/gypsiferous (estimated)",
+            _type: "Sulfate-rich/gypsiferous (estimated)",
         };
     return {
         clay: v(20, 5, 0),
@@ -641,7 +641,7 @@ function localSoil(lat: number, lon: number, power: any, earth: Record<string, s
         soc: v(8, 3, 9),
         bdod: v(1.3, 0, 12),
         phh2o: v(7.0, 0, 15),
-        _tipo: "Mixed (estimated)",
+        _type: "Mixed (estimated)",
     };
 }
 function aridity(precDay: number | undefined, t2m: number | undefined) {
@@ -650,8 +650,8 @@ function aridity(precDay: number | undefined, t2m: number | undefined) {
 }
 
 function pickZoneProfile(planet: string, zone: Record<string, string>): ZoneProfile {
-    const profiles = ZONE_PROFILES[planet] || ZONE_PROFILES.marte;
-    const wanted = zone.zona;
+    const profiles = ZONE_PROFILES[planet] || ZONE_PROFILES.mars;
+    const wanted = zone.zone;
     if (wanted && profiles[wanted]) return profiles[wanted];
     let best: ZoneProfile | null = null,
         bestScore = -1;
@@ -703,7 +703,7 @@ function scoreComponents(
     const comps: any = {};
     const hv = hashSeed(`sc:${lat.toFixed(5)},${lon.toFixed(5)}`);
     const jitter = ((hv % 13) - 6) * 0.35;
-    const zkeys = ["zona", "temperatura", "composicion", "relieve"].filter(k => zone[k]);
+    const zkeys = ["zone", "temperature", "composition", "terrain"].filter(k => zone[k]);
     if (zkeys.length)
         comps.target_zone = (100 * zkeys.filter(k => profile.tags[k] === zone[k]).length) / zkeys.length;
     else comps.target_zone = clamp(68 + ((hv >>> 4) % 17), 55, 90);
@@ -712,7 +712,7 @@ function scoreComponents(
         const t = Number(power.T2M),
             p = (Number(power.PRECTOTCORR) || 0) * 365,
             rh = Number(power.RH2M) || 50;
-        const cdef = earth.clima ? CLIMA_DEF[earth.clima] : undefined;
+        const cdef = earth.climate ? CLIMATE_DEF[earth.climate] : undefined;
         if (cdef) {
             const dp = cdef.p ? outside(p, cdef.p) / 100 : 0; // per 100 mm/year outside range
             const dt = cdef.t ? outside(t, cdef.t) / 3 : 0; // per 3 °C outside range
@@ -728,7 +728,7 @@ function scoreComponents(
 
     if (elev != null) {
         const e = Number(elev);
-        const band = earth.altitud ? ALT_BANDS[earth.altitud] : undefined;
+        const band = earth.elevation ? ALT_BANDS[earth.elevation] : undefined;
         if (band) {
             const d = outside(e, band);
             const mid = (band[0] + Math.min(band[1], band[0] + 3000)) / 2;
@@ -741,22 +741,22 @@ function scoreComponents(
     } else comps.elevation_dem = 35;
 
     if (soil || power?.RH2M != null) {
-        if (soil && earth.suelo) {
+        if (soil && earth.soil) {
             const sand = Number(soil.sand ?? 40),
                 clay = Number(soil.clay ?? 20),
                 bd = Number(soil.bdod ?? 1.3),
                 ph = Number(soil.phh2o ?? 7),
                 precY = (Number(power?.PRECTOTCORR) || 0) * 365,
-                w = earth.suelo;
+                w = earth.soil;
             const ok =
-                (w === "arenoso" && sand >= 50) ||
-                (w === "salino" && precY < 350) ||
-                (w === "hielo" && (Number(power?.T2M) ?? 10) < 0) ||
-                (w === "basaltico" && sand >= 30 && sand <= 55) ||
-                (w === "ceniza" && sand >= 45 && sand <= 75 && bd <= 1.15) ||
-                (w === "grava" && sand >= 45 && clay <= 16) ||
-                (w === "ferroso" && clay >= 25) ||
-                (w === "yeso" && precY < 350 && ph >= 7.6);
+                (w === "sandy" && sand >= 50) ||
+                (w === "saline" && precY < 350) ||
+                (w === "ice" && (Number(power?.T2M) ?? 10) < 0) ||
+                (w === "basaltic" && sand >= 30 && sand <= 55) ||
+                (w === "ash" && sand >= 45 && sand <= 75 && bd <= 1.15) ||
+                (w === "gravel" && sand >= 45 && clay <= 16) ||
+                (w === "iron-rich" && clay >= 25) ||
+                (w === "gypsum" && precY < 350 && ph >= 7.6);
             comps.substrate_moisture = clamp((ok ? 90 : 45) + (sand - 45) / 10, 20, 98);
         } else {
             const sand = Number(soil?.sand ?? 40),
@@ -777,7 +777,7 @@ function scoreComponents(
 
     if (power?.RH2M != null) {
         const rh = Number(power.RH2M);
-        const hb = earth.humedad ? HUM_BANDS[earth.humedad] : undefined;
+        const hb = earth.humidity ? HUM_BANDS[earth.humidity] : undefined;
         if (hb) {
             const d = outside(rh, hb);
             comps.relative_humidity = d === 0 ? 93 : clamp(62 - d * 2.2, 20, 62);
@@ -910,7 +910,7 @@ function earthBody(
         if (soil.soc != null) sub.push(`organic C ${Number(soil.soc).toFixed(1)} g/kg`);
         if (soil.bdod != null) sub.push(`bulk density ${Number(soil.bdod).toFixed(2)} kg/dm³`);
         if (soil.phh2o != null) sub.push(`pH(H₂O) ${Number(soil.phh2o).toFixed(2)}`);
-        if (soil._tipo) sub.push(String(soil._tipo));
+        if (soil._type) sub.push(String(soil._type));
     }
     fields.push({
         label: "Soil substrate (SoilGrids, quantitative)",
@@ -946,8 +946,8 @@ function earthBody(
     } as BodyInfo;
 }
 function zoneBody(profile: ZoneProfile, zone: Record<string, string>): BodyInfo {
-    const keys = ["composicion", "temperatura", "relieve", "zona"];
-    const vals = keys.map(k => (zone[k] ? (profile.tags[k] === zone[k] ? 92 : 35) : k === "temperatura" ? 80 : 78));
+    const keys = ["composition", "temperature", "terrain", "zone"];
+    const vals = keys.map(k => (zone[k] ? (profile.tags[k] === zone[k] ? 92 : 35) : k === "temperature" ? 80 : 78));
     const corrs = [vals[0], vals[1], Math.round((vals[2] + vals[3]) / 2), 74];
     return {
         kicker: profile.kicker,
@@ -1044,7 +1044,7 @@ async function buildOne(
 }
 
 async function mockSearch(query: SearchQuery): Promise<Match[]> {
-    const planet = query.planet in ZONE_PROFILES ? query.planet : "marte";
+    const planet = query.planet in ZONE_PROFILES ? query.planet : "mars";
     const earth = query.earth || {};
     const zone = query.zone || {};
     const profile = pickZoneProfile(planet, zone);

@@ -1,6 +1,6 @@
 def test_search_endpoint_returns_matches(client, monkeypatch) -> None:
-    monkeypatch.setattr("app.services.analogs.reverse_geocode_name", lambda lat, lon: ("Valle de prueba", True))
-    monkeypatch.setattr("app.services.analogs.human_interference", lambda lat, lon: ("baja", True, 3, True))
+    monkeypatch.setattr("app.services.analogs.reverse_geocode_name", lambda lat, lon: ("Test Valley", True))
+    monkeypatch.setattr("app.services.analogs.human_interference", lambda lat, lon: ("low", True, 3, True))
     monkeypatch.setattr(
         "app.services.analogs.fetch_nasa_power",
         lambda lat, lon: ({
@@ -30,9 +30,9 @@ def test_search_endpoint_returns_matches(client, monkeypatch) -> None:
     response = client.post(
         "/analogs/search",
         json={
-            "planet": "marte",
-            "earth": {"clima": "templado"},
-            "zone": {"zona": "canones"},
+            "planet": "mars",
+            "earth": {"climate": "temperate"},
+            "zone": {"zone": "canyons"},
             "location": {"lat": 18.5, "lng": -70.5, "radiusKm": 30.0},
             "userLocation": {"lat": 19.2, "lng": -70.9},
             "preferAccessible": True,

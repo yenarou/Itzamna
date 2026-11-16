@@ -1,6 +1,6 @@
 :root {
     --header-h: 5.4rem;
-    --planet-size: min(58vmin, 34rem); /* Tierra/globo y Luna/Marte miden lo mismo */
+    --planet-size: min(58vmin, 34rem); /* Earth, Moon, and Mars are the same size. */
 
     /* Glass */
     --glass-bg: linear-gradient(145deg, rgba(18, 38, 74, 0.5), rgba(8, 18, 38, 0.42));
@@ -71,7 +71,7 @@ body::after {
         radial-gradient(1.2px 1.2px at 15% 55%, rgba(139, 108, 255, 0.45) 50%, transparent 52%);
     opacity: 0.45;
 }
-/* Las vistas y el hero eran opacos y tapaban el aurora */
+/* Keep views and the hero from obscuring the aurora. */
 .app-view,
 html[data-theme="light"] .app-view {
     background: transparent;
@@ -88,7 +88,7 @@ html[data-theme="light"] .hero {
         radial-gradient(700px 420px at 20% 70%, rgba(54, 217, 192, 0.1), transparent 60%);
 }
 
-/* ---------- 2. Scrollbars (el "espacio blanco" era el scroll nativo claro) ---------- */
+/* ---------- 2. Scrollbars (the "white space" came from the light native scrollbar) ---------- */
 html {
     color-scheme: dark;
 }
@@ -103,8 +103,8 @@ html[data-theme="light"] * {
     scrollbar-color: rgba(18, 58, 112, 0.35) transparent;
 }
 
-/* ---------- 3. sr-only roto: .field-select (sin layer) le ganaba a Tailwind y los
-   <select> ocultos medían 100% de ancho → scroll horizontal fantasma ---------- */
+/* ---------- 3. Fix broken sr-only: .field-select overrode Tailwind without a layer, and hidden
+   <select> elements measured 100% width, causing phantom horizontal scrolling. ---------- */
 select.sr-only,
 input.sr-only,
 .field-select.sr-only {
@@ -124,7 +124,7 @@ input.sr-only,
     overflow-x: hidden;
 }
 
-/* ---------- 4. Header: más aire entre botones + fade para que el contenido no se vea detrás ---------- */
+/* ---------- 4. Header: add space between buttons and fade to keep content from showing behind it ---------- */
 .site-header::before {
     content: "";
     position: absolute;
@@ -163,7 +163,7 @@ html[data-theme] :is(.story-card, .content-hero-inner, .loc-card, .info-section,
 html[data-theme] .info-section-advanced.is-open {
     border-color: rgba(54, 214, 245, 0.32);
 }
-/* Contenedor del explorador: un solo vidrio, los dos paneles dentro sin caja propia */
+/* Explorer container: one glass surface, with no separate boxes around the two inner panels. */
 html[data-theme] #explorer {
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
@@ -180,7 +180,7 @@ html[data-theme] #explorer > section:not(#results) {
 #planet-pane {
     border-left: 1px solid var(--glass-border);
 }
-/* Capas que van encima de los planetas: vidrio más denso (con blur para que no se vean detrás) */
+/* Use denser blurred glass for layers above the planets so they cannot be seen through them. */
 html[data-theme] :is(#search-panel, #results.results-panel) {
     background: var(--glass-bg-strong) !important;
     backdrop-filter: var(--glass-blur) !important;
@@ -198,8 +198,8 @@ html[data-theme] :is(.loading-popup, .safety-gate-card, .custom-dd-menu, .planet
     -webkit-backdrop-filter: var(--glass-blur);
 }
 
-/* ---------- 6. NEUMORFISMO: controles ---------- */
-/* 6a. Botones = elevados */
+/* ---------- 6. NEUMORPHISM: controls ---------- */
+/* 6a. Buttons = raised */
 html[data-theme] :is(.btn-secondary, .loc-action-btn, #toggle-search, #reopen-results, #results button) {
     background: var(--neu-bg);
     border: 1px solid var(--neu-border);
@@ -216,14 +216,14 @@ html[data-theme] :is(.btn-secondary, .loc-action-btn, #toggle-search, #reopen-re
     box-shadow: var(--neu-pressed);
     transform: translateY(0);
 }
-/* Seleccionado = hundido + acento cian (tabs de candidatos y toggle Earth/Planet) */
+/* Selected state = recessed with a cyan accent (candidate tabs and Earth/Planet toggle). */
 html[data-theme] :is(.view-toggle-btn.is-active, .view-toggle-btn[aria-pressed="true"], #match-tabs button[aria-selected="true"]) {
     background: var(--neu-well);
     border-color: rgba(54, 214, 245, 0.4);
     color: var(--color-jade);
     box-shadow: var(--neu-pressed), 0 0 0 1px rgba(54, 214, 245, 0.25);
 }
-/* Lectura de similitud = pantalla hundida */
+/* Similarity reading = recessed panel. */
 html[data-theme] #control > div:first-child {
     background: var(--neu-well);
     border: 1px solid var(--neu-border);
@@ -231,7 +231,7 @@ html[data-theme] #control > div:first-child {
     box-shadow: var(--neu-pressed);
 }
 
-/* 6b. Campos (inputs y dropdowns) = hundidos, como un pozo */
+/* 6b. Recess fields (inputs and dropdowns) like a well. */
 html[data-theme] :is(.custom-dd-trigger, .planet-dd-trigger, input.field-select) {
     background: var(--neu-well);
     border: 1px solid var(--neu-border);
@@ -258,7 +258,7 @@ html[data-theme] :is(.custom-dd-option, .planet-dd-option)[aria-selected="true"]
     color: var(--color-chalk);
 }
 
-/* ---------- 7. Tierra/globo y Luna/Marte del MISMO tamaño ---------- */
+/* ---------- 7. Earth, Moon, and Mars globes all use the SAME size ---------- */
 #explorer .planet,
 #explorer #earth-globe,
 #explorer [data-globe] {
@@ -270,11 +270,11 @@ html[data-theme] :is(.custom-dd-option, .planet-dd-option)[aria-selected="true"]
     max-width: var(--planet-size);
 }
 
-/* ---------- 8. Resultados: sin tablas apretadas ni huecos enormes ---------- */
+/* ---------- 8. Results: avoid cramped tables and oversized gaps ---------- */
 .data-table-wrap {
     container-type: inline-size;
 }
-/* Si la tabla es angosta (2 columnas lado a lado), cada fila pasa a tarjeta compacta */
+/* In a narrow table (two side-by-side columns), display each row as a compact card. */
 @container (max-width: 62rem) {
     .data-table,
     .data-table-compact {
@@ -328,7 +328,7 @@ html[data-theme] :is(.custom-dd-option, .planet-dd-option)[aria-selected="true"]
         font-size: 0.88rem;
     }
 }
-/* En la vista avanzada la tarjeta del planeta acompaña el scroll en vez de dejar el hueco debajo */
+/* In advanced view, keep the planet card alongside scrolling content instead of leaving a gap below. */
 @media (min-width: 1280px) and (min-height: 760px) {
     #advanced > article.body-card:nth-child(2) {
         position: sticky;
@@ -337,7 +337,7 @@ html[data-theme] :is(.custom-dd-option, .planet-dd-option)[aria-selected="true"]
     }
 }
 
-/* ---------- 9. Aviso de seguridad: una sola vez ---------- */
+/* ---------- 9. Show the safety notice only once ---------- */
 html[data-safety="accepted"] .safety-gate {
     display: none !important;
 }

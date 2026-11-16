@@ -4,9 +4,9 @@ import Header from '../components/Header.astro';
 
 interface Props {
   title: string;
-  /** true: la página ocupa exactamente el alto de la ventana (explorador). */
+  /** true: the page occupies the full viewport height (explorer). */
   fullscreen?: boolean;
-  /** header transparente sobre hero (scroll aplica vidrio) */
+  /** Transparent header over the hero; scrolling applies the glass effect. */
   transparentHeader?: boolean;
 }
 const { title, fullscreen = false, transparentHeader = false } = Astro.props;

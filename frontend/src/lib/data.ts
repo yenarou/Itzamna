@@ -2,132 +2,132 @@ import type { BodyInfo, FieldDef, PlanetDef } from "./types";
 
 export const EARTH_FIELDS: FieldDef[] = [
     {
-        id: "clima",
+        id: "climate",
         label: "Climate (precipitation / mean annual temperature)",
         options: [
-            { value: "hiperarido", label: "Hyper-arid (< 100 mm/yr, mean temp often > 18 °C)" },
-            { value: "arido", label: "Arid (100–250 mm/yr)" },
-            { value: "semiarido", label: "Semi-arid (250–500 mm/yr)" },
-            { value: "templado", label: "Temperate (500–1500 mm/yr, mean ~5–20 °C)" },
+            { value: "hyperarid", label: "Hyper-arid (< 100 mm/yr, mean temp often > 18 °C)" },
+            { value: "arid", label: "Arid (100–250 mm/yr)" },
+            { value: "semiarid", label: "Semi-arid (250–500 mm/yr)" },
+            { value: "temperate", label: "Temperate (500–1500 mm/yr, mean ~5–20 °C)" },
             { value: "tundra", label: "Tundra (< 250 mm/yr, mean −10 to 5 °C)" },
-            { value: "glaciar", label: "Glacial (< 250 mm/yr, mean < 0 °C year-round)" },
+            { value: "glacial", label: "Glacial (< 250 mm/yr, mean < 0 °C year-round)" },
         ],
     },
     {
-        id: "altitud",
+        id: "elevation",
         label: "Elevation (m a.s.l.)",
         options: [
-            { value: "nivel-mar", label: "Coastal (0–200 m)" },
-            { value: "baja", label: "Low (200–800 m)" },
-            { value: "media", label: "Medium (800–2000 m)" },
-            { value: "alta", label: "High (2000–3500 m)" },
-            { value: "muy-alta", label: "Very high (> 3500 m)" },
+            { value: "sea-level", label: "Coastal (0–200 m)" },
+            { value: "low", label: "Low (200–800 m)" },
+            { value: "medium", label: "Medium (800–2000 m)" },
+            { value: "high", label: "High (2000–3500 m)" },
+            { value: "very-high", label: "Very high (> 3500 m)" },
         ],
     },
     {
-        id: "suelo",
+        id: "soil",
         label: "Surface substrate (0–15 cm)",
         options: [
-            { value: "basaltico", label: "Basaltic (volcanic mafic rock)" },
-            { value: "ceniza", label: "Volcanic ash / tephra (< 2 mm particles)" },
-            { value: "arenoso", label: "Sandy (0.05–2 mm grains)" },
-            { value: "grava", label: "Gravelly (> 2 mm fragments)" },
-            { value: "ferroso", label: "Iron-rich (Fe oxides present)" },
-            { value: "salino", label: "Saline (evaporite/salt crusts)" },
-            { value: "yeso", label: "Gypsiferous (sulfate/gypsum-rich)" },
-            { value: "hielo", label: "Icy / permafrost (frozen ground)" },
+            { value: "basaltic", label: "Basaltic (volcanic mafic rock)" },
+            { value: "ash", label: "Volcanic ash / tephra (< 2 mm particles)" },
+            { value: "sandy", label: "Sandy (0.05–2 mm grains)" },
+            { value: "gravel", label: "Gravelly (> 2 mm fragments)" },
+            { value: "iron-rich", label: "Iron-rich (Fe oxides present)" },
+            { value: "saline", label: "Saline (evaporite/salt crusts)" },
+            { value: "gypsum", label: "Gypsiferous (sulfate/gypsum-rich)" },
+            { value: "ice", label: "Icy / permafrost (frozen ground)" },
         ],
     },
     {
-        id: "humedad",
+        id: "humidity",
         label: "Mean annual relative humidity (RH)",
         options: [
-            { value: "muy-baja", label: "Very low (0–20% RH)" },
-            { value: "baja", label: "Low (20–40% RH)" },
-            { value: "media", label: "Medium (40–60% RH)" },
-            { value: "alta", label: "High (60–80% RH)" },
-            { value: "muy-alta", label: "Very high (80–100% RH)" },
+            { value: "very-low", label: "Very low (0–20% RH)" },
+            { value: "low", label: "Low (20–40% RH)" },
+            { value: "medium", label: "Medium (40–60% RH)" },
+            { value: "high", label: "High (60–80% RH)" },
+            { value: "very-high", label: "Very high (80–100% RH)" },
         ],
     },
 ];
 
 export const PLANETS: PlanetDef[] = [
     {
-        id: "luna",
+        id: "moon",
         name: "Moon",
         fields: [
             {
-                id: "zona",
+                id: "zone",
                 label: "Lunar zone",
                 options: [
-                    { value: "mares", label: "Basaltic maria (broad low plains)" },
-                    { value: "crateres", label: "Craters and highlands (elevated, impact terrain)" },
-                    { value: "polos", label: "Poles (high-latitude, low sun angle)" },
+                    { value: "maria", label: "Basaltic maria (broad low plains)" },
+                    { value: "craters", label: "Craters and highlands (elevated, impact terrain)" },
+                    { value: "poles", label: "Poles (high-latitude, low sun angle)" },
                 ],
             },
             {
-                id: "temperatura",
+                id: "temperature",
                 label: "Surface thermal regime",
                 options: [
-                    { value: "extrema", label: "Extreme day–night cycle (approx. −170 to 120 °C)" },
-                    { value: "muy-fria", label: "Permanently shadowed (often < −150 °C)" },
+                    { value: "extreme", label: "Extreme day–night cycle (approx. −170 to 120 °C)" },
+                    { value: "very-cold", label: "Permanently shadowed (often < −150 °C)" },
                 ],
             },
             {
-                id: "composicion",
+                id: "composition",
                 label: "Regolith composition",
                 options: [
-                    { value: "basalto", label: "Mare basalt (Fe/Ti-rich volcanic rock)" },
-                    { value: "regolito", label: "Fine regolith (dust/fragments, μm–mm scale)" },
-                    { value: "hielo", label: "Water ice (volatile deposits)" },
+                    { value: "basalt", label: "Mare basalt (Fe/Ti-rich volcanic rock)" },
+                    { value: "regolith", label: "Fine regolith (dust/fragments, μm–mm scale)" },
+                    { value: "ice", label: "Water ice (volatile deposits)" },
                 ],
             },
             {
-                id: "relieve",
+                id: "terrain",
                 label: "Terrain (typical slope)",
                 options: [
-                    { value: "plano", label: "Plain (approx. < 5° slope)" },
-                    { value: "crateres", label: "Cratered (variable slopes, often > 10°)" },
+                    { value: "flat", label: "Plain (approx. < 5° slope)" },
+                    { value: "craters", label: "Cratered (variable slopes, often > 10°)" },
                 ],
             },
         ],
     },
     {
-        id: "marte",
+        id: "mars",
         name: "Mars",
         fields: [
             {
-                id: "zona",
+                id: "zone",
                 label: "Martian zone",
                 options: [
-                    { value: "planicies", label: "Plains (low-relief basins/plateaus)" },
-                    { value: "canones", label: "Canyons and valleys (steep walls, km-scale relief)" },
-                    { value: "polos", label: "Polar caps (ice-rich, > 80° latitude)" },
+                    { value: "plains", label: "Plains (low-relief basins/plateaus)" },
+                    { value: "canyons", label: "Canyons and valleys (steep walls, km-scale relief)" },
+                    { value: "poles", label: "Polar caps (ice-rich, > 80° latitude)" },
                 ],
             },
             {
-                id: "temperatura",
+                id: "temperature",
                 label: "Surface thermal regime",
                 options: [
-                    { value: "fria", label: "Cold (approx. −90 to 20 °C)" },
-                    { value: "muy-fria", label: "Very cold / polar (approx. −140 to −60 °C)" },
+                    { value: "cold", label: "Cold (approx. −90 to 20 °C)" },
+                    { value: "very-cold", label: "Very cold / polar (approx. −140 to −60 °C)" },
                 ],
             },
             {
-                id: "composicion",
+                id: "composition",
                 label: "Surface composition",
                 options: [
-                    { value: "oxidos", label: "Iron oxides (Fe-oxide rich, reddish dust/rock)" },
-                    { value: "sulfatos", label: "Sulfates (evaporite/sulfate minerals)" },
-                    { value: "hielo-agua", label: "Water ice (surface/subsurface ice)" },
+                    { value: "oxides", label: "Iron oxides (Fe-oxide rich, reddish dust/rock)" },
+                    { value: "sulfates", label: "Sulfates (evaporite/sulfate minerals)" },
+                    { value: "water-ice", label: "Water ice (surface/subsurface ice)" },
                 ],
             },
             {
-                id: "relieve",
+                id: "terrain",
                 label: "Terrain (typical slope)",
                 options: [
-                    { value: "plano", label: "Plain (approx. < 5° slope)" },
-                    { value: "montanoso", label: "Rugged / mountainous (variable slopes, often > 10°)" },
+                    { value: "flat", label: "Plain (approx. < 5° slope)" },
+                    { value: "rugged", label: "Rugged / mountainous (variable slopes, often > 10°)" },
                 ],
             },
         ],
@@ -136,7 +136,7 @@ export const PLANETS: PlanetDef[] = [
 
 export interface AnalogSeed {
     id: string;
-    planet: "luna" | "marte";
+    planet: "moon" | "mars";
     base: number;
     earthTags: Record<string, string>;
     zoneTags: Record<string, string>;
@@ -164,9 +164,9 @@ export const NASA_MOON_FALLBACK = "https://images-assets.nasa.gov/image/PIA23210
 export const NASA_MARS_FALLBACK = "https://images-assets.nasa.gov/image/PIA02150/PIA02150~orig.jpg";
 
 export const PLANET_IMAGES = {
-    tierra: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/The_Earth_seen_from_Apollo_17.jpg/1280px-The_Earth_seen_from_Apollo_17.jpg",
-    luna: "https://images-assets.nasa.gov/image/PIA00405/PIA00405~medium.jpg",
-    marte: NASA_MARS_FALLBACK,
+    earth: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/The_Earth_seen_from_Apollo_17.jpg/1280px-The_Earth_seen_from_Apollo_17.jpg",
+    moon: "https://images-assets.nasa.gov/image/PIA00405/PIA00405~medium.jpg",
+    mars: NASA_MARS_FALLBACK,
 } as const;
 
 // Satellite image centered on the coordinate (Esri World Imagery export; no API key)
@@ -183,12 +183,12 @@ export function buildEarthLocationImage(lat: number, lng: number): string {
 
 export const ANALOGS: AnalogSeed[] = [
     {
-        id: "luna-krafla",
-        planet: "luna",
+        id: "moon-krafla",
+        planet: "moon",
         base: 78,
         coords: [65.715, -16.754],
-        earthTags: { clima: "polar", altitud: "media", suelo: "basaltico", humedad: "media" },
-        zoneTags: { zona: "mares", temperatura: "extrema", composicion: "basalto", relieve: "plano" },
+        earthTags: { climate: "polar", elevation: "medium", soil: "basaltic", humidity: "medium" },
+        zoneTags: { zone: "maria", temperature: "extreme", composition: "basalt", terrain: "flat" },
         earth: {
             kicker: "Earth · Iceland",
             title: "Krafla lava field",
@@ -237,12 +237,12 @@ export const ANALOGS: AnalogSeed[] = [
         },
     },
     {
-        id: "luna-barringer",
-        planet: "luna",
+        id: "moon-barringer",
+        planet: "moon",
         base: 81,
         coords: [35.028, -111.023],
-        earthTags: { clima: "arido", altitud: "media", suelo: "arenoso", humedad: "baja" },
-        zoneTags: { zona: "crateres", temperatura: "extrema", composicion: "regolito", relieve: "crateres" },
+        earthTags: { climate: "arid", elevation: "medium", soil: "sandy", humidity: "low" },
+        zoneTags: { zone: "craters", temperature: "extreme", composition: "regolith", terrain: "craters" },
         earth: {
             kicker: "Earth · Arizona, USA",
             title: "Barringer Crater",
@@ -291,12 +291,12 @@ export const ANALOGS: AnalogSeed[] = [
         },
     },
     {
-        id: "luna-mcmurdo",
-        planet: "luna",
+        id: "moon-mcmurdo",
+        planet: "moon",
         base: 66,
         coords: [-77.465, 162.52],
-        earthTags: { clima: "polar", altitud: "baja", suelo: "hielo", humedad: "muy-baja" },
-        zoneTags: { zona: "polos", temperatura: "muy-fria", composicion: "hielo", relieve: "crateres" },
+        earthTags: { climate: "polar", elevation: "low", soil: "ice", humidity: "very-low" },
+        zoneTags: { zone: "poles", temperature: "very-cold", composition: "ice", terrain: "craters" },
         earth: {
             kicker: "Earth · Antarctica",
             title: "McMurdo Dry Valleys",
@@ -345,12 +345,12 @@ export const ANALOGS: AnalogSeed[] = [
         },
     },
     {
-        id: "marte-atacama",
-        planet: "marte",
+        id: "mars-atacama",
+        planet: "mars",
         base: 85,
         coords: [-24.5, -69.25],
-        earthTags: { clima: "arido", altitud: "alta", suelo: "salino", humedad: "muy-baja" },
-        zoneTags: { zona: "planicies", temperatura: "fria", composicion: "sulfatos", relieve: "plano" },
+        earthTags: { climate: "arid", elevation: "high", soil: "saline", humidity: "very-low" },
+        zoneTags: { zone: "plains", temperature: "cold", composition: "sulfates", terrain: "flat" },
         earth: {
             kicker: "Earth · Chile",
             title: "Atacama Desert",
@@ -399,12 +399,12 @@ export const ANALOGS: AnalogSeed[] = [
         },
     },
     {
-        id: "marte-riotinto",
-        planet: "marte",
+        id: "mars-riotinto",
+        planet: "mars",
         base: 76,
         coords: [37.694, -6.597],
-        earthTags: { clima: "templado", altitud: "baja", suelo: "ferroso", humedad: "media" },
-        zoneTags: { zona: "canones", temperatura: "fria", composicion: "oxidos", relieve: "montanoso" },
+        earthTags: { climate: "temperate", elevation: "low", soil: "iron-rich", humidity: "medium" },
+        zoneTags: { zone: "canyons", temperature: "cold", composition: "oxides", terrain: "rugged" },
         earth: {
             kicker: "Earth · Spain",
             title: "Río Tinto",
@@ -453,12 +453,12 @@ export const ANALOGS: AnalogSeed[] = [
         },
     },
     {
-        id: "marte-mcmurdo",
-        planet: "marte",
+        id: "mars-mcmurdo",
+        planet: "mars",
         base: 69,
         coords: [-77.465, 162.52],
-        earthTags: { clima: "polar", altitud: "baja", suelo: "hielo", humedad: "muy-baja" },
-        zoneTags: { zona: "polos", temperatura: "muy-fria", composicion: "hielo-agua", relieve: "plano" },
+        earthTags: { climate: "polar", elevation: "low", soil: "ice", humidity: "very-low" },
+        zoneTags: { zone: "poles", temperature: "very-cold", composition: "water-ice", terrain: "flat" },
         earth: {
             kicker: "Earth · Antarctica",
             title: "McMurdo Dry Valleys",

@@ -1,4 +1,4 @@
-export type PlanetId = 'luna' | 'marte';
+export type PlanetId = 'moon' | 'mars';
 
 export interface FieldOption {
   value: string;

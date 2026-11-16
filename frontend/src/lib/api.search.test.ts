@@ -6,10 +6,10 @@ describe("resolveCandidateMetadata", () => {
         const result = await resolveCandidateMetadata({
             lat: 48.0179,
             lon: -34.1598,
-            earth: { clima: "arido" },
+            earth: { climate: "arid" },
             fetchers: {
                 reverseGeocode: async () => [null, false],
-                overpassInterference: async () => ["baja", true, 0, false],
+                overpassInterference: async () => ["low", true, 0, false],
                 nasaPower: async () => [null, false],
                 openTopo: async () => [null, false],
                 soilGrids: async () => [null, false],

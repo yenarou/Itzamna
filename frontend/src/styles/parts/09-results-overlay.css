@@ -35,15 +35,15 @@ html[data-theme="light"] .loading-popup {
     background: #fff;
 }
 
-/* ============ Fix de encimado: resultados / avanzada ============ */
-/* El header es fixed (transparente): el contenido de la vista Explorar debe empezar debajo */
+/* ============ Results / advanced view overlap fixes ============ */
+/* The header is fixed and transparent, so the Explore view content must start below it. */
 #view-explore {
     padding-top: 5.25rem;
 }
 #explorer {
     scroll-margin-top: 5rem;
 }
-/* Paneles superpuestos con fondo OPACO (antes eran translúcidos y se veían Tierra/Luna detrás) */
+/* Use opaque backgrounds for overlapping panels to hide Earth and the Moon behind them. */
 #search-panel {
     background: var(--color-surface) !important;
     backdrop-filter: none !important;
@@ -53,8 +53,8 @@ html[data-theme="light"] .loading-popup {
     background: var(--color-surface) !important;
     backdrop-filter: none !important;
 }
-/* En estado "results" el explorador deja de ser una caja fija de 88svh con scroll interno:
-   los resultados fluyen en la página y la barra queda pegada bajo el header */
+/* In the "results" state, let results flow in the page and keep the bar below the header
+   instead of using a fixed 88svh explorer box with internal scrolling. */
 #explorer[data-state="results"] {
     display: block;
     min-height: 0;
@@ -72,7 +72,7 @@ html[data-theme="light"] .loading-popup {
 }
 .results-bar {
     position: sticky;
-    top: 4.1rem; /* alto de .site-header-inner */
+    top: 4.1rem; /* Height of .site-header-inner. */
     z-index: 20;
     background: var(--color-surface);
     border-bottom: 1px solid var(--color-line);
@@ -134,4 +134,4 @@ html[data-theme="light"] .loading-popup {
     border: 1px solid rgba(38, 123, 255, 0.3);
 }
 
-/* Impresión / PDF */
+/* Print / PDF */

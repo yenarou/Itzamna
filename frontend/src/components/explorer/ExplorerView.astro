@@ -149,7 +149,7 @@ const paneTitle = 'font-display text-3xl font-medium';
         {
           PLANETS.map((p) => (
             <fieldset hidden class="space-y-4" data-group="zone" data-planet-fields={p.id}>
-              <legend class:list={['mb-4 font-display text-2xl', p.id === 'marte' ? 'text-rust' : 'text-mist']}>
+              <legend class:list={['mb-4 font-display text-2xl', p.id === 'mars' ? 'text-rust' : 'text-mist']}>
                 {p.name}
               </legend>
               {p.fields.map((f) => (

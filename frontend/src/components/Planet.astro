@@ -2,17 +2,17 @@
 import { PLANET_IMAGES } from '../lib/data';
 
 interface Props {
-  body: 'tierra' | 'luna' | 'marte';
+  body: 'earth' | 'moon' | 'mars';
 }
 
 const { body } = Astro.props;
 const src = PLANET_IMAGES[body];
-const isEarth = body === 'tierra';
+const isEarth = body === 'earth';
 ---
 
 {
   isEarth ? (
-    <div class="planet planet-tierra planet-globe" aria-hidden="true">
+    <div class="planet planet-earth planet-globe" aria-hidden="true">
       <div id="earth-globe"></div>
     </div>
   ) : (
@@ -43,8 +43,8 @@ const isEarth = body === 'tierra';
     animation: planet-spin 90s linear infinite;
     transform-origin: 50% 50%;
   }
-  .planet-luna img { animation-duration: 140s; }
-  .planet-marte img { animation-duration: 110s; }
+  .planet-moon img { animation-duration: 140s; }
+  .planet-mars img { animation-duration: 110s; }
 
   @keyframes planet-spin {
     from { transform: rotate(0deg) scale(1.08); }
@@ -61,7 +61,7 @@ const isEarth = body === 'tierra';
     pointer-events: none;
   }
 
-  /* El globo 3D dibuja su propia esfera y atmósfera: sin recorte circular */
+  /* The 3D globe renders its own sphere and atmosphere, so it needs no circular clipping. */
   .planet-globe {
     overflow: visible;
     background: transparent;
@@ -93,7 +93,7 @@ const isEarth = body === 'tierra';
     const wrap = host.parentElement as HTMLElement;
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // Texturas locales (public/textures): sin depender de CDN ni de CORS
+    // Load local textures from public/textures without relying on a CDN or CORS.
     const globe = new (Globe as any)(host, { animateIn: false })
       .globeImageUrl('/textures/earth-blue-marble.jpg')
       .bumpImageUrl('/textures/earth-topology.png')
@@ -110,7 +110,7 @@ const isEarth = body === 'tierra';
     controls.enableZoom = false;
     controls.enablePan = false;
 
-    // El lienzo siempre es cuadrado y del tamaño del contenedor (--planet-size) → centrado y igual a la Luna/Marte
+    // Keep the canvas square and sized to its container (--planet-size), matching the Moon and Mars.
     const fit = () => {
       const size = Math.round(wrap.clientWidth);
       if (size < 10) {

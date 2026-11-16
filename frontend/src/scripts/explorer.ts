@@ -77,7 +77,7 @@ function planetTexture(id: string): string {
         const ctx = c.getContext("2d");
         if (!ctx) return "";
         // Seeded PRNG for stable, complete coverage (no black gaps)
-        let s = id === "luna" ? 424242 : 13371337;
+        let s = id === "moon" ? 424242 : 13371337;
         const rnd = () => {
             s = (s * 1664525 + 1013904223) >>> 0;
             return s / 4294967296;
@@ -94,7 +94,7 @@ function planetTexture(id: string): string {
                 ctx.restore();
             }
         };
-        if (id === "luna") {
+        if (id === "moon") {
             const g = ctx.createLinearGradient(0, 0, 0, c.height);
             g.addColorStop(0, "#d9d9d9");
             g.addColorStop(0.5, "#a7a7a7");
@@ -194,31 +194,31 @@ function initPlanetGlobe(id: string): void {
     try {
         const texFallback = planetTexture(id);
         // Equirectangular (2:1) Mars textures only — verified to load as direct images.
-        const texUrls = id === "luna"
+        const texUrls = id === "moon"
             ? ["https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/moon_1024.jpg"]
             : [
                 "https://raw.githubusercontent.com/jeromeetienne/threex.planets/master/images/marsmap1k.jpg"
               ];
         const g = new Globe(node)
             .backgroundColor("rgba(0,0,0,0)")
-            .showAtmosphere(id === "marte")
-            .atmosphereColor(id === "marte" ? "#ffb08a" : "#cfd8e3")
-            .atmosphereAltitude(id === "marte" ? 0.14 : 0.02)
+            .showAtmosphere(id === "mars")
+            .atmosphereColor(id === "mars" ? "#ffb08a" : "#cfd8e3")
+            .atmosphereAltitude(id === "mars" ? 0.14 : 0.02)
             .globeImageUrl(texFallback);
-        if (id === "luna") {
+        if (id === "moon") {
             try { g.bumpImageUrl(texFallback).bumpScale(1.2); } catch {}
         }
         g.width(node.clientWidth || 300);
         g.height(node.clientHeight || node.clientWidth || 300);
         const controls = g.controls();
         controls.autoRotate = true;
-        controls.autoRotateSpeed = id === "marte" ? 0.28 : 0.18;
+        controls.autoRotateSpeed = id === "mars" ? 0.28 : 0.18;
         controls.enableRotate = true;
         controls.enablePan = false;
         controls.enableZoom = true;
         controls.minDistance = 120;
         controls.maxDistance = 450;
-        g.pointOfView({ lat: id === "luna" ? 10 : 15, lng: id === "luna" ? 0 : -20, altitude: 1.8 }, 0);
+        g.pointOfView({ lat: id === "moon" ? 10 : 15, lng: id === "moon" ? 0 : -20, altitude: 1.8 }, 0);
         // Try remote textures; keep full procedural fallback (complete 360°) if none load or if they render badly.
         const tryTex = (i: number) => {
             if (i >= texUrls.length) return;
@@ -276,7 +276,7 @@ let userLocation: UserLocation | undefined;
 let candidateMaps: { map: any; lat: number; lon: number }[] = [];
 
 function zoneFallback(p: PlanetId | "" = planet): string {
-    return p === "marte" ? NASA_MARS_FALLBACK : NASA_MOON_FALLBACK;
+    return p === "mars" ? NASA_MARS_FALLBACK : NASA_MOON_FALLBACK;
 }
 
 function esc(text: string): string {
@@ -626,9 +626,9 @@ function bodyColumn(
             </tr>`;
         })
         .join("");
-    const isEarthLike = withImage && (b.kicker.includes("Earth") || b.kicker.includes("Tierra") || /Earth|Tierra|calcul|candidat|candidate/i.test(b.kicker + " " + b.title));
+    const isEarthLike = withImage && /Earth|calculat|candidate/i.test(b.kicker + " " + b.title);
     const isPlanetZone = /^Mars\b|^Moon\b/i.test(b.kicker);
-    const fallback = isPlanetZone ? zoneFallback(/^Mars\b/i.test(b.kicker) ? "marte" : "luna") : NASA_EARTH_FALLBACK;
+    const fallback = isPlanetZone ? zoneFallback(/^Mars\b/i.test(b.kicker) ? "mars" : "moon") : NASA_EARTH_FALLBACK;
     const mapCoords = isEarthLike ? coordsFromBody(b) : null;
     const pin = isEarthLike && b.imageUrl && !mapCoords
         ? `<span aria-hidden="true" class="pointer-events-none absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-full"><span class="block h-4 w-4 -rotate-45 rounded-full rounded-bl-none border-2 border-white bg-ochre shadow-lg"></span><span class="mx-auto -mt-0.5 block h-2 w-2 rounded-full bg-white/90 shadow"></span></span>`
@@ -709,7 +709,7 @@ function destroyCandidateMaps(): void {
     candidateMaps = [];
 }
 
-/** Previsualización de mapa (Leaflet + Esri) centrada exactamente en el candidato. */
+/** Leaflet + Esri map preview centered on the candidate. */
 function mountCandidateMaps(): void {
     if (typeof L === "undefined") return;
     document.querySelectorAll<HTMLElement>(".candidate-map[data-lat]").forEach(node => {
@@ -737,7 +737,7 @@ function mountCandidateMaps(): void {
     });
 }
 
-/** Los mapas montados dentro de un contenedor oculto (vista avanzada) se recalculan al mostrarse. */
+/** Recalculate maps mounted in a hidden container (advanced view) when they become visible. */
 function refreshCandidateMaps(): void {
     candidateMaps.forEach(({ map, lat, lon }) => {
         map.invalidateSize();
@@ -870,29 +870,29 @@ function readFormLabel(id: string): string {
 
 function exportResultsPdf(): void {
     if (!matches.length) return;
-    const planetName = planet ? (planet === "luna" ? "Moon" : "Mars") : "—";
+    const planetName = planet ? (planet === "moon" ? "Moon" : "Mars") : "—";
     const now = new Date();
     const fecha = now.toLocaleString("en-US", { dateStyle: "full", timeStyle: "short" });
     const lat = readFormLabel("loc-lat");
     const lng = readFormLabel("loc-lng");
     const radius = readFormLabel("loc-radius");
-    const zona = readFormLabel("zone-zona") || readFormLabel("luna-zona") || readFormLabel("marte-zona");
-    const temp = readFormLabel("zone-temperatura") || readFormLabel("luna-temperatura") || readFormLabel("marte-temperatura");
-    const comp = readFormLabel("zone-composicion") || readFormLabel("luna-composicion") || readFormLabel("marte-composicion");
-    const rel = readFormLabel("zone-relieve") || readFormLabel("luna-relieve") || readFormLabel("marte-relieve");
-    const clima = readFormLabel("earth-clima");
-    const alt = readFormLabel("earth-altitud");
-    const suelo = readFormLabel("earth-suelo");
-    const hum = readFormLabel("earth-humedad");
+    const zone = readFormLabel("zone-zone") || readFormLabel("moon-zone") || readFormLabel("mars-zone");
+    const temp = readFormLabel("zone-temperature") || readFormLabel("moon-temperature") || readFormLabel("mars-temperature");
+    const comp = readFormLabel("zone-composition") || readFormLabel("moon-composition") || readFormLabel("mars-composition");
+    const rel = readFormLabel("zone-terrain") || readFormLabel("moon-terrain") || readFormLabel("mars-terrain");
+    const climate = readFormLabel("earth-climate");
+    const alt = readFormLabel("earth-elevation");
+    const soil = readFormLabel("earth-soil");
+    const hum = readFormLabel("earth-humidity");
     const filtros =
         [
-            zona && `Zone: ${zona}`,
+            zone && `Zone: ${zone}`,
             temp && `Temperature: ${temp}`,
             comp && `Composition: ${comp}`,
             rel && `Terrain: ${rel}`,
-            clima && `Climate: ${clima}`,
+            climate && `Climate: ${climate}`,
             alt && `Elevation: ${alt}`,
-            suelo && `Soil: ${suelo}`,
+            soil && `Soil: ${soil}`,
             hum && `Humidity: ${hum}`,
         ]
             .filter(Boolean)
