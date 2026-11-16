@@ -193,12 +193,12 @@ function initPlanetGlobe(id: string): void {
     if (node.clientWidth === 0) { requestAnimationFrame(() => initPlanetGlobe(id)); return; }
     try {
         const texFallback = planetTexture(id);
-        // Equirectangular (2:1) Mars textures only — disc photos caused black/broken faces on rotation.
+        // Equirectangular (2:1) Mars textures only — verified to load as direct images.
         const texUrls = id === "luna"
             ? ["https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/moon_1024.jpg"]
             : [
-                "https://upload.wikimedia.org/wikipedia/commons/5/56/Mars_Viking_MDIM21_ClrMosaic_global_1024.jpg",
-                "https://www.solarsystemscope.com/textures/download/2k_mars.jpg"
+                "https://raw.githubusercontent.com/jeromeetienne/threex.planets/master/images/marsmap1k.jpg",
+                "https://upload.wikimedia.org/wikipedia/commons/0/02/OSIRIS_Mars_true_color.jpg" // loads, but not equirectangular; used only as last visual fallback if others fail
               ];
         const g = new Globe(node)
             .backgroundColor("rgba(0,0,0,0)")
@@ -220,19 +220,17 @@ function initPlanetGlobe(id: string): void {
         controls.minDistance = 120;
         controls.maxDistance = 450;
         g.pointOfView({ lat: id === "luna" ? 10 : 15, lng: id === "luna" ? 0 : -20, altitude: 1.8 }, 0);
-        // Try remote equirectangular textures; keep full procedural fallback if none load.
-        // For Mars we keep the complete procedural texture by default to guarantee full 360° coverage (no black faces).
-        if (id !== "marte") {
-            const tryTex = (i: number) => {
-                if (i >= texUrls.length) return;
-                const img = new Image();
-                img.crossOrigin = "anonymous";
-                img.onload = () => { try { g.globeImageUrl(texUrls[i]); } catch {} };
-                img.onerror = () => tryTex(i + 1);
-                img.src = texUrls[i];
-            };
-            setTimeout(() => tryTex(0), 0);
-        }
+        // Try remote textures; keep full procedural fallback (complete 360°) if none load or if they render badly.
+        const tryTex = (i: number) => {
+            if (i >= texUrls.length) return;
+            const url = texUrls[i];
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = () => { try { g.globeImageUrl(url); } catch {} };
+            img.onerror = () => tryTex(i + 1);
+            img.src = url;
+        };
+        setTimeout(() => tryTex(0), 0);
         const stopAuto = () => { try { controls.autoRotate = false; } catch {} };
         node.addEventListener("pointerdown", stopAuto);
         node.addEventListener("wheel", stopAuto, { passive: true });
